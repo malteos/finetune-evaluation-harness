@@ -1,0 +1,25 @@
+name: Docker (cito)
+
+on: [push, pull_request]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Push docker images for tags (SHA + tag + latest)
+        if: "contains(github.event.head_commit.message, 'docker build')"
+        run: |
+          # Workaround to provide additional free space for testing.
+          #   https://github.com/actions/virtual-environments/issues/2840
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          # Actual Docker build
+          export TAG=${GITHUB_REF/refs\/tags\//}
+          docker build -t ${{ secrets.docker_user }}/${{ secrets.docker_image }}:${GITHUB_SHA} .
+          docker login -u ${{ secrets.docker_user }} -p ${{ secrets.docker_password }}
+          docker push ${{ secrets.docker_user }}/${{ secrets.docker_image }}:${GITHUB_SHA}
+          docker tag ${{ secrets.docker_user }}/${{ secrets.docker_image }}:${GITHUB_SHA} ${{ secrets.docker_user }}/${{ secrets.docker_image }}:latest
+          docker push ${{ secrets.docker_user }}/${{ secrets.docker_image }}:latest
