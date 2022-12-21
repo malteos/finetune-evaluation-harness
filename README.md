@@ -47,16 +47,16 @@ python hgf_fine_tune_class.py \
 --label_value binary --ignore_mismatched_sizes --remove_labels multi
 ```
 - label_value is required to identify the column on which text classification is required
-- remove_labels will exclude the columns which are not needed. Note: this behaviour is not by default, so you will have to check the dataset colunns and
-specify the columns which you dont want, it becomes all the more important in multi-label class.
+- remove_labels will exclude the columns which are not needed. Note: this behaviour is not by default, so you will have to check the dataset columns and
+specify the ones which you dont want, it becomes all the more important in multi-label class.
 - do_eval makes sure that evaluation metrics are run and saved as json on the validation or the test split (which ever is avaialble on HF). Many HF datasets do not naturally have the test split.
 - Incase for some dataset (eg GERMEVAL 2017), an error is thrown saying: ``` TypeError: TextInputSequence must be str ```, then try and add a parameter --use_fast_tokenizer False
 
 
 ### Token Classfication Task
 - The HF developers provided a common script for ner tagging, pos tagging and chunk tag identification. Hence it becomes all the more important to be sure of the exact task you want to run, the dataset format and how it was created.
--  HF expects the dataset for these task to be of certain type, for reference please check out ``` elenanereiss/german-ler ``` dataet hosted on HF. If you want to run the your own dataset using this script, the best way would be to model the data in the exact same format. Take special care about <b>column type</b> and the name of the column. The default task is ner identification and it expects the column name similar to ```ner_tags``` to exist in the dataset for this task.
-- Another thing to note is the importance of having Feature file. Certain datasets hosted on hub with stringent reuirements (pre 2021) have feature file for each the token classification task. A feature label contains the mapping between various types of tags. Also it differenciates between B- tag and I- tag, if it exists. Read more, here on what it is: https://stackoverflow.com/questions/53933854/what-is-the-list-of-possible-tags-with-a-description-of-conll-2003-ner-task
+-  HF expects the dataset for these task to be of certain type, for reference please check out ``` elenanereiss/german-ler ``` dataset hosted on HF. If you want to run the your own dataset using this script, the best way would be to model the data in the exact same format. Take special care about <b>column type</b> and the name of the column. The default task is ner identification and it expects the column name similar to ```ner_tags``` to exist in the dataset for this task.
+- Another thing to note is the importance of having feature file. Certain datasets hosted on hub with stringent requiremets (pre 2021) have feature file for each the token classification task. A feature label contains the mapping between various types of tags. Also it differenciates between B- tag and I- tag, if it exists. Read more, here on what it is: https://stackoverflow.com/questions/53933854/what-is-the-list-of-possible-tags-with-a-description-of-conll-2003-ner-task
 
 - Here, we are sharing two examples for this task. One for dataset hosted on hub, in the expected format and the other one which was modifed in the expected format and saved as json as train and test file
 
@@ -65,7 +65,7 @@ specify the columns which you dont want, it becomes all the more important in mu
  --dataset_name elenanereiss/german-ler --output_dir /netscratch/agautam/experiments/test_logs/sample \
  --do_train --do_eval  --overwrite_output_dir --num_train_epochs 1 --feature_file True --max_seq_length 512
 ```
--Note the special argument --feature_file True, this ensures that the version of dataset hosetd on HF has a feature file.
+-Note the special argument --feature_file True, this ensures that the version of dataset hosted on HF has a feature file.
 
 ```
 python hgf_fine_tune_ner.py  --model_name_or_path malteos/gpt2-wechsel-german-ds-meg \
@@ -88,4 +88,4 @@ python hgf_fine_tune_qa.py  --model_name_or_path bert-base-german-cased \
 --do_train --do_eval  --overwrite_output_dir --num_train_epochs 1 --max_seq_length 512
 ```
 
-- Default script and parameters, no major additions to the script.
+- Default script and parameters, no major additions to the script. Only thing to note is to be careful if the model which you want to run has a an AutoModel For Question Answering Type else it throws an error.
