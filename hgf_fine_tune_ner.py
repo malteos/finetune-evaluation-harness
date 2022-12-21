@@ -20,6 +20,7 @@ Fine-tuning the library models for token classification.
 # comments.
 
 import logging
+from ast import literal_eval
 import os
 import sys
 from dataclasses import dataclass, field
@@ -122,6 +123,10 @@ class DataTrainingArguments:
     )
     text_column_name: Optional[str] = field(
         default=None, metadata={"help": "The column name of text to input in the file (a csv or JSON file)."}
+    )
+    feature_file: bool = field (
+        default = True,
+        metadata = {"help": "Does your dataset has feature file on HF Hub"}
     )
     label_column_name: Optional[str] = field(
         default=None, metadata={"help": "The column name of label to input in the file (a csv or JSON file)."}
@@ -292,6 +297,9 @@ def main():
     # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
     # https://huggingface.co/docs/datasets/loading_datasets.html.
 
+    #raw_datasets = raw_datasets.map(lambda x: {"ner_tags": [int(i) for i in x["ner_tags"].split(",")]})
+    #raw_datasets = raw_datasets.map(lambda x: {"pos_tags": [int(i) for i in x["pos_tags"].split(",")]})
+
     if training_args.do_train:
         column_names = raw_datasets["train"].column_names
         features = raw_datasets["train"].features
@@ -325,7 +333,12 @@ def main():
 
     # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
     # Otherwise, we have to get the list of labels manually.
-    labels_are_int = isinstance(features[label_column_name].feature, ClassLabel)
+
+    if(data_args.feature_file == True):
+        labels_are_int = isinstance(features[label_column_name].feature, ClassLabel)
+    else:
+        labels_are_int = 0
+
     if labels_are_int:
         label_list = features[label_column_name].feature.names
         label_to_id = {i: i for i in range(len(label_list))}
@@ -334,6 +347,7 @@ def main():
         label_to_id = {l: i for i, l in enumerate(label_list)}
 
     num_labels = len(label_list)
+    print("num_labels", num_labels)
 
     # Load pretrained model and tokenizer
     #
@@ -415,11 +429,16 @@ def main():
 
     # Map that sends B-Xxx label to its I-Xxx counterpart
     b_to_i_label = []
+
+    if(data_args.feature_file == True):
+        for idx, label in enumerate(label_list):
+            if label.startswith("B-") and label.replace("B-", "I-") in label_list:
+                b_to_i_label.append(label_list.index(label.replace("B-", "I-")))
+            else:
+                b_to_i_label.append(idx)
+
     for idx, label in enumerate(label_list):
-        if label.startswith("B-") and label.replace("B-", "I-") in label_list:
-            b_to_i_label.append(label_list.index(label.replace("B-", "I-")))
-        else:
-            b_to_i_label.append(idx)
+        b_to_i_label.append(idx)
 
     # Preprocessing the dataset
     # Padding strategy
@@ -427,6 +446,7 @@ def main():
 
     # Tokenize all texts and align the labels with them.
     def tokenize_and_align_labels(examples):
+        #print(examples)
         tokenized_inputs = tokenizer(
             examples[text_column_name],
             padding=padding,
@@ -435,6 +455,8 @@ def main():
             # We use this argument because the texts in our dataset are lists of words (with a label for each word).
             is_split_into_words=True,
         )
+        #print("tokenized_inputs", tokenized_inputs)
+
         labels = []
         for i, label in enumerate(examples[label_column_name]):
             word_ids = tokenized_inputs.word_ids(batch_index=i)
@@ -520,14 +542,35 @@ def main():
         predictions = np.argmax(predictions, axis=2)
 
         # Remove ignored index (special tokens)
-        true_predictions = [
-            [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
-        true_labels = [
-            [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
+        ## Note: Original logic did not had str() remove that if needed
+
+        # true_predictions = [
+        #     [str(label_list[p]) for (p, l) in zip(prediction, label) if l != -100]
+        #     for prediction, label in zip(predictions, labels)
+        # ]
+        # true_labels = [
+        #     [str(label_list[l]) for (p, l) in zip(prediction, label) if l != -100]
+        #     for prediction, label in zip(predictions, labels)
+        # ]
+
+        if(data_args.feature_file == False):
+            true_predictions = [
+                [str(label_list[p]) for (p, l) in zip(prediction, label) if l != -100]
+                for prediction, label in zip(predictions, labels)
+            ]
+            true_labels = [
+                [str(label_list[l]) for (p, l) in zip(prediction, label) if l != -100]
+                for prediction, label in zip(predictions, labels)
+            ]
+        else:
+            true_predictions = [
+                [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+                for prediction, label in zip(predictions, labels)
+            ]
+            true_labels = [
+                [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+                for prediction, label in zip(predictions, labels)
+            ]
 
         results = metric.compute(predictions=true_predictions, references=true_labels)
         if data_args.return_entity_level_metrics:

@@ -21,7 +21,7 @@ import os
 import random
 import sys
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, List
 
 import datasets
 import numpy as np
@@ -102,6 +102,10 @@ class DataTrainingArguments:
     )
     label_value: Optional[str] = field(
         default = None, metadata={"help": "label from the original dataset"}
+    )
+    remove_labels: Optional[List[str]] = field(
+        default = None,
+        metadata = {"help" : "Labels which have to removed (please verify these from the original dataset)"}
     )
     pad_to_max_length: bool = field(
         default=True,
@@ -385,7 +389,7 @@ def main():
     )
 
     if(tokenizer.pad_token is None):
-        print("Adding PAD token")
+        #print("Adding PAD token")
         tokenizer.pad_token = tokenizer.eos_token
 
     model.config.pad_token_id = model.config.eos_token_id
@@ -398,7 +402,7 @@ def main():
         # Again, we try to have some nice defaults but don't hesitate to tweak to your use case.
         #non_label_column_names = [name for name in raw_datasets["train"].column_names if name != "label"]
         non_label_column_names = [name for name in raw_datasets["train"].column_names if name != label_value]
-        print("non_label_columns", non_label_column_names)
+        #print("non_label_columns", non_label_column_names)
         if "sentence1" in non_label_column_names and "sentence2" in non_label_column_names:
             sentence1_key, sentence2_key = "sentence1", "sentence2"
         else:
@@ -472,9 +476,11 @@ def main():
         raw_datasets = raw_datasets.map(
             preprocess_function,
             batched=True,
-            remove_columns= ["multi", "binary"],
+            #remove_columns= ["multi", "binary"],
             #remove_columns = ["label"],
             #remove_columns = ["relevance", "id"],
+            #remove_columns = ["sentiment", "relevance", "id"],
+            remove_columns = data_args.remove_labels,
             load_from_cache_file=not data_args.overwrite_cache,
             desc="Running tokenizer on dataset",
         )
@@ -489,7 +495,10 @@ def main():
     if training_args.do_eval:
         #if "validation" not in raw_datasets and "validation_matched" not in raw_datasets:
         #    raise ValueError("--do_eval requires a validation dataset")
-        eval_dataset = raw_datasets["test"]
+        if("validation" in raw_datasets):
+            eval_dataset = raw_datasets["validation"]
+        else:
+            eval_dataset = raw_datasets["test"]
 
         #eval_dataset = raw_datasets["validation_matched" if data_args.task_name == "mnli" else "validation"]
         if data_args.max_eval_samples is not None:
@@ -539,7 +548,7 @@ def main():
     else:
         data_collator = None
 
-    print(train_dataset[56])
+    #print(train_dataset[56])
 
 
     # Initialize our Trainer
@@ -588,6 +597,7 @@ def main():
                 valid_mm_dataset = valid_mm_dataset.select(range(max_eval_samples))
             eval_datasets.append(valid_mm_dataset)
             combined = {}
+
         '''
         for eval_dataset, task in zip(eval_datasets, tasks):
             metrics = trainer.evaluate(eval_dataset=eval_dataset)
