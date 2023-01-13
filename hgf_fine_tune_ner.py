@@ -23,6 +23,7 @@ import logging
 from ast import literal_eval
 import os
 import sys
+import json
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -91,6 +92,10 @@ class ModelArguments:
             )
         },
     )
+    freeze_layers: bool = field(
+        default=False,
+        metadata={"help": "Freeze layers during fine-tuning"}
+    )
     ignore_mismatched_sizes: bool = field(
         default=False,
         metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
@@ -121,11 +126,14 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "An optional input test data file to predict on (a csv or JSON file)."},
     )
+    results_log_path: Optional[str] = field(
+        default = None, metadata={"help": "Path to store the results json file (to be used later for visualization)"}
+    )
     text_column_name: Optional[str] = field(
         default=None, metadata={"help": "The column name of text to input in the file (a csv or JSON file)."}
     )
     feature_file: bool = field (
-        default = True,
+        default = False,
         metadata = {"help": "Does your dataset has feature file on HF Hub"}
     )
     label_column_name: Optional[str] = field(
@@ -334,7 +342,13 @@ def main():
     # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
     # Otherwise, we have to get the list of labels manually.
 
-    if(data_args.feature_file == True):
+    # check if the ClassLabel for sequences exist on HF Hub
+    if(isinstance(features[label_column_name].feature, ClassLabel) == True):
+        feature_file_exists = True
+    else:
+        feature_file_exists = False
+
+    if(feature_file_exists):
         labels_are_int = isinstance(features[label_column_name].feature, ClassLabel)
     else:
         labels_are_int = 0
@@ -347,7 +361,7 @@ def main():
         label_to_id = {l: i for i, l in enumerate(label_list)}
 
     num_labels = len(label_list)
-    print("num_labels", num_labels)
+    print("num_distinct_labels", num_labels)
 
     # Load pretrained model and tokenizer
     #
@@ -393,6 +407,10 @@ def main():
         ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
 
+    if(model_args.freeze_layers == True):
+        for param in model.base_model.parameters():
+            param.requires_grad = False
+
     if(tokenizer.pad_token is None):
         print("Adding PAD token")
         tokenizer.pad_token = tokenizer.eos_token
@@ -430,7 +448,7 @@ def main():
     # Map that sends B-Xxx label to its I-Xxx counterpart
     b_to_i_label = []
 
-    if(data_args.feature_file == True):
+    if(feature_file_exists):
         for idx, label in enumerate(label_list):
             if label.startswith("B-") and label.replace("B-", "I-") in label_list:
                 b_to_i_label.append(label_list.index(label.replace("B-", "I-")))
@@ -553,7 +571,7 @@ def main():
         #     for prediction, label in zip(predictions, labels)
         # ]
 
-        if(data_args.feature_file == False):
+        if(feature_file_exists == False):
             true_predictions = [
                 [str(label_list[p]) for (p, l) in zip(prediction, label) if l != -100]
                 for prediction, label in zip(predictions, labels)
@@ -630,6 +648,14 @@ def main():
 
         max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
         metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
+        metrics["model_name"] = model_args.model_name_or_path
+        metrics["dataset_name"] = data_args.dataset_name
+        metrics["problem_type"] = "token_classification"
+        metrics["batch_size"] = training_args.per_device_train_batch_size
+
+        log_file_path = data_args.results_log_path + ".json"
+        with open(log_file_path, 'w') as fp:
+            json.dump(metrics, fp)
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)

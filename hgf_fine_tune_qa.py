@@ -23,6 +23,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 from typing import Optional
+import json
 
 import datasets
 from datasets import load_dataset
@@ -34,7 +35,6 @@ from trainer_qa import QuestionAnsweringTrainer
 from transformers import (
     AutoConfig,
     AutoModelForQuestionAnswering,
-    GPT2ModelForQuestionAnswering,
     AutoTokenizer,
     DataCollatorWithPadding,
     EvalPrediction,
@@ -84,6 +84,10 @@ class ModelArguments:
         default="main",
         metadata={"help": "The specific model version to use (can be a branch name, tag name or commit id)."},
     )
+    freeze_layers: bool = field(
+        default = False,
+        metadata={"help": "Freeze Layers of the model during fine-tuning"}
+    ),
     use_auth_token: bool = field(
         default=False,
         metadata={
@@ -118,6 +122,9 @@ class DataTrainingArguments:
     )
     overwrite_cache: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
+    )
+    results_log_path: Optional[str] = field(
+        default = None, metadata={"help": "Path to store the results json file (to be used later for visualization)"}
     )
     preprocessing_num_workers: Optional[int] = field(
         default=None,
@@ -342,7 +349,9 @@ def main():
         use_auth_token=True if model_args.use_auth_token else None,
     )
 
-    model = GPT2ModelForQuestionAnswering
+    if(model_args.freeze_layers == True):
+        for param in model.base_model.parameters():
+            param.requires_grad = False
 
     # Tokenizer check: this script requires a fast tokenizer.
     if not isinstance(tokenizer, PreTrainedTokenizerFast):
@@ -664,6 +673,14 @@ def main():
 
         max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
         metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
+        metrics["model_name"] = model_args.model_name_or_path
+        metrics["dataset_name"] = data_args.dataset_name
+        metrics["problem_type"] = "question_answering"
+        metrics["batch_size"] = training_args.per_device_train_batch_size
+
+        log_file_path = data_args.results_log_path + ".json"
+        with open(log_file_path, 'w') as fp:
+            json.dump(metrics, fp)
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
