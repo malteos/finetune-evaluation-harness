@@ -12,7 +12,8 @@ nice_model_names = {
     'malteos/gpt2-wechsel-german-ds-meg': 'gpt2-wechsel-german',
     'bert-base-german-cased': 'bert-german',
     'malteos/bloom-1b7-twc-german': 'bloom-1b7-german',
-    'malteos/gpt2-xl-wechsel-german': 'gpt2-xl-german'
+    'malteos/gpt2-xl-wechsel-german': 'gpt2-xl-german',
+    'malteos/test-gs_24021': 'bloom-7b1-twc-german'
 }
 
 nice_dataset_names = {
