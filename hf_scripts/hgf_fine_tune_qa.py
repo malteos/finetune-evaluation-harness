@@ -24,6 +24,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import Optional
 import json
+from os import path
 
 import datasets
 from datasets import load_dataset
@@ -31,7 +32,9 @@ from datasets import load_dataset, ClassLabel, Value
 
 import evaluate
 import transformers
-from trainer_qa import QuestionAnsweringTrainer
+#from trainer_qa import QuestionAnsweringTrainer
+from . import trainer_qa
+
 from transformers import (
     AutoConfig,
     AutoModelForQuestionAnswering,
@@ -47,7 +50,8 @@ from transformers import (
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
-from utils_qa import postprocess_qa_predictions
+#from utils_qa import postprocess_qa_predictions
+from . import utils_qa
 
 
 # for now disabling due to debugging
@@ -226,7 +230,7 @@ class DataTrainingArguments:
                 assert extension in ["csv", "json"], "`test_file` should be a csv or a json file."
 
 
-def main():
+def main(args):
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
     # We now keep distinct sets of args, for a cleaner separation of concerns.
@@ -237,7 +241,7 @@ def main():
         # let's parse it to get our arguments.
         model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
-        model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+        model_args, data_args, training_args = parser.parse_args_into_dataclasses(args = args)
 
     # Sending telemetry. Tracking the example usage helps us better allocate resources to maintain them. The
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
@@ -299,7 +303,7 @@ def main():
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
-
+        
     else:
         data_files = {}
         if data_args.train_file is not None:
@@ -364,7 +368,7 @@ def main():
     # Preprocessing the datasets.
     # Preprocessing is slighlty different for training and evaluation.
 
-    # this is imp step because the evaluation logic expects id of string
+    # this is imp step because the evaluation logic expects id of string 
     print(raw_datasets["train"].features)
     new_features = raw_datasets["train"].features.copy()
     new_features["id"] = Value('string')
@@ -605,7 +609,7 @@ def main():
     # Post-processing:
     def post_processing_function(examples, features, predictions, stage="eval"):
         # Post-processing: we match the start logits and end logits to answers in the original context.
-        predictions = postprocess_qa_predictions(
+        predictions = utils_qa.postprocess_qa_predictions(
             examples=examples,
             features=features,
             predictions=predictions,
@@ -634,7 +638,7 @@ def main():
         return metric.compute(predictions=p.predictions, references=p.label_ids)
 
     # Initialize our Trainer
-    trainer = QuestionAnsweringTrainer(
+    trainer = trainer_qa.QuestionAnsweringTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset if training_args.do_train else None,
@@ -679,8 +683,27 @@ def main():
         metrics["batch_size"] = training_args.per_device_train_batch_size
 
         log_file_path = data_args.results_log_path + ".json"
-        with open(log_file_path, 'w') as fp:
-            json.dump(metrics, fp)
+        # check if file exists
+        # if no then add the first entry
+        if(path.isfile(log_file_path) is False):
+            with open(log_file_path, 'w') as fp:
+                metrics_list = []
+                metrics_list.append(metrics)
+                json.dump(metrics_list, fp)
+            fp.close()
+            
+        else:
+            # file exists read the prev entry, add new one and then write
+            with open(log_file_path, 'r') as new_file_path:
+                curr_list = json.load(new_file_path)
+                curr_list = curr_list + [metrics]
+                print("curr_list", curr_list)
+
+            with open(log_file_path, 'w') as new_file_path:
+                json.dump(curr_list, new_file_path)
+
+            new_file_path.close()        
+
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
@@ -720,4 +743,5 @@ def _mp_fn(index):
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    main(sys.argv[1:])

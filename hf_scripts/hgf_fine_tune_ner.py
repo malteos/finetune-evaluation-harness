@@ -23,6 +23,7 @@ import logging
 from ast import literal_eval
 import os
 import sys
+from os import path
 import json
 from dataclasses import dataclass, field
 from typing import Optional
@@ -219,18 +220,18 @@ class DataTrainingArguments:
         self.task_name = self.task_name.lower()
 
 
-def main():
+def main(args):
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
     # We now keep distinct sets of args, for a cleaner separation of concerns.
-
+    print("args", args)
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
         model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
-        model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+        model_args, data_args, training_args = parser.parse_args_into_dataclasses(args = args)
 
     # Sending telemetry. Tracking the example usage helps us better allocate resources to maintain them. The
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
@@ -346,7 +347,7 @@ def main():
     if(isinstance(features[label_column_name].feature, ClassLabel) == True):
         feature_file_exists = True
     else:
-        feature_file_exists = False
+        feature_file_exists = False 
 
     if(feature_file_exists):
         labels_are_int = isinstance(features[label_column_name].feature, ClassLabel)
@@ -396,7 +397,7 @@ def main():
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
-
+    
     model = AutoModelForTokenClassification.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -454,7 +455,7 @@ def main():
                 b_to_i_label.append(label_list.index(label.replace("B-", "I-")))
             else:
                 b_to_i_label.append(idx)
-
+    
     for idx, label in enumerate(label_list):
         b_to_i_label.append(idx)
 
@@ -558,9 +559,9 @@ def main():
     def compute_metrics(p):
         predictions, labels = p
         predictions = np.argmax(predictions, axis=2)
-
+    
         # Remove ignored index (special tokens)
-        ## Note: Original logic did not had str() remove that if needed
+        ## Note: Original logic did not had str() remove that if needed 
 
         # true_predictions = [
         #     [str(label_list[p]) for (p, l) in zip(prediction, label) if l != -100]
@@ -570,14 +571,14 @@ def main():
         #     [str(label_list[l]) for (p, l) in zip(prediction, label) if l != -100]
         #     for prediction, label in zip(predictions, labels)
         # ]
-
+        
         if(feature_file_exists == False):
             true_predictions = [
-                [str(label_list[p]) for (p, l) in zip(prediction, label) if l != -100]
+                [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
                 for prediction, label in zip(predictions, labels)
             ]
             true_labels = [
-                [str(label_list[l]) for (p, l) in zip(prediction, label) if l != -100]
+                [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
                 for prediction, label in zip(predictions, labels)
             ]
         else:
@@ -591,6 +592,7 @@ def main():
             ]
 
         results = metric.compute(predictions=true_predictions, references=true_labels)
+        print(results)
         if data_args.return_entity_level_metrics:
             # Unpack nested dictionaries
             final_results = {}
@@ -654,8 +656,28 @@ def main():
         metrics["batch_size"] = training_args.per_device_train_batch_size
 
         log_file_path = data_args.results_log_path + ".json"
-        with open(log_file_path, 'w') as fp:
-            json.dump(metrics, fp)
+
+        # check if file exists
+        # if no then add the first entry
+        if(path.isfile(log_file_path) is False):
+            with open(log_file_path, 'w') as fp:
+                metrics_list = []
+                metrics_list.append(metrics)
+                json.dump(metrics_list, fp)
+            fp.close()
+            
+        else:
+            # file exists read the prev entry, add new one and then write
+            with open(log_file_path, 'r') as new_file_path:
+                curr_list = json.load(new_file_path)
+                curr_list = curr_list + [metrics]
+                print("curr_list", curr_list)
+
+            with open(log_file_path, 'w') as new_file_path:
+                json.dump(curr_list, new_file_path)
+
+            new_file_path.close()
+        
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
@@ -704,4 +726,5 @@ def _mp_fn(index):
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    main(sys.argv[1:])

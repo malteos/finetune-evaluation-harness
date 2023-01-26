@@ -18,6 +18,8 @@
 
 import logging
 import os
+from os import path
+import json
 import random
 import sys
 from dataclasses import dataclass, field
@@ -143,6 +145,9 @@ class DataTrainingArguments:
             )
         },
     )
+    results_log_path: Optional[str] = field(
+        default = None, metadata={"help": "Path to store the results json file (to be used later for visualization)"}
+    )
     train_file: Optional[str] = field(
         default=None, metadata={"help": "A csv or a json file containing the training data."}
     )
@@ -188,6 +193,10 @@ class ModelArguments:
         default=None,
         metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
     )
+    freeze_layers: bool = field(
+        default = False,
+        metadata={"help": "Freeze Layers of the model during fine-tuning"}
+    ),
     use_fast_tokenizer: bool = field(
         default=True,
         metadata={"help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."},
@@ -211,18 +220,18 @@ class ModelArguments:
     )
 
 
-def main():
+def main(args):
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
     # We now keep distinct sets of args, for a cleaner separation of concerns.
-
+    print("args", args)
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
         model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
-        model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+        model_args, data_args, training_args = parser.parse_args_into_dataclasses(args = args)
 
     # Sending telemetry. Tracking the example usage helps us better allocate resources to maintain them. The
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
@@ -336,7 +345,15 @@ def main():
     # https://huggingface.co/docs/datasets/loading_datasets.html.
 
     # Labels
-    label_value = data_args.label_value
+    if(data_args.label_value is not None):
+        label_value = data_args.label_value
+    elif "label" in raw_datasets.column_names:
+        label_value = "label"
+    else:
+        label_value = str(raw_datasets.column_names['train'][-1])
+
+    print("label_value", label_value)
+
     if data_args.task_name is not None:
         is_regression = data_args.task_name == "stsb"
         if not is_regression:
@@ -358,6 +375,12 @@ def main():
             label_list = raw_datasets["train"].unique(label_value)
             label_list.sort()  # Let's sort it for determinism
             num_labels = len(label_list)
+
+
+    all_columns = raw_datasets.column_names
+    #column_others = all_columns['train'].remove(data_args.label_value)
+    column_others = all_columns['train'].remove(label_value)
+
 
     # Load pretrained model and tokenizer
     #
@@ -388,10 +411,15 @@ def main():
         ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
 
+    if(model_args.freeze_layers == True):
+        for param in model.base_model.parameters():
+            param.requires_grad = False
+
+
     if(tokenizer.pad_token is None):
         #print("Adding PAD token")
         tokenizer.pad_token = tokenizer.eos_token
-
+    
     model.config.pad_token_id = model.config.eos_token_id
     model.resize_token_embeddings(len(tokenizer))
 
@@ -462,7 +490,7 @@ def main():
         #result = tokenizer(text = examples, padding = padding, max_length = max_seq_length, truncation = True)
 
         # Map labels to IDs (not necessary for GLUE tasks)
-
+        
         if label_to_id is not None and label_value in examples:
             result[label_value] = [(label_to_id[l] if l != -1 else -1) for l in examples[label_value]]
 
@@ -480,7 +508,7 @@ def main():
             #remove_columns = ["label"],
             #remove_columns = ["relevance", "id"],
             #remove_columns = ["sentiment", "relevance", "id"],
-            remove_columns = data_args.remove_labels,
+            remove_columns = column_others,
             load_from_cache_file=not data_args.overwrite_cache,
             desc="Running tokenizer on dataset",
         )
@@ -597,7 +625,7 @@ def main():
                 valid_mm_dataset = valid_mm_dataset.select(range(max_eval_samples))
             eval_datasets.append(valid_mm_dataset)
             combined = {}
-
+            
         '''
         for eval_dataset, task in zip(eval_datasets, tasks):
             metrics = trainer.evaluate(eval_dataset=eval_dataset)
@@ -623,6 +651,36 @@ def main():
                 data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
             )
             metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
+            metrics["model_name"] = model_args.model_name_or_path
+            metrics["dataset_name"] = data_args.dataset_name
+            metrics['problem_type'] = "classification"
+            metrics["problem_description"] = model.config.problem_type
+            metrics["batch_size"] = training_args.per_device_train_batch_size
+            metrics["label"] = label_value
+
+            log_file_path = data_args.results_log_path + ".json"
+
+            # check if file exists
+            # if no then add the first entry
+            if(path.isfile(log_file_path) is False):
+                with open(log_file_path, 'w') as fp:
+                    metrics_list = []
+                    metrics_list.append(metrics)
+                    json.dump(metrics_list, fp)
+                fp.close()
+            
+            else:
+                # file exists read the prev entry, add new one and then write
+                with open(log_file_path, 'r') as new_file_path:
+                    curr_list = json.load(new_file_path)
+                    curr_list = curr_list + [metrics]
+                    print("curr_list", curr_list)
+
+                with open(log_file_path, 'w') as new_file_path:
+                    json.dump(curr_list, new_file_path)
+
+                new_file_path.close()
+                
             trainer.log_metrics("eval", metrics)
             trainer.save_metrics("eval", metrics)
 
@@ -674,4 +732,5 @@ def _mp_fn(index):
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    main(sys.argv[1:])
