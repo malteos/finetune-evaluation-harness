@@ -29,6 +29,13 @@ srun enroot import -o /netscratch/$USER/enroot/malteos+finetune-eval+latest.sqsh
 
 - If you fail to understand what any of the paramater does, --help is your friend. Other keyword arguments used for HF transformers library are mentioned here: https://github.com/huggingface/transformers/blob/main/src/transformers/trainer.py
 
+- Sample example for using main master script for running the tasks
+
+```
+python main.py --model bert-base-german-cased --task_list germeval2018 germeval2017 gnad10
+```
+Additional parameters can be specified for the master script.
+
 ### Datasets Used and HuggingFace Id's
 1. philschmid/germeval18 -- GERMEVAL 18
 2. elenanereiss/german-ler -- GERMAN_NER_LEGAL
@@ -37,6 +44,8 @@ srun enroot import -o /netscratch/$USER/enroot/malteos+finetune-eval+latest.sqsh
 5. akash418/germeval_2017 -- GERMEVAL_2017
 6. akash418/german_europarl -- GERMAN EUROPARL
 
+
+Incase you want to have a more fine-grained control over the scripts, the use the examples given below
 
 ### Text Classification Task
 ```
