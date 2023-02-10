@@ -3,20 +3,20 @@ import numpy as np
 #from . import TASK_REGISTRY, TASK_TYPE_REGISTRY, get_task
 
 
+class GermanQuad():
 
-class GermanNerLegal():
-
-    DATASET_ID = "elenanereiss/german-ler"    # HF datasets ID
+    DATASET_ID = "deepset/germanquad"    # HF datasets ID
     VERSION = "0"
     EPOCHS = "1"
-    TRAIN_BATCH_SIZE = "16"
+    TRAIN_BATCH_SIZE = "2"
     MAX_SEQUENCE_LENGTH = "512"
 
     def __init__(self):
         super().__init__()
         
+
     def get_task_type(self):
-        return "ner"
+        return "classification"
     
     def has_training_docs(self):
         return True
@@ -33,8 +33,7 @@ class GermanNerLegal():
         freeze_layers,
         epochs,
         per_device_train_batch_size,
-        save_steps,
-        peft_choice,
+        save_steps
     ):
 
         all_param_list = []
@@ -58,10 +57,6 @@ class GermanNerLegal():
         all_param_list.append(str(freeze_layers))
         all_param_list.append("--save_steps")
         all_param_list.append(save_steps)
-        all_param_list.append("--peft_choice"),
-        all_param_list.append(peft_choice)
-        all_param_list.append("--is_task_ner")
-        all_param_list.append("True")
 
         print(all_param_list)
         return all_param_list

@@ -4,9 +4,9 @@ import numpy as np
 
 
 
-class GermanNerLegal():
+class GermanEuroParl():
 
-    DATASET_ID = "elenanereiss/german-ler"    # HF datasets ID
+    DATASET_ID = "akash418/german_europarl"    # HF datasets ID
     VERSION = "0"
     EPOCHS = "1"
     TRAIN_BATCH_SIZE = "16"

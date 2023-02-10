@@ -2,11 +2,9 @@ import datasets
 import numpy as np 
 #from . import TASK_REGISTRY, TASK_TYPE_REGISTRY, get_task
 
+class Gnad10():
 
-
-class GermanNerLegal():
-
-    DATASET_ID = "elenanereiss/german-ler"    # HF datasets ID
+    DATASET_ID = "gnad10"    # HF datasets ID
     VERSION = "0"
     EPOCHS = "1"
     TRAIN_BATCH_SIZE = "16"
@@ -15,8 +13,9 @@ class GermanNerLegal():
     def __init__(self):
         super().__init__()
         
+
     def get_task_type(self):
-        return "ner"
+        return "classification"
     
     def has_training_docs(self):
         return True
@@ -58,10 +57,12 @@ class GermanNerLegal():
         all_param_list.append(str(freeze_layers))
         all_param_list.append("--save_steps")
         all_param_list.append(save_steps)
-        all_param_list.append("--peft_choice"),
+        all_param_list.append("--peft_choice")
         all_param_list.append(peft_choice)
-        all_param_list.append("--is_task_ner")
+        all_param_list.append("--use_fast_tokenizer")
         all_param_list.append("True")
+        all_param_list.append("--learning_rate")
+        all_param_list.append("3e-4")
 
         print(all_param_list)
         return all_param_list

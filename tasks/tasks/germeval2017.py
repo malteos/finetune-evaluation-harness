@@ -2,11 +2,21 @@ import datasets
 import numpy as np 
 #from . import TASK_REGISTRY, TASK_TYPE_REGISTRY, get_task
 
+_CITATION = """
+@inproceedings{germevaltask2017,
+title = {{GermEval 2017: Shared Task on Aspect-based Sentiment in Social Media Customer Feedback}},
+author = {Michael Wojatzki and Eugen Ruppert and Sarah Holschneider and Torsten Zesch and Chris Biemann},
+year = {2017},
+booktitle = {Proceedings of the GermEval 2017 - Shared Task on Aspect-based Sentiment in Social Media Customer Feedback},
+address={Berlin, Germany},
+pages={1--12}
+}
+"""
 
 
-class GermanNerLegal():
+class GermEval2017():
 
-    DATASET_ID = "elenanereiss/german-ler"    # HF datasets ID
+    DATASET_ID = "akash418/germeval_2017"    # HF datasets ID
     VERSION = "0"
     EPOCHS = "1"
     TRAIN_BATCH_SIZE = "16"
@@ -15,8 +25,9 @@ class GermanNerLegal():
     def __init__(self):
         super().__init__()
         
+
     def get_task_type(self):
-        return "ner"
+        return "classification"
     
     def has_training_docs(self):
         return True
@@ -56,12 +67,12 @@ class GermanNerLegal():
         all_param_list.append(per_device_train_batch_size)
         all_param_list.append("--freeze_layers")
         all_param_list.append(str(freeze_layers))
+        all_param_list.append("--use_fast_tokenizer")
+        all_param_list.append("False")
         all_param_list.append("--save_steps")
         all_param_list.append(save_steps)
-        all_param_list.append("--peft_choice"),
+        all_param_list.append("--peft_choice")
         all_param_list.append(peft_choice)
-        all_param_list.append("--is_task_ner")
-        all_param_list.append("True")
 
         print(all_param_list)
         return all_param_list
