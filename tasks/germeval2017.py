@@ -45,6 +45,7 @@ class GermEval2017():
         epochs,
         per_device_train_batch_size,
         save_steps,
+        peft_choice,
     ):
 
         all_param_list = []
@@ -70,6 +71,8 @@ class GermEval2017():
         all_param_list.append("False")
         all_param_list.append("--save_steps")
         all_param_list.append(save_steps)
+        all_param_list.append("--peft_choice")
+        all_param_list.append(peft_choice)
 
         print(all_param_list)
         return all_param_list

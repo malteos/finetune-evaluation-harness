@@ -33,6 +33,7 @@ class Gnad10():
         epochs,
         per_device_train_batch_size,
         save_steps,
+        peft_choice,
     ):
 
         all_param_list = []
@@ -56,6 +57,12 @@ class Gnad10():
         all_param_list.append(str(freeze_layers))
         all_param_list.append("--save_steps")
         all_param_list.append(save_steps)
+        all_param_list.append("--peft_choice")
+        all_param_list.append(peft_choice)
+        all_param_list.append("--use_fast_tokenizer")
+        all_param_list.append("True")
+        all_param_list.append("--learning_rate")
+        all_param_list.append("3e-4")
 
         print(all_param_list)
         return all_param_list

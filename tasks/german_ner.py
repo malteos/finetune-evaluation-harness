@@ -34,6 +34,7 @@ class GermanNerLegal():
         epochs,
         per_device_train_batch_size,
         save_steps,
+        peft_choice,
     ):
 
         all_param_list = []
@@ -57,6 +58,8 @@ class GermanNerLegal():
         all_param_list.append(str(freeze_layers))
         all_param_list.append("--save_steps")
         all_param_list.append(save_steps)
+        all_param_list.append("--peft_choice")
+        all_param_list.append(peft_choice)
 
         print(all_param_list)
         return all_param_list

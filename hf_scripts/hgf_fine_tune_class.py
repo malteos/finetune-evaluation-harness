@@ -28,6 +28,8 @@ from typing import Optional, List
 import datasets
 import numpy as np
 from datasets import load_dataset
+from hf_scripts.model_args import ModelArguments
+from hf_scripts.data_trainining_args import DataTrainingArguments
 
 import evaluate
 import transformers
@@ -48,11 +50,12 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 from peft import get_peft_config,get_peft_model, get_peft_model_state_dict, set_peft_model_state_dict, LoraConfig, PeftType, LoraModel
-from peft import PrefixTuningConfig, PromptEncoderConfig
+from peft import PrefixTuningConfig, PromptEncoderConfig, PromptTuningConfig
 from peft.utils.other import fsdp_auto_wrap_policy
 import accelerate
 from accelerate import accelerator
 from accelerate import Accelerator, DistributedType
+from transformers import AutoModel
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 #check_min_version("4.26.0.dev0")
@@ -74,161 +77,6 @@ task_to_keys = {
 logger = logging.getLogger(__name__)
 # for now disabling due to debugging
 os.environ["WANDB_DISABLED"] = "true"
-
-#os.environ["LOCAL_RANK"]='-1'
-
-@dataclass
-class DataTrainingArguments:
-    """
-    Arguments pertaining to what data we are going to input our model for training and eval.
-
-    Using `HfArgumentParser` we can turn this class
-    into argparse arguments to be able to specify them on
-    the command line.
-    """
-
-    task_name: Optional[str] = field(
-        default=None,
-        metadata={"help": "The name of the task to train on: " + ", ".join(task_to_keys.keys())},
-    )
-    dataset_name: Optional[str] = field(
-        default=None, metadata={"help": "The name of the dataset to use (via the datasets library)."}
-    )
-    dataset_config_name: Optional[str] = field(
-        default=None, metadata={"help": "The configuration name of the dataset to use (via the datasets library)."}
-    )
-    max_seq_length: int = field(
-        default=128,
-        metadata={
-            "help": (
-                "The maximum total input sequence length after tokenization. Sequences longer "
-                "than this will be truncated, sequences shorter will be padded."
-            )
-        },
-    )
-    overwrite_cache: bool = field(
-        default=False, metadata={"help": "Overwrite the cached preprocessed datasets or not."}
-    )
-    label_value: Optional[str] = field(
-        default = None, metadata={"help": "label from the original dataset"}
-    )
-    remove_labels: Optional[List[str]] = field(
-        default = None,
-        metadata = {"help" : "Labels which have to removed (please verify these from the original dataset)"}
-    )
-    peft_choice: Optional[str] = field(
-        default = None,
-        metadata={"help": "Which parameter efficent training strategy to use (LORA, P TUNING, PREFIX TUNING, PROMPT TUNING)"}
-    )
-    pad_to_max_length: bool = field(
-        default=True,
-        metadata={
-            "help": (
-                "Whether to pad all samples to `max_seq_length`. "
-                "If False, will pad the samples dynamically when batching to the maximum length in the batch."
-            )
-        },
-    )
-    max_train_samples: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": (
-                "For debugging purposes or quicker training, truncate the number of training examples to this "
-                "value if set."
-            )
-        },
-    )
-    max_eval_samples: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": (
-                "For debugging purposes or quicker training, truncate the number of evaluation examples to this "
-                "value if set."
-            )
-        },
-    )
-    max_predict_samples: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": (
-                "For debugging purposes or quicker training, truncate the number of prediction examples to this "
-                "value if set."
-            )
-        },
-    )
-    results_log_path: Optional[str] = field(
-        default = None, metadata={"help": "Path to store the results json file (to be used later for visualization)"}
-    )
-    train_file: Optional[str] = field(
-        default=None, metadata={"help": "A csv or a json file containing the training data."}
-    )
-    validation_file: Optional[str] = field(
-        default=None, metadata={"help": "A csv or a json file containing the validation data."}
-    )
-    test_file: Optional[str] = field(default=None, metadata={"help": "A csv or a json file containing the test data."})
-
-    def __post_init__(self):
-        if self.task_name is not None:
-            self.task_name = self.task_name.lower()
-            if self.task_name not in task_to_keys.keys():
-                raise ValueError("Unknown task, you should pick one in " + ",".join(task_to_keys.keys()))
-        elif self.dataset_name is not None:
-            pass
-        elif self.train_file is None or self.validation_file is None:
-            raise ValueError("Need either a GLUE task, a training/validation file or a dataset name.")
-        else:
-            train_extension = self.train_file.split(".")[-1]
-            assert train_extension in ["csv", "json"], "`train_file` should be a csv or a json file."
-            validation_extension = self.validation_file.split(".")[-1]
-            assert (
-                validation_extension == train_extension
-            ), "`validation_file` should have the same extension (csv or json) as `train_file`."
-
-
-@dataclass
-class ModelArguments:
-    """
-    Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
-    """
-
-    model_name_or_path: str = field(
-        metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
-    )
-    config_name: Optional[str] = field(
-        default=None, metadata={"help": "Pretrained config name or path if not the same as model_name"}
-    )
-    tokenizer_name: Optional[str] = field(
-        default=None, metadata={"help": "Pretrained tokenizer name or path if not the same as model_name"}
-    )
-    cache_dir: Optional[str] = field(
-        default=None,
-        metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
-    )
-    freeze_layers: bool = field(
-        default = False,
-        metadata={"help": "Freeze Layers of the model during fine-tuning"}
-    ),
-    use_fast_tokenizer: bool = field(
-        default=True,
-        metadata={"help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."},
-    )
-    model_revision: str = field(
-        default="main",
-        metadata={"help": "The specific model version to use (can be a branch name, tag name or commit id)."},
-    )
-    use_auth_token: bool = field(
-        default=False,
-        metadata={
-            "help": (
-                "Will use the token generated when running `huggingface-cli login` (necessary to use this script "
-                "with private models)."
-            )
-        },
-    )
-    ignore_mismatched_sizes: bool = field(
-        default=False,
-        metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
-    )
 
 
 def main(args):
@@ -411,8 +259,9 @@ def main(args):
         use_fast=model_args.use_fast_tokenizer,
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
+        padding_side = "left",
     )
-
+    
     model = AutoModelForSequenceClassification.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -420,9 +269,9 @@ def main(args):
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
-        ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
-
+    
+    
 
     def print_trainable_parameters(model):
         """
@@ -437,55 +286,53 @@ def main(args):
         print(
             f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
         )
+        return (100 * trainable_params / all_param)
 
-
-    print("data_args", data_args)
-    #accelerator = Accelerator()
-    print("Before prefix tuning")
     print_trainable_parameters(model)
 
     if(data_args.peft_choice is not None):
         if(data_args.peft_choice == 'lora'):
-            peft_type = PeftType.LORA
             peft_config = LoraConfig(
                 task_type = "SEQ_CLS",
                 inference_mode = "False",
-                target_modules=["query", "value"],
+                #target_modules=["query", "value"],
                 bias="none",
                 r=8,
                 lora_alpha = 16,
                 lora_dropout = 0.0
             )
-            model = AutoModelForSequenceClassification.from_pretrained(model_args.model_name_or_path, return_dict=True)
-            #model = get_peft_model(model, peft_config)
-            model = LoraModel(peft_config, model)
-            #print(model.print_trainable_parameters())
-            print(model)
-            #for param in model.classifier.parameters():
-            #    param.requires_grad = True
+            model = get_peft_model(model, peft_config)
+            for param in model.base_model.parameters():
+                param.requires_grad = True
 
         elif(data_args.peft_choice == 'p_tune'):
-            peft_type = PeftType.P_TUNING
             peft_config = PromptEncoderConfig(
                 task_type = "SEQ_CLS",
                 inference_mode = "False",
                 num_virtual_tokens=20,
                 encoder_hidden_size=128,
             )
-            model = AutoModelForSequenceClassification.from_pretrained(model_args.model_name_or_path, return_dict=True)
             model = get_peft_model(model, peft_config)
-
+            for param in model.base_model.parameters():
+                param.requires_grad = True
+        
         elif(data_args.peft_choice == "prefix_tune"):
-            peft_type = PeftType.PREFIX_TUNING
             peft_config = PrefixTuningConfig(
                 task_type="SEQ_CLS",
                 num_virtual_tokens=20
             )
-            model = AutoModelForSequenceClassification.from_pretrained(model_args.model_name_or_path, return_dict=True)
             model = get_peft_model(model, peft_config)
-            print(model.print_trainable_parameters())
-            print(model)
-
+            for param in model.base_model.parameters():
+                param.requires_grad = True
+        else:
+            peft_config = PromptTuningConfig(
+                task_type = "SEQ_CLS",
+                num_virtual_tokens=10
+            )
+            model = get_peft_model(model, peft_config)
+            for param in model.base_model.parameters():
+                param.requires_grad = True
+            
 
     if(model_args.freeze_layers == True):
         for param in model.base_model.parameters():
@@ -493,9 +340,8 @@ def main(args):
 
 
     if(tokenizer.pad_token is None):
-        #print("Adding PAD token")
         tokenizer.pad_token = tokenizer.eos_token
-
+    
     model.config.pad_token_id = model.config.eos_token_id
     model.resize_token_embeddings(len(tokenizer))
 
@@ -566,24 +412,21 @@ def main(args):
         #result = tokenizer(text = examples, padding = padding, max_length = max_seq_length, truncation = True)
 
         # Map labels to IDs (not necessary for GLUE tasks)
-
+        
         if label_to_id is not None and label_value in examples:
             result[label_value] = [(label_to_id[l] if l != -1 else -1) for l in examples[label_value]]
 
-
         #if label_to_id is not None and "label" in examples:
         #    result["label"] = [(label_to_id[l] if l != -1 else -1) for l in examples["label"]]
+
         result["labels"] = result[label_value].copy()
+
         return result
 
     with training_args.main_process_first(desc="dataset map pre-processing"):
         raw_datasets = raw_datasets.map(
             preprocess_function,
             batched=True,
-            #remove_columns= ["multi", "binary"],
-            #remove_columns = ["label"],
-            #remove_columns = ["relevance", "id"],
-            #remove_columns = ["sentiment", "relevance", "id"],
             remove_columns = column_others,
             load_from_cache_file=not data_args.overwrite_cache,
             desc="Running tokenizer on dataset",
@@ -621,6 +464,7 @@ def main(args):
     if training_args.do_train:
         for index in random.sample(range(len(train_dataset)), 2):
             logger.info(f"Sample {index} of the training set: {train_dataset[index]}.")
+        
 
     # Get the metric function
     if data_args.task_name is not None:
@@ -652,11 +496,10 @@ def main(args):
     else:
         data_collator = None
 
-    #print(train_dataset[56])
+    print(train_dataset[56])
 
-
-    print(type(model))
-    print("model trainable paramters", print_trainable_parameters(model))
+    remaining_params = print_trainable_parameters(model)
+    print("reamining trainable parameters", remaining_params)
 
     # Initialize our Trainer
     trainer = Trainer(
@@ -704,7 +547,7 @@ def main(args):
                 valid_mm_dataset = valid_mm_dataset.select(range(max_eval_samples))
             eval_datasets.append(valid_mm_dataset)
             combined = {}
-
+            
         '''
         for eval_dataset, task in zip(eval_datasets, tasks):
             metrics = trainer.evaluate(eval_dataset=eval_dataset)
@@ -733,6 +576,8 @@ def main(args):
             metrics["model_name"] = model_args.model_name_or_path
             metrics["dataset_name"] = data_args.dataset_name
             metrics['problem_type'] = "classification"
+            metrics['peft_choice'] = str(data_args.peft_choice)
+            metrics['trainable_parameters_percentage'] = str(remaining_params)
             metrics["problem_description"] = model.config.problem_type
             metrics["batch_size"] = training_args.per_device_train_batch_size
             metrics["label"] = label_value
@@ -747,7 +592,7 @@ def main(args):
                     metrics_list.append(metrics)
                     json.dump(metrics_list, fp)
                 fp.close()
-
+            
             else:
                 # file exists read the prev entry, add new one and then write
                 with open(log_file_path, 'r') as new_file_path:
@@ -759,7 +604,7 @@ def main(args):
                     json.dump(curr_list, new_file_path)
 
                 new_file_path.close()
-
+                
             trainer.log_metrics("eval", metrics)
             trainer.save_metrics("eval", metrics)
 

@@ -33,7 +33,8 @@ class GermanEuroParl():
         freeze_layers,
         epochs,
         per_device_train_batch_size,
-        save_steps
+        save_steps,
+        peft_choice,
     ):
 
         all_param_list = []
@@ -57,6 +58,10 @@ class GermanEuroParl():
         all_param_list.append(str(freeze_layers))
         all_param_list.append("--save_steps")
         all_param_list.append(save_steps)
+        all_param_list.append("--peft_choice"),
+        all_param_list.append(peft_choice)
+        all_param_list.append("--is_task_ner")
+        all_param_list.append("True")
 
         print(all_param_list)
         return all_param_list
