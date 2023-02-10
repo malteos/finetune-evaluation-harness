@@ -47,7 +47,12 @@ from transformers import (
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
-
+from peft import get_peft_config,get_peft_model, get_peft_model_state_dict, set_peft_model_state_dict, LoraConfig, PeftType, LoraModel
+from peft import PrefixTuningConfig, PromptEncoderConfig
+from peft.utils.other import fsdp_auto_wrap_policy
+import accelerate
+from accelerate import accelerator
+from accelerate import Accelerator, DistributedType
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 #check_min_version("4.26.0.dev0")
@@ -69,6 +74,8 @@ task_to_keys = {
 logger = logging.getLogger(__name__)
 # for now disabling due to debugging
 os.environ["WANDB_DISABLED"] = "true"
+
+#os.environ["LOCAL_RANK"]='-1'
 
 @dataclass
 class DataTrainingArguments:
@@ -108,6 +115,10 @@ class DataTrainingArguments:
     remove_labels: Optional[List[str]] = field(
         default = None,
         metadata = {"help" : "Labels which have to removed (please verify these from the original dataset)"}
+    )
+    peft_choice: Optional[str] = field(
+        default = None,
+        metadata={"help": "Which parameter efficent training strategy to use (LORA, P TUNING, PREFIX TUNING, PROMPT TUNING)"}
     )
     pad_to_max_length: bool = field(
         default=True,
@@ -401,6 +412,7 @@ def main(args):
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
     )
+
     model = AutoModelForSequenceClassification.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -411,6 +423,70 @@ def main(args):
         ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
 
+
+    def print_trainable_parameters(model):
+        """
+        Prints the number of trainable parameters in the model.
+        """
+        trainable_params = 0
+        all_param = 0
+        for _, param in model.named_parameters():
+            all_param += param.numel()
+            if param.requires_grad:
+                trainable_params += param.numel()
+        print(
+            f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
+        )
+
+
+    print("data_args", data_args)
+    #accelerator = Accelerator()
+    print("Before prefix tuning")
+    print_trainable_parameters(model)
+
+    if(data_args.peft_choice is not None):
+        if(data_args.peft_choice == 'lora'):
+            peft_type = PeftType.LORA
+            peft_config = LoraConfig(
+                task_type = "SEQ_CLS",
+                inference_mode = "False",
+                target_modules=["query", "value"],
+                bias="none",
+                r=8,
+                lora_alpha = 16,
+                lora_dropout = 0.0
+            )
+            model = AutoModelForSequenceClassification.from_pretrained(model_args.model_name_or_path, return_dict=True)
+            #model = get_peft_model(model, peft_config)
+            model = LoraModel(peft_config, model)
+            #print(model.print_trainable_parameters())
+            print(model)
+            #for param in model.classifier.parameters():
+            #    param.requires_grad = True
+
+        elif(data_args.peft_choice == 'p_tune'):
+            peft_type = PeftType.P_TUNING
+            peft_config = PromptEncoderConfig(
+                task_type = "SEQ_CLS",
+                inference_mode = "False",
+                num_virtual_tokens=20,
+                encoder_hidden_size=128,
+            )
+            model = AutoModelForSequenceClassification.from_pretrained(model_args.model_name_or_path, return_dict=True)
+            model = get_peft_model(model, peft_config)
+
+        elif(data_args.peft_choice == "prefix_tune"):
+            peft_type = PeftType.PREFIX_TUNING
+            peft_config = PrefixTuningConfig(
+                task_type="SEQ_CLS",
+                num_virtual_tokens=20
+            )
+            model = AutoModelForSequenceClassification.from_pretrained(model_args.model_name_or_path, return_dict=True)
+            model = get_peft_model(model, peft_config)
+            print(model.print_trainable_parameters())
+            print(model)
+
+
     if(model_args.freeze_layers == True):
         for param in model.base_model.parameters():
             param.requires_grad = False
@@ -419,7 +495,7 @@ def main(args):
     if(tokenizer.pad_token is None):
         #print("Adding PAD token")
         tokenizer.pad_token = tokenizer.eos_token
-    
+
     model.config.pad_token_id = model.config.eos_token_id
     model.resize_token_embeddings(len(tokenizer))
 
@@ -490,7 +566,7 @@ def main(args):
         #result = tokenizer(text = examples, padding = padding, max_length = max_seq_length, truncation = True)
 
         # Map labels to IDs (not necessary for GLUE tasks)
-        
+
         if label_to_id is not None and label_value in examples:
             result[label_value] = [(label_to_id[l] if l != -1 else -1) for l in examples[label_value]]
 
@@ -579,6 +655,9 @@ def main(args):
     #print(train_dataset[56])
 
 
+    print(type(model))
+    print("model trainable paramters", print_trainable_parameters(model))
+
     # Initialize our Trainer
     trainer = Trainer(
         model=model,
@@ -625,7 +704,7 @@ def main(args):
                 valid_mm_dataset = valid_mm_dataset.select(range(max_eval_samples))
             eval_datasets.append(valid_mm_dataset)
             combined = {}
-            
+
         '''
         for eval_dataset, task in zip(eval_datasets, tasks):
             metrics = trainer.evaluate(eval_dataset=eval_dataset)
@@ -668,7 +747,7 @@ def main(args):
                     metrics_list.append(metrics)
                     json.dump(metrics_list, fp)
                 fp.close()
-            
+
             else:
                 # file exists read the prev entry, add new one and then write
                 with open(log_file_path, 'r') as new_file_path:
@@ -680,7 +759,7 @@ def main(args):
                     json.dump(curr_list, new_file_path)
 
                 new_file_path.close()
-                
+
             trainer.log_metrics("eval", metrics)
             trainer.save_metrics("eval", metrics)
 
