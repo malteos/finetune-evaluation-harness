@@ -20,3 +20,5 @@ jupyter
 pandas
 ipywidgets>=8.0.2
 fire
+
+transformers accelerate evaluate datasets loralib git+https://github.com/huggingface/peft
