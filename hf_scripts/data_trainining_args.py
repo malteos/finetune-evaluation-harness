@@ -5,6 +5,7 @@ import random
 import sys 
 from dataclasses import dataclass, field
 from typing import Optional, List
+#from hf_scripts.utility_functions import task_to_keys
 
 # data class for defining data training arguments
 
@@ -71,6 +72,26 @@ class DataTrainingArguments:
         default = None,
         metadata={"help": "Which parameter efficent training strategy to use (LORA, P TUNING, PREFIX TUNING, PROMPT TUNING)"}
     )
+    r: int = field(
+        default=8,
+        metadata={"help": "Value of r for the parameter efficient fine-tuning"}
+    )
+    lora_alpha: int = field(
+        default = 16,
+        metadata={"help": "Value of lora alpha for the parameter efficient fine-tuning"}
+    )
+    lora_dropout: float = field(
+        default=0.0,
+        metadata={"help": "Value of lora dropout for the parameter efficient fine-tuning"}
+    )
+    num_virtual_tokens: int = field(
+        default=20,
+        metadata={"help":"Number of virtual tokens to keep for parameter efficient fine-tuning"}
+    )
+    encoder_hidden_states: int = field(
+        default=128,
+        metadata={"help": "Encoder hidden state size to keep for parameter efficent fine-tuning"}
+    )
     pad_to_max_length: bool = field(
         default=True,
         metadata={
@@ -123,9 +144,35 @@ class DataTrainingArguments:
         default=3500,
         metadata={"help": "Steps after which to save model checkpoints"}
     )
+    version_2_with_negative: bool = field(
+        default=False, metadata={"help": "If true, some of the examples do not have an answer."}
+    )
     feature_file: bool = field (
         default = False,
         metadata = {"help": "Does your dataset has feature file on HF Hub"}
+    )
+    n_best_size: int = field(
+        default=20,
+        metadata={"help": "The total number of n-best predictions to generate when looking for an answer."},
+    )
+    null_score_diff_threshold: float = field(
+        default=0.0,
+        metadata={
+            "help": (
+                "The threshold used to select the null answer: if the best answer has a score that is less than "
+                "the score of the null answer minus this threshold, the null answer is selected for this example. "
+                "Only useful when `version_2_with_negative=True`."
+            )
+        },
+    )
+    max_answer_length: int = field(
+        default=30,
+        metadata={
+            "help": (
+                "The maximum length of an answer that can be generated. This is needed because the start "
+                "and end predictions are not conditioned on one another."
+            )
+        },
     )
     text_column_name: Optional[str] = field(
         default=None, metadata={"help": "The column name of text to input in the file (a csv or JSON file)."}
@@ -153,6 +200,10 @@ class DataTrainingArguments:
     base_checkpoint_dir: Optional[str] = field(
         default= "/netscratch/agautam/experiments/test_logs",
         metadata={"help": "Path for storing model checkpoints and weights."}
+    )
+    doc_stride: int = field(
+        default=16,
+        metadata={"help": "When splitting up a long document into chunks, how much stride to take between chunks."},
     )
     train_file: Optional[str] = field(
         default=None, metadata={"help": "A csv or a json file containing the training data."}
