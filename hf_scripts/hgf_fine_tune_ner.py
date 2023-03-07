@@ -1,55 +1,44 @@
-import logging
 from ast import literal_eval
 import os
 import sys
-from os import path
-import json
 from dataclasses import dataclass, field
 from typing import Optional
-import datasets
 import numpy as np
 from datasets import ClassLabel, load_dataset
-from hf_scripts.model_args import ModelArguments
-from hf_scripts.data_trainining_args import DataTrainingArguments
+#from hf_scripts.model_args import ModelArguments
+#from hf_scripts.data_trainining_args import DataTrainingArguments
+from hf_scripts.utility_functions import *
+import hf_scripts
 import evaluate
-import transformers
 from transformers import (
     DataCollatorForTokenClassification,
-    HfArgumentParser,
     PretrainedConfig,
-    PreTrainedTokenizerFast,
-    Trainer,
-    TrainingArguments,
     set_seed,
 )
-from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
-from hf_scripts.utility_functions import *
-
-# for now disabling due to debugging
-os.environ["WANDB_DISABLED"] = "true"
 
 require_version(
     "datasets>=1.8.0",
     "To fix: pip install -r examples/pytorch/token-classification/requirements.txt",
 )
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 
 def main(args):
-    model_args, data_args, training_args = parse_hf_arguments(args)
+
+    model_args, data_args, training_args = hf_scripts.utility_functions.parse_hf_arguments(args)
     send_example_telemetry("run_ner", model_args, data_args)
 
-    logger = prepare_logger(training_args)
-    last_checkpoint = detect_last_checkpoint(logger, training_args)
+    logger = hf_scripts.utility_functions.prepare_logger(training_args)
+    last_checkpoint = hf_scripts.utility_functions.detect_last_checkpoint(logger, training_args)
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
 
-    raw_datasets = load_raw_dataset_ner(data_args, model_args)
+    raw_datasets = hf_scripts.utility_functions.load_raw_dataset_ner(data_args, model_args)
 
     # raw_datasets = raw_datasets.map(lambda x: {"ner_tags": [int(i) for i in x["ner_tags"].split(",")]})
     # raw_datasets = raw_datasets.map(lambda x: {"pos_tags": [int(i) for i in x["pos_tags"].split(",")]})
@@ -81,14 +70,14 @@ def main(args):
     # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
     # Otherwise, we have to get the list of labels manually.
 
-    label_list, label_to_id, feature_file_exists, labels_are_int = generate_label_list(
+    label_list, label_to_id, feature_file_exists, labels_are_int = hf_scripts.utility_functions.generate_label_list(
         raw_datasets, features, ClassLabel, label_column_name
     )
 
     num_labels = len(label_list)
     print("num_distinct_labels", num_labels)
 
-    config = load_config(
+    config = hf_scripts.utility_functions.load_config(
         model_args.model_name_or_path,
         num_labels,
         "ner",
@@ -98,7 +87,7 @@ def main(args):
         "ner",
     )
     if config.model_type in {"bloom", "gpt2", "roberta"}:
-        tokenizer = load_tokenizer(
+        tokenizer = hf_scripts.utility_functions.load_tokenizer(
             model_args.model_name_or_path,
             model_args.cache_dir,
             model_args.use_fast_tokenizer,
@@ -108,7 +97,7 @@ def main(args):
             True,
         )
     else:
-        tokenizer = load_tokenizer(
+        tokenizer = hf_scripts.utility_functions.load_tokenizer(
             model_args.model_name_or_path,
             model_args.cache_dir,
             model_args.use_fast_tokenizer,
@@ -117,7 +106,7 @@ def main(args):
             None,
             False,
         )
-    model = load_model(
+    model = hf_scripts.utility_functions.load_model(
         model_args.model_name_or_path,
         bool(".ckpt" in model_args.model_name_or_path),
         config,
@@ -127,19 +116,19 @@ def main(args):
         "ner",
     )
 
-    print_trainable_parameters(model)
+    hf_scripts.utility_functions.print_trainable_parameters(model)
 
-    if data_args.peft_choice in peft_choice_list:
-        model = load_model_peft(model, data_args, "TOKEN_CLS")
+    if data_args.peft_choice in hf_scripts.utility_functions.peft_choice_list:
+        model = hf_scripts.utility_functions.load_model_peft(model, data_args, "TOKEN_CLS")
 
-    model = freeze_layers(model_args, model)
+    model = hf_scripts.utility_functions.freeze_layers(model_args, model)
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
     model.resize_token_embeddings(len(tokenizer))
 
-    check_tokenizer_instance(tokenizer)
+    hf_scripts.utility_functions.check_tokenizer_instance(tokenizer)
 
     # Model has labels -> use them.
     if model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id:
@@ -164,7 +153,7 @@ def main(args):
     model.config.label2id = {l: i for i, l in enumerate(label_list)}
     model.config.id2label = {i: l for i, l in enumerate(label_list)}
 
-    b_to_i_label = generate_b_to_i_label(feature_file_exists, label_list)
+    b_to_i_label = hf_scripts.utility_functions.generate_b_to_i_label(feature_file_exists, label_list)
 
     # Preprocessing the dataset
     # Padding strategy
@@ -180,7 +169,7 @@ def main(args):
         "b_to_i_label": b_to_i_label,
     }
 
-    train_dataset, eval_dataset, predict_dataset = map_train_validation_predict_ds_ner(
+    train_dataset, eval_dataset, predict_dataset = hf_scripts.utility_functions.map_train_validation_predict_ds_ner(
         training_args, data_args, raw_datasets, fn_kwargs
     )
 
@@ -195,45 +184,7 @@ def main(args):
     def compute_metrics(p):
         predictions, labels = p
         predictions = np.argmax(predictions, axis=2)
-
-        if feature_file_exists == False:
-            true_predictions = [
-                [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
-                for prediction, label in zip(predictions, labels)
-            ]
-            true_labels = [
-                [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
-                for prediction, label in zip(predictions, labels)
-            ]
-        else:
-            true_predictions = [
-                [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
-                for prediction, label in zip(predictions, labels)
-            ]
-            true_labels = [
-                [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
-                for prediction, label in zip(predictions, labels)
-            ]
-
-        results = metric.compute(predictions=true_predictions, references=true_labels)
-        print(results)
-        if data_args.return_entity_level_metrics:
-            # Unpack nested dictionaries
-            final_results = {}
-            for key, value in results.items():
-                if isinstance(value, dict):
-                    for n, v in value.items():
-                        final_results[f"{key}_{n}"] = v
-                else:
-                    final_results[key] = value
-            return final_results
-        else:
-            return {
-                "precision": results["overall_precision"],
-                "recall": results["overall_recall"],
-                "f1": results["overall_f1"],
-                "accuracy": results["overall_accuracy"],
-            }
+        return hf_scripts.utility_functions.get_true_predictions_labels(label_list, predictions, labels, metric, data_args)
 
     compute_metrics_ner_dict = {
         "feature_file_exists": feature_file_exists,
@@ -241,7 +192,7 @@ def main(args):
         "data_args": data_args,
     }
 
-    trainer = train_eval_prediction(
+    trainer = hf_scripts.utility_functions.train_eval_prediction(
         "token-classification",
         model,
         training_args,
@@ -262,7 +213,7 @@ def main(args):
         False,
     )
 
-    set_hub_arguments(
+    hf_scripts.utility_functions.set_hub_arguments(
         trainer, model_args, data_args, training_args, "token-classification"
     )
 

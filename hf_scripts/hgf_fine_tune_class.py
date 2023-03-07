@@ -24,7 +24,6 @@ require_version(
 
 
 def main(args):
-
     model_args, data_args, training_args = parse_hf_arguments(args)
     send_example_telemetry("run_glue", model_args, data_args)
     logger = prepare_logger(training_args)

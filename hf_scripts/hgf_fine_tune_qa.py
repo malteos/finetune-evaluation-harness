@@ -8,7 +8,7 @@ from datasets import load_dataset, ClassLabel, Value
 import evaluate
 #from trainer_qa import QuestionAnsweringTrainer
 from . import trainer_qa
-from transformers import (EvalPrediction,set_seed)
+from transformers import (EvalPrediction,set_seed, HfArgumentParser, TrainingArguments)
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 #from utils_qa import postprocess_qa_predictions
@@ -18,6 +18,18 @@ from hf_scripts.data_trainining_args import DataTrainingArguments
 from hf_scripts.utility_functions import *
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/question-answering/requirements.txt")
+
+def parse_hf_arguments(args):
+    """
+    method to parse arguments in each of the hf script for each task
+    """
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
+    if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
+        model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
+    else:
+        model_args, data_args, training_args = parser.parse_args_into_dataclasses(args = args)
+    
+    return model_args, data_args, training_args
 
 def main(args):
     model_args, data_args, training_args = parse_hf_arguments(args)

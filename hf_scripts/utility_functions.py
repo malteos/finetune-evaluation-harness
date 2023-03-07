@@ -63,6 +63,7 @@ task_to_keys = {
 peft_choice_list = ['lora', 'p_tune', 'prefix_tune', 'prompt_tune']
 
 
+
 def parse_hf_arguments(args):
     """
     method to parse arguments in each of the hf script for each task
@@ -74,6 +75,7 @@ def parse_hf_arguments(args):
         model_args, data_args, training_args = parser.parse_args_into_dataclasses(args = args)
     
     return model_args, data_args, training_args
+
 
 def freeze_layers(model_args, model):
     """
@@ -1182,3 +1184,37 @@ def map_source_file(task_name):
         return hgf_fine_tune_ner
     else:
         return hgf_fine_tune_qa
+    
+
+def get_true_predictions_labels(label_list, predictions, labels, metric, data_args):
+    """
+    get true predictions and labels for ner task
+    """
+    true_predictions = [
+        [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+        for prediction, label in zip(predictions, labels)
+    ]
+    true_labels = [
+        [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+        for prediction, label in zip(predictions, labels)
+    ]
+
+    results = metric.compute(predictions=true_predictions, references=true_labels)
+    print(results)
+    if data_args.return_entity_level_metrics:
+        # Unpack nested dictionaries
+        final_results = {}
+        for key, value in results.items():
+            if isinstance(value, dict):
+                for n, v in value.items():
+                    final_results[f"{key}_{n}"] = v
+            else:
+                final_results[key] = value
+        return final_results
+    else:
+        return {
+            "precision": results["overall_precision"],
+            "recall": results["overall_recall"],
+            "f1": results["overall_f1"],
+            "accuracy": results["overall_accuracy"],
+        }
