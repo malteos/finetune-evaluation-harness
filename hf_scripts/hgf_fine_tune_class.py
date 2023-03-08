@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 from typing import Optional, List
 import numpy as np
 from datasets import load_dataset
-from hf_scripts.model_args import ModelArguments
-from hf_scripts.data_trainining_args import DataTrainingArguments
+#from hf_scripts.model_args import ModelArguments
+#from hf_scripts.data_trainining_args import DataTrainingArguments
 from transformers import (
     PretrainedConfig,
     set_seed,
@@ -23,8 +23,9 @@ require_version(
 )
 
 
-def main(args):
-    model_args, data_args, training_args = parse_hf_arguments(args)
+def run_task_evaluation(model_args, data_args, training_args, init_args):
+    #model_args, data_args, training_args = parse_hf_arguments(args)
+    (training_args, data_args) = prepend_data_args(training_args, data_args, init_args)
     send_example_telemetry("run_glue", model_args, data_args)
     logger = prepare_logger(training_args)
     last_checkpoint = detect_last_checkpoint(logger, training_args)
@@ -245,6 +246,9 @@ def main(args):
         trainer, model_args, data_args, training_args, "text-classification"
     )
 
+
+def main():
+    run_task_evaluation()
 
 def _mp_fn(index):
     # For xla_spawn (TPUs)

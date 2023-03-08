@@ -8,3 +8,11 @@ class Classification(ABC):
     @abstractmethod
     def get_dataset_id(self):
         pass
+
+    @abstractmethod
+    def get_task_name(self):
+        pass
+
+    @abstractmethod
+    def get_label_name(self):
+        pass

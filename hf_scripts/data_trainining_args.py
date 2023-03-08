@@ -35,10 +35,6 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "The name of the task to train on: " + ", ".join(task_to_keys.keys())},
     )
-    task_list: Optional[List[str]] = field(
-        default=None,
-        metadata={"help": "List of tasks passed in order."}
-    )
     dataset_name: Optional[str] = field(
         default=None, metadata={"help": "The name of the dataset to use (via the datasets library)."}
     )
@@ -198,7 +194,7 @@ class DataTrainingArguments:
         metadata={"help": "Path to store the results json file (to be used later for visualization)"}
     )
     base_checkpoint_dir: Optional[str] = field(
-        default= "/netscratch/agautam/experiments/test_logs",
+        default= "",
         metadata={"help": "Path for storing model checkpoints and weights."}
     )
     doc_stride: int = field(
@@ -220,8 +216,10 @@ class DataTrainingArguments:
                 raise ValueError("Unknown task, you should pick one in " + ",".join(task_to_keys.keys()))
         elif self.dataset_name is not None:
             pass
-        elif self.train_file is None or self.validation_file is None:
-            raise ValueError("Need either a GLUE task, a training/validation file or a dataset name.")
+        elif self.dataset_name is None:
+            pass 
+        #elif self.train_file is None or self.validation_file is None:
+        #    raise ValueError("Need either a GLUE task, a training/validation file or a dataset name.")
         else:
             train_extension = self.train_file.split(".")[-1]
             assert train_extension in ["csv", "json"], "`train_file` should be a csv or a json file."

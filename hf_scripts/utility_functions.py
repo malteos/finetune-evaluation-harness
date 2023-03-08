@@ -63,6 +63,16 @@ task_to_keys = {
 peft_choice_list = ['lora', 'p_tune', 'prefix_tune', 'prompt_tune']
 
 
+def prepend_data_args(training_args, data_args, init_args):
+    """
+    method to set necessary parameters for task evaluation
+    """
+    data_args.results_log_path = init_args.results_logging_dir
+    training_args.do_train = True
+    training_args.do_eval = True
+    training_args.overwrite_output_dir = True
+    return (training_args, data_args)
+
 
 def parse_hf_arguments(args):
     """

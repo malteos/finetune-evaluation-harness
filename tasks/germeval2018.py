@@ -20,8 +20,16 @@ _CITATION = """
 class GermEval2018(Classification):
 
     DATASET_ID = "philschmid/germeval18"  # HF datasets ID
+    TASK_NAME = "germeval2018"
+    LABEL_NAME = "multi"                # column name from HF dataset
+
+    def get_task_name(self):
+        return self.TASK_NAME
 
     def get_dataset_id(self):
         return self.DATASET_ID
+    
+    def get_label_name(self):
+        return self.LABEL_NAME
     
 
