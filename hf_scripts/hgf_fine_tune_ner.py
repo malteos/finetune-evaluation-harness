@@ -1,22 +1,15 @@
-from ast import literal_eval
-import os
 import sys
-from dataclasses import dataclass, field
-from typing import Optional
-import numpy as np
-from datasets import ClassLabel, load_dataset
-#from hf_scripts.model_args import ModelArguments
-#from hf_scripts.data_trainining_args import DataTrainingArguments
-from hf_scripts.utility_functions import *
-import hf_scripts
 import evaluate
 from transformers import (
     DataCollatorForTokenClassification,
     PretrainedConfig,
     set_seed,
 )
-from transformers.utils import check_min_version, send_example_telemetry
+from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
+from datasets import ClassLabel
+from hf_scripts.utility_functions import *
+import hf_scripts
 
 
 require_version(
@@ -24,12 +17,11 @@ require_version(
     "To fix: pip install -r examples/pytorch/token-classification/requirements.txt",
 )
 
-#logger = logging.getLogger(__name__)
 
+def run_task_evaluation(model_args, data_args, training_args, init_args):
 
-def main(args):
-
-    model_args, data_args, training_args = hf_scripts.utility_functions.parse_hf_arguments(args)
+    #model_args, data_args, training_args = hf_scripts.utility_functions.parse_hf_arguments(args)
+    (training_args, data_args) = hf_scripts.utility_functions.prepend_data_args(training_args, data_args, init_args)
     send_example_telemetry("run_ner", model_args, data_args)
 
     logger = hf_scripts.utility_functions.prepare_logger(training_args)
@@ -186,12 +178,6 @@ def main(args):
         predictions = np.argmax(predictions, axis=2)
         return hf_scripts.utility_functions.get_true_predictions_labels(label_list, predictions, labels, metric, data_args)
 
-    compute_metrics_ner_dict = {
-        "feature_file_exists": feature_file_exists,
-        "label_list": label_list,
-        "data_args": data_args,
-    }
-
     trainer = hf_scripts.utility_functions.train_eval_prediction(
         "token-classification",
         model,
@@ -213,15 +199,18 @@ def main(args):
         False,
     )
 
-    hf_scripts.utility_functions.set_hub_arguments(
+    trainer = hf_scripts.utility_functions.set_hub_arguments(
         trainer, model_args, data_args, training_args, "token-classification"
     )
 
+    return trainer 
+
+def main():
+    run_task_evaluation()
 
 def _mp_fn(index):
     # For xla_spawn (TPUs)
     main()
-
 
 if __name__ == "__main__":
     # main()

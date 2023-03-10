@@ -1,21 +1,11 @@
-import os
-from os import path
-import random
 import sys
-from dataclasses import dataclass, field
-from typing import Optional, List
-import numpy as np
-from datasets import load_dataset
-#from hf_scripts.model_args import ModelArguments
-#from hf_scripts.data_trainining_args import DataTrainingArguments
 from transformers import (
     PretrainedConfig,
     set_seed,
 )
-from transformers.utils import check_min_version, send_example_telemetry
+from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
-from hf_scripts.utility_functions import *
-from typing import Any, Dict
+from hf_scripts import utility_functions
 
 require_version(
     "datasets>=1.8.0",
@@ -24,16 +14,20 @@ require_version(
 
 
 def run_task_evaluation(model_args, data_args, training_args, init_args):
-    #model_args, data_args, training_args = parse_hf_arguments(args)
-    (training_args, data_args) = prepend_data_args(training_args, data_args, init_args)
+    # model_args, data_args, training_args = parse_hf_arguments(args)
+    (training_args, data_args) = utility_functions.prepend_data_args(
+        training_args, data_args, init_args
+    )
     send_example_telemetry("run_glue", model_args, data_args)
-    logger = prepare_logger(training_args)
-    last_checkpoint = detect_last_checkpoint(logger, training_args)
+    logger = utility_functions.prepare_logger(training_args)
+    last_checkpoint = utility_functions.detect_last_checkpoint(logger, training_args)
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
 
-    raw_datasets = load_raw_dataset(data_args, training_args, model_args, logger)
+    raw_datasets = utility_functions.load_raw_dataset(
+        data_args, training_args, model_args, logger
+    )
 
     # Labels
     if data_args.label_value is not None:
@@ -71,7 +65,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     # column_others = all_columns['train'].remove(data_args.label_value)
     column_others = all_columns["train"].remove(label_value)
 
-    config = load_config(
+    config = utility_functions.load_config(
         model_args.model_name_or_path,
         num_labels,
         data_args.task_name,
@@ -80,7 +74,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         model_args.use_auth_token,
         "sequence",
     )
-    tokenizer = load_tokenizer(
+    tokenizer = utility_functions.load_tokenizer(
         model_args.model_name_or_path,
         model_args.cache_dir,
         model_args.use_fast_tokenizer,
@@ -89,7 +83,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         "left",
         None,
     )
-    model = load_model(
+    model = utility_functions.load_model(
         model_args.model_name_or_path,
         bool(".ckpt" in model_args.model_name_or_path),
         config,
@@ -99,12 +93,12 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         "sequence",
     )
 
-    print("parameters before", print_trainable_parameters(model))
+    print("parameters before", utility_functions.print_trainable_parameters(model))
 
-    if data_args.peft_choice in peft_choice_list:
-        model = load_model_peft(model, data_args, "SEQ_CLS")
+    if data_args.peft_choice in utility_functions.peft_choice_list:
+        model = utility_functions.load_model_peft(model, data_args, "SEQ_CLS")
 
-    model = freeze_layers(model_args, model)
+    model = utility_functions.freeze_layers(model_args, model)
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -112,7 +106,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     model.config.pad_token_id = model.config.eos_token_id
     model.resize_token_embeddings(len(tokenizer))
 
-    sentence1_key, sentence2_key = preprocess_raw_datasets(
+    sentence1_key, sentence2_key = utility_functions.preprocess_raw_datasets(
         raw_datasets, data_args, label_value
     )
 
@@ -171,7 +165,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     with training_args.main_process_first(desc="dataset map pre-processing"):
         raw_datasets = raw_datasets.map(
-            preprocess_function_classification,
+            utility_functions.preprocess_function_classification,
             batched=True,
             fn_kwargs=fn_kwargs,
             remove_columns=column_others,
@@ -214,14 +208,17 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
             )
             predict_dataset = predict_dataset.select(range(max_predict_samples))
 
-    data_collator = data_collator_sequence_classification(
+    data_collator = utility_functions.data_collator_sequence_classification(
         data_args, training_args, tokenizer
     )
 
     # print(train_dataset[56])
-    print("reamining trainable params", print_trainable_parameters(model))
+    print(
+        "reamining trainable params",
+        utility_functions.print_trainable_parameters(model),
+    )
 
-    trainer = train_eval_prediction(
+    trainer = utility_functions.train_eval_prediction(
         "classification",
         model,
         training_args,
@@ -233,7 +230,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         data_collator,
         tokenizer,
         None,
-        compute_metrics_classification,
+        utility_functions.compute_metrics_classification,
         last_checkpoint,
         label_value,
         predict_dataset,
@@ -242,13 +239,19 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         is_regression,
     )
 
-    set_hub_arguments(
+    trainer = utility_functions.set_hub_arguments(
         trainer, model_args, data_args, training_args, "text-classification"
     )
+
+    print(type(trainer))
+    print(trainer.compute_metrics)
+
+    return trainer
 
 
 def main():
     run_task_evaluation()
+
 
 def _mp_fn(index):
     # For xla_spawn (TPUs)

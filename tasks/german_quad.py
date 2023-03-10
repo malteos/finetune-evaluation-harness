@@ -1,14 +1,13 @@
-import datasets
-import numpy as np
 from tasks.qa import QuestionAnswering
-# from . import TASK_REGISTRY, TASK_TYPE_REGISTRY, get_task
 
 
 class GermanQuad(QuestionAnswering):
 
     DATASET_ID = "deepset/germanquad"  # HF datasets ID
-    
+    TASK_NAME = "german_quad"
+
     def get_dataset_id(self):
         return self.DATASET_ID
 
-    
+    def get_task_name(self):
+        return self.TASK_NAME

@@ -1,14 +1,19 @@
-import datasets 
-import numpy as np 
-#from . import TASK_REGISTRY, TASK_TYPE_REGISTRY, get_task
 from tasks.ner import NamedEntityRecognition
 
 
 class GermanEuroParl(NamedEntityRecognition):
 
-    DATASET_ID = "akash418/german_europarl"    # HF datasets ID
-    
+    DATASET_ID = "akash418/german_europarl"
+    TASK_NAME = "german_europarl"
+
     def get_dataset_id(self):
+        """
+        return HF dataset id
+        """
         return self.DATASET_ID
-    
-    
+
+    def get_task_name(self):
+        """
+        return task name
+        """
+        return self.TASK_NAME

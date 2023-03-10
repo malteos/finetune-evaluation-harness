@@ -35,10 +35,10 @@ ALL_TASK_TYPES = sorted(list(TASK_TYPE_REGISTRY))
 def get_task(task_name):
     try:
         return TASK_REGISTRY[task_name]
-    except KeyError:
+    except KeyError as exc:
         print("Available tasks:")
         print(TASK_REGISTRY)
-        raise KeyError(f"Missing task {task_name}")
+        raise KeyError(f"Missing task {task_name}") from exc
 
 
 # return string names of all the tasks for reference
@@ -48,7 +48,6 @@ def get_all_tasks():
         all_task_str.append(key)
 
     return all_task_str
-
 
 
 def get_all_task_types():
