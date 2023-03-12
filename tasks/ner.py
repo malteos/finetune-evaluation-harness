@@ -2,6 +2,13 @@ from abc import ABC, abstractmethod
 
 
 class NamedEntityRecognition(ABC):
+
+    """
+    Parent Class for defining Named Entity Recognition 
+    consisting of all abstract methods which need to 
+    be implemented for each of the NER task. 
+    """
+
     def get_task_type(self):
         """
         return type

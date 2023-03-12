@@ -28,7 +28,6 @@ from transformers.trainer_utils import get_last_checkpoint
 from peft import (
     get_peft_model,
     LoraConfig,
-    
 )
 from peft import PrefixTuningConfig, PromptEncoderConfig, PromptTuningConfig, TaskType
 from peft.utils.other import fsdp_auto_wrap_policy
@@ -39,7 +38,10 @@ from typing import Any, Dict
 from . import utils_qa
 from datasets import load_dataset
 
-# File containing utility functions used all over the hf_scripts folder
+"""
+File containing utlility functions used over all the hf_scripts folder for all the tasks
+"""
+
 
 # dict used in sequence classification task
 task_to_keys = {
@@ -60,12 +62,17 @@ peft_choice_list = ["lora", "p_tune", "prefix_tune", "prompt_tune"]
 def add_labels_data_args(each_task, data_args):
     """
     method to add labels and dataset name in data_args
+
+    Args:
+        each_task: str: type of the task
+        data_args: an object of type DataTrainingArguments
+
     """
+
     dataset_name = TASK_REGISTRY[each_task]().get_dataset_id()
     if TASK_REGISTRY[each_task]().get_task_type() == "classification":
         label_value = TASK_REGISTRY[each_task]().get_label_name()
         data_args.label_value = label_value
-
 
     if TASK_REGISTRY[each_task]().get_task_type() == "ner":
         data_args.is_task_ner = True
@@ -74,10 +81,21 @@ def add_labels_data_args(each_task, data_args):
     return data_args
 
 
-def prepend_data_args(training_args: TrainingArguments, data_args: DataTrainingArguments, init_args: InitialArguments):
+def prepend_data_args(
+    training_args: TrainingArguments,
+    data_args: DataTrainingArguments,
+    init_args: InitialArguments,
+):
     """
     method to set necessary parameters for task evaluation
+
+    Args:
+        training_args: object of TrainingArguments
+        data_args: object of DataTrainingArguments
+        init_args: object of InitialArguments
+
     """
+
     data_args.results_log_path = init_args.results_logging_dir
     training_args.do_train = True
     training_args.do_eval = True
@@ -88,6 +106,13 @@ def prepend_data_args(training_args: TrainingArguments, data_args: DataTrainingA
 def parse_hf_arguments(args):
     """
     method to parse arguments in each of the hf script for each task
+
+    Args:
+        args: command line arguments passed while while running the main.py file
+
+    Returns:
+        triplet consisting of model_args, data_args and training_args
+
     """
     parser = HfArgumentParser(
         (ModelArguments, DataTrainingArguments, TrainingArguments)
@@ -107,6 +132,11 @@ def parse_hf_arguments(args):
 def freeze_layers(model_args: ModelArguments, model):
     """
     freeze layers of the model if parameter is passed
+
+    Args:
+        model_args: object of ModelArguments
+        model: object of AutoModel
+
     """
     if model_args.freeze_layers == True:
         for param in model.base_model.parameters():
@@ -126,6 +156,19 @@ def load_config(
 ):
     """
     method for returning the model config type
+
+    Args:
+        model_name_or_path: name of the model according to hf hub
+        num_labels: number of labels if the task is classification
+        finetuning_task: the type of the task
+        cache_dir: paramater of model_args class
+        model_revision: parameter of model_args class
+        use_auth_token: parameter of model_args class
+        model_type: type of model
+
+    Returns:
+        config: object of AutoConfig
+
     """
 
     if model_type == "qa":
@@ -161,6 +204,18 @@ def load_tokenizer(
 ):
     """
     method for returning the tokenizer type
+
+    Args:
+        model_name_or_path: name of the model according to hf hub
+        cache_dir: paramater of model_args class
+        model_revision: parameter of model_args class
+        use_auth_token: parameter of model_args class
+        padding_side: padding side for the tokenizer
+        add_prefix_space: adding prefix space for the tokenizerr
+
+    Returns:
+        tokenizer: object of AutoTokenizer
+
     """
     tokenizer = AutoTokenizer.from_pretrained(
         model_name_or_path,
@@ -185,6 +240,19 @@ def load_model(
 ):
     """
     method for loading the model type
+
+    Args:
+        model_name_or_path: name of the model according to hf hub
+        frmom_tf: bool object to load model from a checkpoint
+        config: object of AutoConfig
+        cache_dir: paramater of model_args
+        model_revision: paramater of model_args
+        use_auth_token: parameter of model_args
+        model_type: type of the model
+
+    Returns:
+        model: AutoModel depending on various tasks (Classification, TokenClassification, and QuestionAnswering)
+
     """
 
     if model_type == "sequence":
@@ -221,6 +289,13 @@ def load_model(
 def print_trainable_parameters(model: Any):
     """
     Prints the number of trainable parameters in the model.
+
+    Args:
+        model: object of AutoModel class
+
+    Returns:
+        float: percentage of parameters which are left trainable in the model
+
     """
     trainable_params = 0
     all_param = 0
@@ -241,7 +316,18 @@ def load_model_peft(
 ):
     """
     method for returning the parameter efficent version of model
+
+    Args:
+        model: object of AutoModel class
+        data_args: object of DataTrainingArgument class
+        task_type: type of the task
+
+
+    Returns:
+        model: parameter efficent version of AutoModel class
+
     """
+
     task_type_dict = {"SEQ_CLS": TaskType.SEQ_CLS, "TOKEN_CLS": TaskType.TOKEN_CLS}
 
     if data_args.peft_choice == "lora":
@@ -290,6 +376,7 @@ def compute_metrics_ner(p: EvalPrediction, **compute_metrics_ner_dict):
     """
     method for computing metric for ner task
     """
+
     print(compute_metrics_ner_dict)
     feature_file_exists = compute_metrics_ner_dict["feature_file_exists"]
     label_list = compute_metrics_ner_dict["label_list"]
@@ -350,6 +437,19 @@ def load_trainer(
 ):
     """
     method for creating and returning the Trainer object
+
+    Args:
+        model: object of AutoModel class
+        training_args: object of TrainingArgument class
+        train_dataset: train version of the HF dataset
+        eval_dataset: eval version of the HF dataset
+        compute_metrics: function for computing the metrics
+        tokenizer: object of AutoTokenizer class
+        data_collator: data_collator function
+
+    Returns:
+        trainer: object of Trainer class
+
     """
 
     trainer = Trainer(
@@ -369,6 +469,17 @@ def load_save_metrics_train(
 ):
     """
     method for saving train metrics if do_train is True
+
+    Args:
+        train_dataset: train version of the HF dataset
+        resume_from_checkpoint: resume incase the model training was stopped in between
+        trainer: object of Trainer class
+        last_checkpoint: detect and start training from the previous checkpoint
+        max_train_samples: maximum of training samples
+
+    Returns:
+        trainer: object of Trainer class
+
     """
 
     checkpoint = None
@@ -409,6 +520,21 @@ def load_save_metrics_validation(
 
     """
     method for saving validation metrics if do_eval is True
+
+    Args:
+        model_name_or_path: name of the model according to HF hub
+        trainer: object of the Trainer class
+        max_eval_samples: maximum number of eval samples
+        dataset_name: name of the dataset according to HF hub
+        problem_type: type of the task
+        eval_datasets: list of eval datasets
+        peft_choice: choice of peft argument
+        remaming_params: number of remaining parameters
+        problem_description: type of problem
+        per_device_train_batch_size: size of train batch size
+        label_value: name of the label
+        results_log_path: directory where the results should be logged
+
     """
 
     for eval_dataset in eval_datasets:
@@ -455,17 +581,33 @@ def load_save_metrics_validation(
 
 
 def load_save_metrics_predict(
-    trainer: Trainer, 
-    tasks: list, 
-    predict_datasets: Any, 
-    label_value: str, 
-    is_regression: bool, 
-    output_dir: str, 
-    label_list: list
+    trainer: Trainer,
+    tasks: list,
+    predict_datasets: Any,
+    label_value: str,
+    is_regression: bool,
+    output_dir: str,
+    label_list: list,
 ):
 
     """
     method for saving evaluation metrics incase do_predict = True
+
+    Args:
+        model_name_or_path: name of the model according to HF hub
+        trainer: object of the Trainer class
+        max_eval_samples: maximum number of eval samples
+        dataset_name: name of the dataset according to HF hub
+        problem_type: type of the task
+        eval_datasets: list of eval datasets
+        peft_choice: choice of peft argument
+        remaming_params: number of remaining parameters
+        problem_description: type of problem
+        per_device_train_batch_size: size of train batch size
+        label_value: name of the label
+        results_log_path: directory where the results should be logged
+
+
     """
 
     for predict_dataset, task in zip(predict_datasets, tasks):
@@ -492,15 +634,31 @@ def load_save_metrics_predict(
 
 
 def save_metrics_predict_ner(
-    trainer: Trainer, 
-    training_args: TrainingArguments, 
-    predict_dataset: Any, 
-    output_dir: str, 
-    label_list: list
+    trainer: Trainer,
+    training_args: TrainingArguments,
+    predict_dataset: Any,
+    output_dir: str,
+    label_list: list,
 ):
 
     """
     method for saving prediction metrics for ner
+
+    Args:
+        model_name_or_path: name of the model according to HF hub
+        trainer: object of the Trainer class
+        max_eval_samples: maximum number of eval samples
+        dataset_name: name of the dataset according to HF hub
+        problem_type: type of the task
+        eval_datasets: list of eval datasets
+        peft_choice: choice of peft argument
+        remaming_params: number of remaining parameters
+        problem_description: type of problem
+        per_device_train_batch_size: size of train batch size
+        label_value: name of the label
+        results_log_path: directory where the results should be logged
+
+
     """
 
     predictions, labels, metrics = trainer.predict(
@@ -594,10 +752,14 @@ def compute_metrics_classification(p: EvalPrediction):
     return {"accuracy": (preds == p.label_ids).astype(np.float32).mean().item()}
 
 
-
 def detect_last_checkpoint(logger, training_args):
     """
     detect the last checkpoint
+
+    Args:
+        logger: object of Logger class
+        training_args: object of TrainingArgument class
+
     """
     last_checkpoint = None
     if (
@@ -625,6 +787,13 @@ def detect_last_checkpoint(logger, training_args):
 def prepare_logger(training_args: TrainingArguments):
     """
     prepare the logger object
+
+    Args:
+        training_args: object of Training_Arguments
+
+    Returns:
+        logger: object of logger class
+
     """
     logger = logging.getLogger(__name__)
 
@@ -651,9 +820,19 @@ def prepare_logger(training_args: TrainingArguments):
     return logger
 
 
-def data_collator_sequence_classification(data_args: DataTrainingArguments, training_args: TrainingArguments, tokenizer: AutoTokenizer):
+def data_collator_sequence_classification(
+    data_args: DataTrainingArguments,
+    training_args: TrainingArguments,
+    tokenizer: AutoTokenizer,
+):
     """
     define data collator for sequence classification
+
+    Args:
+        data_args: object of DataTrainingArguments
+        training_args: object of TrainingArguments
+        tokenizer: object of AutoTokenizer
+
     """
     if data_args.pad_to_max_length:
         data_collator = default_data_collator
@@ -665,9 +844,23 @@ def data_collator_sequence_classification(data_args: DataTrainingArguments, trai
     return data_collator
 
 
-def set_hub_arguments(trainer: TrainingArguments, model_args: ModelArguments, data_args: DataTrainingArguments, training_args: TrainingArguments, task_name: str):
+def set_hub_arguments(
+    trainer: TrainingArguments,
+    model_args: ModelArguments,
+    data_args: DataTrainingArguments,
+    training_args: TrainingArguments,
+    task_name: str,
+):
     """
     method for setting and uploading the model to the hub
+
+    Args:
+        trainer: object of Trainer class
+        model_args: object of ModelTrainingArguments
+        data_args; object of DataTrainingArguments
+        training_args: object of TrainingArguments
+        task_name: name of the task
+
     """
 
     kwargs = {"finetuned_from": model_args.model_name_or_path, "tasks": task_name}
@@ -681,14 +874,26 @@ def set_hub_arguments(trainer: TrainingArguments, model_args: ModelArguments, da
         trainer.push_to_hub(**kwargs)
     else:
         trainer.create_model_card(**kwargs)
-    
+
     return trainer
 
 
-def load_raw_dataset(data_args: DataTrainingArguments, training_args: TrainingArguments, model_args: ModelArguments, logger: Any):
+def load_raw_dataset(
+    data_args: DataTrainingArguments,
+    training_args: TrainingArguments,
+    model_args: ModelArguments,
+    logger: Any,
+):
 
     """
     method for handling the downloading of raw dataset
+
+    Args:
+        data_args: object of DataTrainingArguments
+        training_args: object of TrainingArguments
+        model_args: object of ModelArguments
+        logger: object of Logger class
+
     """
     if data_args.task_name is not None:
         # Downloading and loading a dataset from the hub.
@@ -755,6 +960,13 @@ def load_raw_dataset(data_args: DataTrainingArguments, training_args: TrainingAr
 def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArguments):
     """
     download raw dataset
+
+    Args:
+        data_args: object of DataTrainingArguments
+        training_args: object of TrainingArguments
+        model_args: object of ModelArguments
+        logger: object of Logger class
+
     """
     if data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
@@ -780,10 +992,20 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
     return raw_datasets
 
 
-def preprocess_raw_datasets(raw_datasets: Any, data_args: DataTrainingArguments, label_value: str):
+def preprocess_raw_datasets(
+    raw_datasets: Any, data_args: DataTrainingArguments, label_value: str
+):
 
     """
     method for pre-processing raw datasets
+
+    Args:
+        data_args: object of DataTrainingArguments
+        training_args: object of TrainingArguments
+        model_args: object of ModelArguments
+        logger: object of Logger class
+
+
     """
 
     if data_args.task_name is not None:
@@ -812,6 +1034,10 @@ def preprocess_raw_datasets(raw_datasets: Any, data_args: DataTrainingArguments,
 def get_label_list(labels: list):
     """
     return label list for ner task
+
+    Args:
+        labels: list of the labels
+
     """
     unique_labels = set()
     for label in labels:
@@ -824,6 +1050,18 @@ def get_label_list(labels: list):
 def tokenize_and_align_labels(examples: Dict[str, Any], **fn_kwargs) -> Dict[str, Any]:
 
     # print("fn_kwargs", fn_kwargs)
+
+    """
+    returns object of Tokenizer class
+
+    Args:
+        examples: samples from the dataset
+        fn_kwargs: other columns relating to aligning labels for ner
+
+    Returns:
+        tokenized_inputs: object of Tokenizer class
+
+    """
 
     text_column_name = fn_kwargs["text_column_name"]
     padding = fn_kwargs["padding"]
@@ -874,6 +1112,13 @@ def check_tokenizer_instance(tokenizer: AutoTokenizer):
 
     """
     check if tokenizer is PretrainedTokenizer
+
+    Args:
+        tokenizer: object of AutoTokenizer
+
+    Returns:
+        raises an excpetion if its not the fast version of the Tokenizer
+
     """
 
     if not isinstance(tokenizer, PreTrainedTokenizerFast):
@@ -905,7 +1150,10 @@ def generate_b_to_i_label(feature_file_exists: bool, label_list: list):
 
 
 def map_train_validation_predict_ds_ner(
-    training_args: TrainingArguments, data_args: DataTrainingArguments, raw_datasets: Any, fn_kwargs: Any
+    training_args: TrainingArguments,
+    data_args: DataTrainingArguments,
+    raw_datasets: Any,
+    fn_kwargs: Any,
 ):
 
     """
@@ -976,7 +1224,9 @@ def map_train_validation_predict_ds_ner(
     return train_dataset, eval_dataset, predict_dataset
 
 
-def generate_label_list(raw_datasets: Any, features: Any, ClassLabel: Any, label_column_name: str):
+def generate_label_list(
+    raw_datasets: Any, features: Any, ClassLabel: Any, label_column_name: str
+):
     """
     method to generate label_list and label_to_id
     """
@@ -1207,7 +1457,7 @@ def train_eval_prediction(
     model: Any,
     training_args: TrainingArguments,
     data_args: DataTrainingArguments,
-    model_args:ModelArguments,
+    model_args: ModelArguments,
     train_dataset: Any,
     eval_dataset: Any,
     eval_examples: Any,
@@ -1225,6 +1475,27 @@ def train_eval_prediction(
 
     """
     method consisting of training, evaluation and prediction loop logic for each of the task
+
+    Args:
+        task_type: type of the task
+        model: object of AutoModel
+        training_args: object of TrainingArguments
+        data_args: object of DataTrainingArgument
+        model_args: object of ModelArguments
+        train_dataset: train dataset of HF dataset
+        eval_dataset: eval dataset of HF dataset
+        eval_example: examples from the evaluation dataset
+        data_collator: data collator function
+        tokenizer: object of AutoTokenizer
+        post_processing_function: post processing function
+        compute_metrics: metric of seqeval
+        last_checkpoint: last checkpoint during training
+        label_value: name of the label
+        predict_dataset: prediction dataset
+        predict_examples: examples from the prediction dataset
+        label_list: list of labels
+        is_regression: is the task conccerning regression
+
     """
 
     if task_type == "question-answering":
@@ -1314,6 +1585,10 @@ def map_source_file(task_name: str):
 
     """
     identify the task_type and return the name of the appropriate hf script name
+
+    Args:
+        task_name: name of the task (classification, ner and qa)
+
     """
     task_type = TASK_TYPE_REGISTRY[task_name]
     if task_type == "classification":
@@ -1324,9 +1599,23 @@ def map_source_file(task_name: str):
         return hgf_fine_tune_qa
 
 
-def get_true_predictions_labels(label_list: list, predictions: Any, labels: list, metric: Any, data_args: DataTrainingArguments):
+def get_true_predictions_labels(
+    label_list: list,
+    predictions: Any,
+    labels: list,
+    metric: Any,
+    data_args: DataTrainingArguments,
+):
     """
     get true predictions and labels for ner task
+
+    Args:
+        label_list: list of labels
+        predictins: prediction tensor from the model
+        labels: list of labels
+        metric: seqeval metric
+        data_args: object of DataTrainingArguments
+
     """
     true_predictions = [
         [label_list[p] for (p, l) in zip(prediction, label) if l != -100]

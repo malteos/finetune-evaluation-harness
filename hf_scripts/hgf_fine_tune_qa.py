@@ -20,18 +20,6 @@ from hf_scripts import utility_functions
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/question-answering/requirements.txt")
 
-def parse_hf_arguments(args):
-    """
-    method to parse arguments in each of the hf script for each task
-    """
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
-    if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
-        model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
-    else:
-        model_args, data_args, training_args = parser.parse_args_into_dataclasses(args = args)
-    
-    return model_args, data_args, training_args
-
 def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     #model_args, data_args, training_args = parse_hf_arguments(args)

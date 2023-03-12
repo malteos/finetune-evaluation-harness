@@ -3,6 +3,10 @@ from tasks.qa import QuestionAnswering
 
 class GermanQuad(QuestionAnswering):
 
+    """
+    Class for German Quad Task
+    """
+
     DATASET_ID = "deepset/germanquad"  # HF datasets ID
     TASK_NAME = "german_quad"
 

@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Optional, List
 
-# data class for defining data training arguments
+"""
+Data Class for defining Data Training Arguments
+"""
 
 task_to_keys = {
     "cola": ("sentence", None),

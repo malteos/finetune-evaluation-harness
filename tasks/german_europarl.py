@@ -3,6 +3,10 @@ from tasks.ner import NamedEntityRecognition
 
 class GermanEuroParl(NamedEntityRecognition):
 
+    """
+    Class for German Europarl Task
+    """
+
     DATASET_ID = "akash418/german_europarl"
     TASK_NAME = "german_europarl"
 

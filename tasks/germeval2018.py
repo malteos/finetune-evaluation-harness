@@ -14,6 +14,10 @@ _CITATION = """
 
 class GermEval2018(Classification):
 
+    """
+    Class for GermEval 2018 Classification Task
+    """
+
     DATASET_ID = "philschmid/germeval18"  # HF datasets ID
     TASK_NAME = "germeval2018"
     LABEL_NAME = "multi"  # column name from HF dataset

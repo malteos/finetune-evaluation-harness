@@ -14,6 +14,11 @@ pages={1--12}
 
 class GermEval2017(Classification):
 
+    """
+    Class for GermEval 2017 Classification Task
+    """
+
+
     DATASET_ID = "akash418/germeval_2017"  # HF datasets ID
     TASK_NAME = "germeval2017"
     LABEL_NAME = "relevance"  # column name from HF dataset
