@@ -15,7 +15,7 @@ To evaluate a model (eg GERMAN-BERT) on task, please use something like this:
 ```
 python main.py --model_name_or_path bert-base-german-cased \
 --task_list germeval2018 \
---results_logging_dir /sample/directory \
+--results_logging_dir /sample/directory/results \
 --output_dir /sample/directory
 ```
 
@@ -26,16 +26,16 @@ This framework is build on top of Huggingface, hence all the keyword arguments u
 
 ```
 --model_name_or_path MODEL_NAME_OR_PATH
-                        Path to pretrained model or model identifier from huggingface.co/models (default: None)
+    Path to pretrained model or model identifier from huggingface.co/models (default: None)
 
 --task_list TASK_LIST [TASK_LIST ...]
-                        List of tasks passed in order. (default: None)
+    List of tasks passed in order. (default: None) eg germeval2018, germeval2017, gnad10, german_europarl
 
 --results_logging_dir RESULTS_LOGGING_DIR
-                        Where do you want to store the pretrained models downloaded from huggingface.co (default: None)
+   Where do you want to save the results of the run as a json file (default: None)
 
 --output_dir OUTPUT_DIR
-                        The output directory where the model predictions and checkpoints will be written. (default: None)
+	The output directory where the model predictions and checkpoints will be written. (default: None)
 
 
 
