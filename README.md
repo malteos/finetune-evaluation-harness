@@ -58,3 +58,10 @@ If you fail to understand what any of the paramater does, --help is your friend.
 - GermEval 2018 (de) https://huggingface.co/datasets/philschmid/germeval18
 - German XQUAD (de) https://huggingface.co/datasets/deepset/germanquad
 
+
+## Implementing New Tasks
+
+To implement a new task in eval harness, see [this guide](./docs/task_guide.md).
+
+
+
