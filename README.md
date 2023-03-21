@@ -22,7 +22,7 @@ python main.py --model_name_or_path bert-base-german-cased \
 This framework is build on top of Huggingface, hence all the keyword arguments used in regular HF transformers library work here as well: https://github.com/huggingface/transformers/blob/main/src/transformers/trainer.py.
 
 
-## Some Mandatory Arguments
+## Some Important Arguments
 
 ```
 --model_name_or_path MODEL_NAME_OR_PATH
@@ -37,7 +37,14 @@ This framework is build on top of Huggingface, hence all the keyword arguments u
 --output_dir OUTPUT_DIR
 	The output directory where the model predictions and checkpoints will be written. (default: None)
 
+--num_train_epochs NUM_TRAIN_EPOCHS
+    Total number of training epochs to perform. (default: 1.0)
 
+--per_device_train_batch_size PER_DEVICE_TRAIN_BATCH_SIZE
+    Batch size per GPU/TPU core/CPU for training. (default: 8)
+
+--use_fast_tokenizer [USE_FAST_TOKENIZER]
+    Whether to use one of the fast tokenizer (backed by the tokenizers library) or not. (default: True)
 
 ```
 
