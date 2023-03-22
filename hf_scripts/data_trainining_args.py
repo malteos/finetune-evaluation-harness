@@ -104,6 +104,12 @@ class DataTrainingArguments:
             "help": "Encoder hidden state size to keep for parameter efficent fine-tuning"
         },
     )
+    encoder_hidden_size: int = field(
+        default=128,
+        metadata={
+            "help": "Encoder hidden state size to keep for parameter efficent fine-tuning"
+        },
+    )
     pad_to_max_length: bool = field(
         default=True,
         metadata={

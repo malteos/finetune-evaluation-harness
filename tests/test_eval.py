@@ -24,7 +24,7 @@ def test_cls_evaluation():
     data_args.base_checkpoint_dir = "/sample/directory"
     data_args.is_task_ner = False
     data_args.label_value = "relevance"
-    data_args.peft_choice = "lora"
+    data_args.peft_choice = "p_tune"
 
     model_args = ModelArguments("bert-base-german-cased")
     model_args.model_name_or_path = "bert-base-german-cased"
@@ -34,6 +34,8 @@ def test_cls_evaluation():
     training_args = TrainingArguments(output_dir="/sample/directory")
     training_args.output_dir = "/sample/directory"
     training_args.num_train_epochs = 1
+    training_args.do_train = True
+    training_args.do_eval = True
     training_args.do_predict = True
 
     init_args = InitialArguments()
@@ -66,6 +68,8 @@ def test_ner_evaluation():
     training_args = TrainingArguments(output_dir="/sample/directory")
     training_args.output_dir = "/sample/directory"
     training_args.num_train_epochs = 1
+    training_args.do_train = True
+    training_args.do_eval = True
     training_args.do_predict = True
 
     init_args = InitialArguments()
@@ -98,6 +102,8 @@ def test_qa_evaluation():
     training_args = TrainingArguments(output_dir="/sample/directory")
     training_args.output_dir = "/sample/directory"
     training_args.num_train_epochs = 1
+    training_args.do_train = True
+    training_args.do_eval = True
     training_args.do_predict = True
 
     init_args = InitialArguments()

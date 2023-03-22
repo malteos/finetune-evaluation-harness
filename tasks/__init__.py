@@ -31,6 +31,7 @@ TASK_TYPE_REGISTRY = {
 ALL_TASKS = sorted(list(TASK_REGISTRY))
 ALL_TASK_TYPES = sorted(list(TASK_TYPE_REGISTRY))
 
+'''
 # returning task class
 def get_task(task_name):
     try:
@@ -40,6 +41,7 @@ def get_task(task_name):
         print(TASK_REGISTRY)
         raise KeyError(f"Missing task {task_name}") from exc
 
+'''
 
 # return string names of all the tasks for reference
 def get_all_tasks():

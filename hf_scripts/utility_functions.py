@@ -727,9 +727,7 @@ def preprocess_function_classification(
         *args, padding=padding, max_length=max_seq_length, truncation=True
     )
     # result = tokenizer(text = examples, padding = padding, max_length = max_seq_length, truncation = True)
-
     # Map labels to IDs (not necessary for GLUE tasks)
-
     if label_to_id is not None and label_value in examples:
         result[label_value] = [
             (label_to_id[l] if l != -1 else -1) for l in examples[label_value]
