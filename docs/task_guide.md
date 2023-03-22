@@ -44,7 +44,7 @@ cp templates/new_task.py finetune-evaluation-harness/<task-name>.py
 
 Next, follow the TODO's specified in the template file to impelment abstract methods depending on your needs
 
-### Running Unit Tests
+## Running Unit Tests
 
 To run the entire test suite, use:
 
