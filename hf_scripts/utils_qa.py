@@ -281,6 +281,7 @@ def postprocess_qa_predictions(
 
     return all_predictions
 
+'''
 
 def postprocess_qa_predictions_with_beam_search(
     examples,
@@ -517,3 +518,5 @@ def postprocess_qa_predictions_with_beam_search(
                 writer.write(json.dumps(scores_diff_json, indent=4) + "\n")
 
     return all_predictions, scores_diff_json
+
+'''

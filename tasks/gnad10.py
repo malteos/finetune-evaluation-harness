@@ -10,6 +10,7 @@ class Gnad10(Classification):
     DATASET_ID = "gnad10"  # HF datasets ID
     TASKNAME = "gnad10"
     LABEL_NAME = "label"
+    HOMEPAGE_URL = "https://huggingface.co/datasets/gnad10"
 
     def get_dataset_id(self):
         return self.DATASET_ID
@@ -19,3 +20,6 @@ class Gnad10(Classification):
 
     def get_task_name(self):
         return self.TASKNAME
+
+    def get_url(self):
+        return self.HOMEPAGE_URL

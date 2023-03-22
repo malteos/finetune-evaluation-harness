@@ -9,6 +9,7 @@ class GermanEuroParl(NamedEntityRecognition):
 
     DATASET_ID = "akash418/german_europarl"
     TASK_NAME = "german_europarl"
+    HOMEPAGE_URL = "https://huggingface.co/datasets/akash418/german_europarl"
 
     def get_dataset_id(self):
         """
@@ -21,3 +22,9 @@ class GermanEuroParl(NamedEntityRecognition):
         return task name
         """
         return self.TASK_NAME
+
+    def get_url(self):
+        """
+        return url
+        """
+        return self.HOMEPAGE_URL

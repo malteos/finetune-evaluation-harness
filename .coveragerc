@@ -2,3 +2,5 @@
 [run]
 omit =
     */huggingface/modules/*
+    tasks/
+    templates/

@@ -94,6 +94,7 @@ class QuestionAnsweringTrainer(Trainer):
         )
         return metrics
 
+    '''
     def predict(
         self,
         predict_dataset,
@@ -154,3 +155,5 @@ class QuestionAnsweringTrainer(Trainer):
             label_ids=predictions.label_ids,
             metrics=metrics,
         )
+        
+    '''

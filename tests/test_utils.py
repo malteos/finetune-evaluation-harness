@@ -7,13 +7,14 @@ from process_args import process_arguments
 from transformers import HfArgumentParser, TrainingArguments
 from hf_scripts.data_trainining_args import DataTrainingArguments
 from tasks import *
+import tasks
 from hf_scripts.hgf_fine_tune_class import *
 from hf_scripts.hgf_fine_tune_ner import *
 from hf_scripts.hgf_fine_tune_qa import *
 
 
 """
-File consisting of integeration unit test cases for utility functions
+File consisting of integeration unit test cases for utility functions (implemented logic)
 """
 
 #@pytest.mark.skip()
@@ -128,11 +129,14 @@ def test_tasks_initialization():
 
 #@pytest.mark.skip()
 def test_process_args():
+    tasks_mock_obj = tasks
+    tasks_mock_obj.get_all_tasks = MagicMock(return_value = ["germeval2018"])
+
     sample_cli_args = [
         "--model_name_or_path",
         "bert-base-german-cased",
         "--task_list",
-        "gnad10",
+        "germeval2018",
         "--base_checkpoint_dir",
         "/sample/directory",
         "--results_logging_dir",
@@ -143,3 +147,55 @@ def test_process_args():
         "/sample/directory",
     ]
     assert isinstance(process_arguments(sample_cli_args), HfArgumentParser)
+
+
+#@pytest.mark.skip()
+def test_get_labels():
+    label_list = ["binary", "multi"]
+    assert isinstance(get_label_list(label_list), list)
+
+
+#@pytest.mark.skip()
+def test_map_source_file():
+    task_name = "gnad10"
+    assert type(map_source_file(task_name))
+
+
+
+
+def test_init():
+    germeval_obj = germeval2017.GermEval2017()
+    assert isinstance(germeval_obj.get_url(), str)
+    assert isinstance(german_europarl.GermanEuroParl().get_task_name(), str)
+    assert isinstance(german_europarl.GermanEuroParl().get_task_type(), str)
+    assert isinstance(german_europarl.GermanEuroParl().get_dataset_id(), str)
+    assert isinstance(german_europarl.GermanEuroParl().get_url(), str)
+
+    assert isinstance(german_ner.GermanNerLegal().get_url(), str)
+    assert isinstance(german_ner.GermanNerLegal().get_task_type(), str)
+    assert isinstance(german_ner.GermanNerLegal().get_task_name(), str)
+    assert isinstance(german_ner.GermanNerLegal().get_dataset_id(), str)
+
+    assert isinstance(german_quad.GermanQuad().get_dataset_id(), str)
+    assert isinstance(german_quad.GermanQuad().get_task_type(), str)
+    assert isinstance(german_quad.GermanQuad().get_task_name(), str)
+    assert isinstance(german_quad.GermanQuad().get_url(), str)
+
+    assert isinstance(gnad10.Gnad10().get_dataset_id(), str)
+    assert isinstance(gnad10.Gnad10().get_task_type(), str)
+    assert isinstance(gnad10.Gnad10().get_url(), str)
+    assert isinstance(gnad10.Gnad10().get_task_name(), str)
+    assert isinstance(gnad10.Gnad10().get_label_name(), str)
+
+    assert isinstance(germeval2017.GermEval2017().get_dataset_id(), str)
+    assert isinstance(germeval2017.GermEval2017().get_task_type(), str)
+    assert isinstance(germeval2017.GermEval2017().get_url(), str)
+    assert isinstance(germeval2017.GermEval2017().get_task_name(), str)
+    assert isinstance(germeval2017.GermEval2017().get_label_name(), str)
+
+    assert isinstance(germeval2018.GermEval2018().get_dataset_id(), str)
+    assert isinstance(germeval2018.GermEval2018().get_task_type(), str)
+    assert isinstance(germeval2018.GermEval2018().get_url(), str)
+    assert isinstance(germeval2018.GermEval2018().get_task_name(), str)
+    assert isinstance(germeval2018.GermEval2018().get_label_name(), str)
+

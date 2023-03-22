@@ -236,6 +236,7 @@ class DataTrainingArguments:
         metadata={"help": "A csv or a json file containing the test data."},
     )
 
+    '''
     def __post_init__(self):
         if self.task_name is not None:
             self.task_name = self.task_name.lower()
@@ -260,3 +261,4 @@ class DataTrainingArguments:
             assert (
                 validation_extension == train_extension
             ), "`validation_file` should have the same extension (csv or json) as `train_file`."
+    '''

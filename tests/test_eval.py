@@ -24,13 +24,13 @@ def test_cls_evaluation():
     data_args.base_checkpoint_dir = "/sample/directory"
     data_args.is_task_ner = False
     data_args.label_value = "relevance"
-    data_args.peft_choice = None
+    data_args.peft_choice = "lora"
 
     model_args = ModelArguments("bert-base-german-cased")
     model_args.model_name_or_path = "bert-base-german-cased"
     model_args.model_revision = "main"
     model_args.use_fast_tokenizer = False
-
+    
     training_args = TrainingArguments(output_dir="/sample/directory")
     training_args.output_dir = "/sample/directory"
     training_args.num_train_epochs = 1
@@ -48,14 +48,15 @@ def test_cls_evaluation():
     )
 
 
-# @pytest.mark.skip()
+#@pytest.mark.skip()
 def test_ner_evaluation():
     data_args = DataTrainingArguments()
     data_args.dataset_name = "elenanereiss/german-ler"
     data_args.base_checkpoint_dir = "/sample/directory"
     data_args.is_task_ner = True
     # data_args.label_value="multi"
-    data_args.peft_choice = None
+    data_args.peft_choice = "prefix_tune"
+    data_args.return_entity_level_metrics = True
 
     model_args = ModelArguments("bert-base-german-cased")
     model_args.model_name_or_path = "bert-base-german-cased"
@@ -86,7 +87,8 @@ def test_qa_evaluation():
     data_args.base_checkpoint_dir = "/sample/directory"
     data_args.is_task_ner = False
     # data_args.label_value="multi"
-    data_args.peft_choice = None
+    data_args.peft_choice = "prompt_tune"
+    data_args.version_2_with_negative = True
 
     model_args = ModelArguments("bert-base-german-cased")
     model_args.model_name_or_path = "bert-base-german-cased"

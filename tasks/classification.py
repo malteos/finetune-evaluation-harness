@@ -8,6 +8,9 @@ class Classification(ABC):
     abstract methods which need to be implemented for each of
     the classification task. 
     """
+    DATASET_ID = None
+    TASK_NAME = None
+    LABEL_NAME = None
 
     def get_task_type(self):
         """
@@ -15,12 +18,12 @@ class Classification(ABC):
         """
         return "classification"
 
-    @abstractmethod
+    
     def get_dataset_id(self):
         """
         implement method
         """
-        pass
+        return self.DATASET_ID
 
     @abstractmethod
     def get_task_name(self):
@@ -31,6 +34,13 @@ class Classification(ABC):
 
     @abstractmethod
     def get_label_name(self):
+        """
+        implement method
+        """
+        pass
+
+    @abstractmethod
+    def get_url(self):
         """
         implement method
         """

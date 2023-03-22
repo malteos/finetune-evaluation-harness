@@ -9,18 +9,22 @@ class NamedEntityRecognition(ABC):
     be implemented for each of the NER task. 
     """
 
+    DATASET_ID = None
+    TASK_NAME = None
+    LABEL_NAME = None
+
     def get_task_type(self):
         """
         return type
         """
         return "ner"
 
-    @abstractmethod
+    
     def get_dataset_id(self):
         """
         implement 
         """
-        pass
+        return self.DATASET_ID
 
     @abstractmethod
     def get_task_name(self):
@@ -28,3 +32,10 @@ class NamedEntityRecognition(ABC):
         implement
         """
         pass
+
+    @abstractmethod
+    def get_url(self):
+        """
+        implement
+        """
+        pass 

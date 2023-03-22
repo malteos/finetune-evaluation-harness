@@ -37,7 +37,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     else:
         label_value = str(raw_datasets.column_names["train"][-1])
 
-    print("label_value", label_value)
+    logger.info(f"label_value {label_value}")
 
     if data_args.task_name is not None:
         is_regression = data_args.task_name == "stsb"
@@ -93,7 +93,9 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         "sequence",
     )
 
-    print("parameters before", utility_functions.print_trainable_parameters(model))
+    logger.info(
+        f"parameters before {utility_functions.print_trainable_parameters(model)}"
+    )
 
     if data_args.peft_choice in utility_functions.peft_choice_list:
         model = utility_functions.load_model_peft(model, data_args, "SEQ_CLS")
@@ -212,10 +214,8 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         data_args, training_args, tokenizer
     )
 
-    # print(train_dataset[56])
-    print(
-        "reamining trainable params",
-        utility_functions.print_trainable_parameters(model),
+    logger.info(
+        f"remaining trainable paramaters{utility_functions.print_trainable_parameters(model)}"
     )
 
     trainer = utility_functions.train_eval_prediction(
@@ -243,8 +243,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         trainer, model_args, data_args, training_args, "text-classification"
     )
 
-    print(type(trainer))
-    print(trainer.compute_metrics)
+    logger.info(f"Training Metrics {trainer.compute_metrics}")
 
     return trainer
 

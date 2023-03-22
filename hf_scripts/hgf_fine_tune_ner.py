@@ -11,13 +11,6 @@ from datasets import ClassLabel
 from hf_scripts.utility_functions import *
 import hf_scripts
 
-
-require_version(
-    "datasets>=1.8.0",
-    "To fix: pip install -r examples/pytorch/token-classification/requirements.txt",
-)
-
-
 def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     #model_args, data_args, training_args = hf_scripts.utility_functions.parse_hf_arguments(args)
@@ -67,7 +60,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     )
 
     num_labels = len(label_list)
-    print("num_distinct_labels", num_labels)
+    logger.info(f"Number of distinct labels {num_labels}")
 
     config = hf_scripts.utility_functions.load_config(
         model_args.model_name_or_path,
@@ -78,26 +71,16 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         model_args.use_auth_token,
         "ner",
     )
-    if config.model_type in {"bloom", "gpt2", "roberta"}:
-        tokenizer = hf_scripts.utility_functions.load_tokenizer(
-            model_args.model_name_or_path,
-            model_args.cache_dir,
-            model_args.use_fast_tokenizer,
-            model_args.model_revision,
-            model_args.use_auth_token,
-            None,
-            True,
-        )
-    else:
-        tokenizer = hf_scripts.utility_functions.load_tokenizer(
-            model_args.model_name_or_path,
-            model_args.cache_dir,
-            model_args.use_fast_tokenizer,
-            model_args.model_revision,
-            model_args.use_auth_token,
-            None,
-            False,
-        )
+    tokenizer = hf_scripts.utility_functions.load_tokenizer(
+        model_args.model_name_or_path,
+        model_args.cache_dir,
+        model_args.use_fast_tokenizer,
+        model_args.model_revision,
+        model_args.use_auth_token,
+        None,
+        True if config.model_type in {"bloom", "gpt2", "roberta"} else False,
+    )
+
     model = hf_scripts.utility_functions.load_model(
         model_args.model_name_or_path,
         bool(".ckpt" in model_args.model_name_or_path),

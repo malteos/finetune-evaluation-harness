@@ -102,7 +102,7 @@ def prepend_data_args(
     training_args.overwrite_output_dir = True
     return (training_args, data_args)
 
-
+'''
 def parse_hf_arguments(args):
     """
     method to parse arguments in each of the hf script for each task
@@ -128,6 +128,8 @@ def parse_hf_arguments(args):
 
     return model_args, data_args, training_args
 
+'''
+    
 
 def freeze_layers(model_args: ModelArguments, model):
     """
@@ -303,9 +305,7 @@ def print_trainable_parameters(model: Any):
         all_param += param.numel()
         if param.requires_grad:
             trainable_params += param.numel()
-    print(
-        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
-    )
+
     return 100 * trainable_params / all_param
 
 
@@ -331,7 +331,7 @@ def load_model_peft(
     task_type_dict = {"SEQ_CLS": TaskType.SEQ_CLS, "TOKEN_CLS": TaskType.TOKEN_CLS}
 
     if data_args.peft_choice == "lora":
-        print("using lora fine tuning")
+
         peft_config = LoraConfig(
             task_type=task_type_dict[task_type],
             inference_mode="False",
@@ -371,13 +371,13 @@ def load_model_peft(
         return model
 
 
+'''
 def compute_metrics_ner(p: EvalPrediction, **compute_metrics_ner_dict):
 
     """
     method for computing metric for ner task
     """
 
-    print(compute_metrics_ner_dict)
     feature_file_exists = compute_metrics_ner_dict["feature_file_exists"]
     label_list = compute_metrics_ner_dict["label_list"]
     data_args = compute_metrics_ner_dict["data_args"]
@@ -406,7 +406,7 @@ def compute_metrics_ner(p: EvalPrediction, **compute_metrics_ner_dict):
         ]
 
     results = metric.compute(predictions=true_predictions, references=true_labels)
-    print(results)
+
     if data_args.return_entity_level_metrics:
         # Unpack nested dictionaries
         final_results = {}
@@ -425,7 +425,9 @@ def compute_metrics_ner(p: EvalPrediction, **compute_metrics_ner_dict):
             "accuracy": results["overall_accuracy"],
         }
 
+'''
 
+'''  
 def load_trainer(
     model: Any,
     training_args: TrainingArguments,
@@ -463,6 +465,7 @@ def load_trainer(
     )
     return trainer
 
+'''
 
 def load_save_metrics_train(
     train_dataset, resume_from_checkpoint, trainer, last_checkpoint, max_train_samples
@@ -575,7 +578,6 @@ def load_save_metrics_validation(
 
             new_file_path.close()
 
-        print(metrics)
         # trainer.log_metrics("eval", metrics)
         # trainer.save_metrics("eval", metrics)
 
@@ -903,7 +905,7 @@ def load_raw_dataset(
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
-    elif data_args.dataset_name is not None:
+    else:
         # Downloading and loading a dataset from the hub.
         raw_datasets = load_dataset(
             data_args.dataset_name,
@@ -911,48 +913,7 @@ def load_raw_dataset(
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
-    else:
-        # Loading a dataset from your local files.
-        # CSV/JSON training and evaluation files are needed.
-        data_files = {
-            "train": data_args.train_file,
-            "validation": data_args.validation_file,
-        }
-
-        # Get the test dataset: you can provide your own CSV/JSON test file (see below)
-        # when you use `do_predict` without specifying a GLUE benchmark task.
-        if training_args.do_predict:
-            if data_args.test_file is not None:
-                train_extension = data_args.train_file.split(".")[-1]
-                test_extension = data_args.test_file.split(".")[-1]
-                assert (
-                    test_extension == train_extension
-                ), "`test_file` should have the same extension (csv or json) as `train_file`."
-                data_files["test"] = data_args.test_file
-            else:
-                raise ValueError(
-                    "Need either a GLUE task or a test file for `do_predict`."
-                )
-
-        for key in data_files.keys():
-            logger.info(f"load a local file for {key}: {data_files[key]}")
-
-        if data_args.train_file.endswith(".csv"):
-            # Loading a dataset from local csv files
-            raw_datasets = load_dataset(
-                "csv",
-                data_files=data_files,
-                cache_dir=model_args.cache_dir,
-                use_auth_token=True if model_args.use_auth_token else None,
-            )
-        else:
-            # Loading a dataset from local json files
-            raw_datasets = load_dataset(
-                "json",
-                data_files=data_files,
-                cache_dir=model_args.cache_dir,
-                use_auth_token=True if model_args.use_auth_token else None,
-            )
+    
 
     return raw_datasets
 
@@ -1049,8 +1010,6 @@ def get_label_list(labels: list):
 
 def tokenize_and_align_labels(examples: Dict[str, Any], **fn_kwargs) -> Dict[str, Any]:
 
-    # print("fn_kwargs", fn_kwargs)
-
     """
     returns object of Tokenizer class
 
@@ -1079,7 +1038,6 @@ def tokenize_and_align_labels(examples: Dict[str, Any], **fn_kwargs) -> Dict[str
         # We use this argument because the texts in our dataset are lists of words (with a label for each word).
         is_split_into_words=True,
     )
-    # print("tokenized_inputs", tokenized_inputs)
 
     labels = []
     for i, label in enumerate(examples[label_column_name]):
@@ -1133,6 +1091,14 @@ def generate_b_to_i_label(feature_file_exists: bool, label_list: list):
 
     """
     method to generate b_to_i_label
+
+    Args:
+        feature_file_exists: boolean value indicating if feature file is there in the hf hub
+        label_list: list of labels from the hf dataset
+
+    Returns:
+        list mapping B- to I- labels if it exists
+
     """
 
     b_to_i_label = []
@@ -1158,8 +1124,19 @@ def map_train_validation_predict_ds_ner(
 
     """
     logic for mapping train, test and validation splits for the ner task
+
+    Args:
+        training_args: object of TrainingArguments
+        data_args: object of DataTrainingArguments
+        raw_datasets: datasets object from the hf
+        fn_kwargs: dict containing other relevant paramaters for the operation
+
+    Returns:
+        train, evaluation and prediction splits of the dataset
+
+
     """
-    # print("fn_kwargs inside map_train_validation_ds", fn_kwargs)
+
     train_dataset = None
     eval_dataset = None
     predict_dataset = None
@@ -1229,6 +1206,12 @@ def generate_label_list(
 ):
     """
     method to generate label_list and label_to_id
+
+    Args:
+        raw_datasets: datasets from the hf hub
+        features: an object of type Feature, see hf datasets
+        ClassLabel:
+
     """
 
     if isinstance(features[label_column_name].feature, ClassLabel) == True:
@@ -1254,6 +1237,18 @@ def generate_label_list(
 def prepare_train_features_qa(
     examples: Dict[str, Any], **fn_kwargs_train
 ) -> Dict[str, Any]:
+
+    """
+    method to prepare train features for qa task
+
+    Args:
+        examples: instances from the processed dataset
+        fn_kwargs: dict containing other fields for preparing train features
+
+    Returns:
+        tokenized_examples: dict containing tokenized examples
+
+    """
 
     question_column_name = fn_kwargs_train["question_column_name"]
     data_args = fn_kwargs_train["data_args"]
@@ -1351,6 +1346,19 @@ def prepare_train_features_qa(
 def prepare_features_validation_qa(
     examples: Dict[str, Any], **fn_kwargs_validation
 ) -> Dict[str, Any]:
+
+    """
+    method to generate features for validation dataset for qa task
+
+    Args:
+        examples: instances from processed validation dataset
+        fn_kwargs_validation: dict containing other fields for processing validation dataset
+
+    Returns:
+        tokenized_examples: dict containing tokenized examples
+
+    """
+
     question_column_name = fn_kwargs_validation["question_column_name"]
     tokenizer = fn_kwargs_validation["tokenizer"]
     context_column_name = fn_kwargs_validation["context_column_name"]
@@ -1410,6 +1418,7 @@ def prepare_features_validation_qa(
 
     return tokenized_examples
 
+'''
 
 def post_processing_qa(
     examples: Any,
@@ -1421,6 +1430,21 @@ def post_processing_qa(
     answer_column_name: str,
     stage="eval",
 ):
+
+    """
+    method to post process qa dataset
+
+    Args:
+        examples: instances from qa dataset
+        features: features from the datset
+        predictions: list containing predictions
+        log_level: logger object
+        data_args: object of DataTrainingArguments
+        training_args: object of TrainingArguments
+        answer_column_name: string name of the answer column
+        stage: "eval
+
+    """
 
     # Post-processing: we match the start logits and end logits to answers in the original context.
     predictions = utils_qa.postprocess_qa_predictions(
@@ -1451,7 +1475,8 @@ def post_processing_qa(
     ]
     return EvalPrediction(predictions=formatted_predictions, label_ids=references)
 
-
+'''
+    
 def train_eval_prediction(
     task_type: str,
     model: Any,
@@ -1627,7 +1652,7 @@ def get_true_predictions_labels(
     ]
 
     results = metric.compute(predictions=true_predictions, references=true_labels)
-    print(results)
+
     if data_args.return_entity_level_metrics:
         # Unpack nested dictionaries
         final_results = {}
