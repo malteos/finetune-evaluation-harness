@@ -161,7 +161,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         predictions = np.argmax(predictions, axis=2)
         return hf_scripts.utility_functions.get_true_predictions_labels(label_list, predictions, labels, metric, data_args)
 
-    trainer = hf_scripts.utility_functions.train_eval_prediction(
+    metrics_eval = hf_scripts.utility_functions.train_eval_prediction(
         "token-classification",
         model,
         training_args,
@@ -182,11 +182,12 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         False,
     )
 
-    trainer = hf_scripts.utility_functions.set_hub_arguments(
-        trainer, model_args, data_args, training_args, "token-classification"
-    )
+    #trainer = hf_scripts.utility_functions.set_hub_arguments(
+    #    trainer, model_args, data_args, training_args, "token-classification"
+    #)
 
-    return trainer 
+    logger.info(f"Training Metrics {metrics_eval}")
+    return metrics_eval
 
 def main():
     run_task_evaluation()

@@ -578,8 +578,10 @@ def load_save_metrics_validation(
 
             new_file_path.close()
 
-        # trainer.log_metrics("eval", metrics)
-        # trainer.save_metrics("eval", metrics)
+        #trainer.log_metrics("eval", metrics)
+        #trainer.save_metrics("eval", metrics)
+
+        return metrics
 
 
 def load_save_metrics_predict(
@@ -1174,7 +1176,8 @@ def map_train_validation_predict_ds_ner(
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on validation dataset",
             )
-
+            
+    '''
     if training_args.do_predict:
         if "test" not in raw_datasets:
             raise ValueError("--do_predict requires a test dataset")
@@ -1195,6 +1198,7 @@ def map_train_validation_predict_ds_ner(
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on prediction dataset",
             )
+    '''
 
     return train_dataset, eval_dataset, predict_dataset
 
@@ -1557,7 +1561,7 @@ def train_eval_prediction(
         tasks = [data_args.task_name]
         eval_datasets = [eval_dataset]
 
-        load_save_metrics_validation(
+        metrics_eval = load_save_metrics_validation(
             model_args.model_name_or_path,
             tasks,
             trainer,
@@ -1601,7 +1605,7 @@ def train_eval_prediction(
                 label_list,
             )
 
-    return trainer
+    return metrics_eval
 
 
 def map_source_file(task_name: str):

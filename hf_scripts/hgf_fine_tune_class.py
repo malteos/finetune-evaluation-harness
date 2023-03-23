@@ -218,7 +218,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         f"remaining trainable paramaters{utility_functions.print_trainable_parameters(model)}"
     )
 
-    trainer = utility_functions.train_eval_prediction(
+    metrics_eval = utility_functions.train_eval_prediction(
         "classification",
         model,
         training_args,
@@ -239,13 +239,13 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         is_regression,
     )
 
-    trainer = utility_functions.set_hub_arguments(
-        trainer, model_args, data_args, training_args, "text-classification"
-    )
+    #trainer = utility_functions.set_hub_arguments(
+    #    trainer, model_args, data_args, training_args, "text-classification"
+    #)
 
-    logger.info(f"Training Metrics {trainer.compute_metrics}")
+    logger.info(f"Training Metrics {metrics_eval}")
 
-    return trainer
+    return metrics_eval
 
 
 def main():

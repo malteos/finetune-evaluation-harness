@@ -127,7 +127,7 @@ def test_tasks_initialization():
     assert isinstance(get_all_tasks(), list)
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_process_args():
     tasks_mock_obj = tasks
     tasks_mock_obj.get_all_tasks = MagicMock(return_value = ["germeval2018"])

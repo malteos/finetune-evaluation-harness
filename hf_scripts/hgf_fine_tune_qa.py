@@ -242,7 +242,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     def compute_metrics(p: EvalPrediction):
         return metric.compute(predictions=p.predictions, references=p.label_ids)
 
-    trainer = utility_functions.train_eval_prediction(
+    metrics_eval = utility_functions.train_eval_prediction(
         "question-answering",
         model,
         training_args,
@@ -263,11 +263,13 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         False,
     )
 
-    trainer = utility_functions.set_hub_arguments(
-        trainer, model_args, data_args, training_args, "question-answering"
-    )
+    #trainer = utility_functions.set_hub_arguments(
+    #    trainer, model_args, data_args, training_args, "question-answering"
+    #)
 
-    return trainer
+    logger.info(f"Training Metrics {metrics_eval}")
+
+    return metrics_eval
 
 
 def main():
