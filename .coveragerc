@@ -2,5 +2,7 @@
 [run]
 omit =
     */huggingface/modules/*
-    tasks/
-    templates/
+    */tasks/classification.py
+    */tasks/ner.py
+    */tasks/qa.py
+    */templates/*

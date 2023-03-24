@@ -937,6 +937,7 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
+    '''
     else:
         data_files = {}
         if data_args.train_file is not None:
@@ -949,6 +950,7 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
         raw_datasets = load_dataset(
             extension, data_files=data_files, cache_dir=model_args.cache_dir
         )
+    '''
 
     return raw_datasets
 

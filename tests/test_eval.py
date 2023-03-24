@@ -43,14 +43,6 @@ def test_cls_evaluation():
     init_args.results_logging_dir = "/sample/directory"
     init_args.task_list = "germeval2017"
 
-    '''
-    assert isinstance(
-        hgf_fine_tune_class.run_task_evaluation(
-            model_args, data_args, training_args, init_args
-        ),
-        Trainer,
-    )
-    '''
     metrics_eval = hgf_fine_tune_class.run_task_evaluation(model_args, data_args, training_args, init_args)
     assert metrics_eval['eval_accuracy'] == pytest.approx(0.81, 0.3)
 
@@ -58,7 +50,7 @@ def test_cls_evaluation():
 #@pytest.mark.skip()
 def test_ner_evaluation():
     data_args = DataTrainingArguments()
-    data_args.dataset_name = "akash418/german_europarl"
+    data_args.dataset_name = "elenanereiss/german-ler"
     data_args.base_checkpoint_dir = "/sample/directory"
     data_args.is_task_ner = True
     # data_args.label_value="multi"
@@ -80,20 +72,10 @@ def test_ner_evaluation():
 
     init_args = InitialArguments()
     init_args.results_logging_dir = "/sample/directory"
-    init_args.task_list = "german_europarl"
-
-    '''
-    assert isinstance(
-        hgf_fine_tune_ner.run_task_evaluation(
-            model_args, data_args, training_args, init_args
-        ),
-        Trainer,
-    )
-    '''
+    init_args.task_list = "german_ner"
 
     metrics_eval = hgf_fine_tune_ner.run_task_evaluation(model_args, data_args, training_args, init_args)
-    print(metrics_eval)
-    assert metrics_eval['eval_overall_accuracy'] == pytest.approx(0.22, 0.3)
+    assert metrics_eval['eval_overall_accuracy'] == pytest.approx(0.90, 0.3)
 
 
 #@pytest.mark.skip()
@@ -117,19 +99,12 @@ def test_qa_evaluation():
     training_args.do_train = True
     training_args.do_eval = True
     training_args.do_predict = True
+    training_args.overwrite_output_dir = True
 
     init_args = InitialArguments()
     init_args.results_logging_dir = "/sample/directory"
     init_args.task_list = "german_quad"
 
-    '''
-    assert isinstance(
-        hgf_fine_tune_qa.run_task_evaluation(
-            model_args, data_args, training_args, init_args
-        ),
-        Trainer,
-    )
-    '''
 
     metrics_eval = hgf_fine_tune_qa.run_task_evaluation(model_args, data_args, training_args, init_args)
     assert metrics_eval['eval_f1'] == pytest.approx(50.99, 0.3)
