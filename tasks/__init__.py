@@ -51,6 +51,3 @@ def get_all_tasks():
 
     return all_task_str
 
-
-def get_all_task_types():
-    return ALL_TASK_TYPES

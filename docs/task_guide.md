@@ -50,7 +50,7 @@ Next, follow the TODO's specified in the template file to impelment abstract met
 Now's a good time to register your task to expose it for usage. All you'll need to do is import your task module in `finetune-evaluation-harness-evaluation-harness/tasks/__init__.py` and provide an entry in the `TASK_REGISTRY`  dictionary with the key as the name of your benchmark task (in the form it'll be referred to in the command line) and the value as the task class. See how it's done for other tasks in the [file](https://github.com/malteos/finetune-evaluation-harness/blob/main/tasks/__init__.py).
 
 
-## Running Unit Tests
+## Running Integeration Unit Tests
 
 To run the entire test suite, use:
 

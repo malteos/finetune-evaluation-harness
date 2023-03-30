@@ -32,7 +32,7 @@ from peft import (
 from peft import PrefixTuningConfig, PromptEncoderConfig, PromptTuningConfig, TaskType
 from peft.utils.other import fsdp_auto_wrap_policy
 from os import path
-from tasks import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY, get_all_task_types
+from tasks import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY
 import json
 from typing import Any, Dict
 from . import utils_qa
@@ -370,102 +370,6 @@ def load_model_peft(
         model = get_peft_model(model, peft_config)
         return model
 
-
-'''
-def compute_metrics_ner(p: EvalPrediction, **compute_metrics_ner_dict):
-
-    """
-    method for computing metric for ner task
-    """
-
-    feature_file_exists = compute_metrics_ner_dict["feature_file_exists"]
-    label_list = compute_metrics_ner_dict["label_list"]
-    data_args = compute_metrics_ner_dict["data_args"]
-
-    metric = evaluate.load("seqeval")
-    predictions, labels = p
-    predictions = np.argmax(predictions, axis=2)
-
-    if feature_file_exists == False:
-        true_predictions = [
-            [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
-        true_labels = [
-            [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
-    else:
-        true_predictions = [
-            [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
-        true_labels = [
-            [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
-
-    results = metric.compute(predictions=true_predictions, references=true_labels)
-
-    if data_args.return_entity_level_metrics:
-        # Unpack nested dictionaries
-        final_results = {}
-        for key, value in results.items():
-            if isinstance(value, dict):
-                for n, v in value.items():
-                    final_results[f"{key}_{n}"] = v
-            else:
-                final_results[key] = value
-        return final_results
-    else:
-        return {
-            "precision": results["overall_precision"],
-            "recall": results["overall_recall"],
-            "f1": results["overall_f1"],
-            "accuracy": results["overall_accuracy"],
-        }
-
-'''
-
-'''  
-def load_trainer(
-    model: Any,
-    training_args: TrainingArguments,
-    train_dataset: Any,
-    eval_dataset: Any,
-    compute_metrics: Any,
-    tokenizer: AutoTokenizer,
-    data_collator: Any,
-):
-    """
-    method for creating and returning the Trainer object
-
-    Args:
-        model: object of AutoModel class
-        training_args: object of TrainingArgument class
-        train_dataset: train version of the HF dataset
-        eval_dataset: eval version of the HF dataset
-        compute_metrics: function for computing the metrics
-        tokenizer: object of AutoTokenizer class
-        data_collator: data_collator function
-
-    Returns:
-        trainer: object of Trainer class
-
-    """
-
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset if training_args.do_train else None,
-        eval_dataset=eval_dataset if training_args.do_eval else None,
-        compute_metrics=compute_metrics,
-        tokenizer=tokenizer,
-        data_collator=data_collator,
-    )
-    return trainer
-
-'''
 
 def load_save_metrics_train(
     train_dataset, resume_from_checkpoint, trainer, last_checkpoint, max_train_samples
@@ -1179,29 +1083,6 @@ def map_train_validation_predict_ds_ner(
                 desc="Running tokenizer on validation dataset",
             )
             
-    '''
-    if training_args.do_predict:
-        if "test" not in raw_datasets:
-            raise ValueError("--do_predict requires a test dataset")
-        predict_dataset = raw_datasets["test"]
-        if data_args.max_predict_samples is not None:
-            max_predict_samples = min(
-                len(predict_dataset), data_args.max_predict_samples
-            )
-            predict_dataset = predict_dataset.select(range(max_predict_samples))
-        with training_args.main_process_first(
-            desc="prediction dataset map pre-processing"
-        ):
-            predict_dataset = predict_dataset.map(
-                tokenize_and_align_labels,
-                batched=True,
-                fn_kwargs=fn_kwargs,
-                num_proc=data_args.preprocessing_num_workers,
-                load_from_cache_file=not data_args.overwrite_cache,
-                desc="Running tokenizer on prediction dataset",
-            )
-    '''
-
     return train_dataset, eval_dataset, predict_dataset
 
 
@@ -1422,64 +1303,6 @@ def prepare_features_validation_qa(
 
     return tokenized_examples
 
-'''
-
-def post_processing_qa(
-    examples: Any,
-    features: Any,
-    predictions: Any,
-    log_level: Any,
-    data_args: DataTrainingArguments,
-    training_args: TrainingArguments,
-    answer_column_name: str,
-    stage="eval",
-):
-
-    """
-    method to post process qa dataset
-
-    Args:
-        examples: instances from qa dataset
-        features: features from the datset
-        predictions: list containing predictions
-        log_level: logger object
-        data_args: object of DataTrainingArguments
-        training_args: object of TrainingArguments
-        answer_column_name: string name of the answer column
-        stage: "eval
-
-    """
-
-    # Post-processing: we match the start logits and end logits to answers in the original context.
-    predictions = utils_qa.postprocess_qa_predictions(
-        examples=examples,
-        features=features,
-        predictions=predictions,
-        version_2_with_negative=data_args.version_2_with_negative,
-        n_best_size=data_args.n_best_size,
-        max_answer_length=data_args.max_answer_length,
-        null_score_diff_threshold=data_args.null_score_diff_threshold,
-        output_dir=training_args.output_dir,
-        log_level=log_level,
-        prefix=stage,
-    )
-    # Format the result to the format the metric expects.
-    if data_args.version_2_with_negative:
-        formatted_predictions = [
-            {"id": k, "prediction_text": v, "no_answer_probability": 0.0}
-            for k, v in predictions.items()
-        ]
-    else:
-        formatted_predictions = [
-            {"id": k, "prediction_text": v} for k, v in predictions.items()
-        ]
-
-    references = [
-        {"id": ex["id"], "answers": ex[answer_column_name]} for ex in examples
-    ]
-    return EvalPrediction(predictions=formatted_predictions, label_ids=references)
-
-'''
     
 def train_eval_prediction(
     task_type: str,

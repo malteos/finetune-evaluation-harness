@@ -105,6 +105,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     hf_scripts.utility_functions.check_tokenizer_instance(tokenizer)
 
+    '''
     # Model has labels -> use them.
     if model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id:
         if list(sorted(model.config.label2id.keys())) == list(sorted(label_list)):
@@ -123,6 +124,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
                 f"model labels: {list(sorted(model.config.label2id.keys()))}, dataset labels:"
                 f" {list(sorted(label_list))}.\nIgnoring the model labels as a result.",
             )
+    '''
 
     # Set the correspondences label/ID inside the model config
     model.config.label2id = {l: i for i, l in enumerate(label_list)}
