@@ -1,11 +1,8 @@
 pyarrow==6.0.1
-spacy
-scispacy
 wandb
 jupyter
 pandas
 ipywidgets>=8.0.2
-fire
 seqeval
 coverage
 pytest
