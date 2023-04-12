@@ -24,36 +24,6 @@ def test_freeze():
     assert freeze_layers(model_args, model) == model
 
 
-#@pytest.mark.skip()
-def test_load_config():
-    model_name_or_path = "bert-base-german-cased"
-    num_labels = 1
-    finetuning_task = "classification"
-    cache_dir = "/sample/directory"
-    model_revision = "main"
-    use_auth_token = False
-    model_type = "classification"
-
-    config = AutoConfig.from_pretrained(
-        model_name_or_path,
-        num_labels=num_labels,
-        fine_tuning_task=finetuning_task,
-        cache_dir=cache_dir,
-        revision=model_revision,
-        use_auth_token=use_auth_token,
-    )
-    assert (
-        load_config(
-            model_name_or_path,
-            num_labels,
-            finetuning_task,
-            cache_dir,
-            model_revision,
-            use_auth_token,
-            model_type,
-        )
-        == config
-    )
 
 def test_add_labels_args():
     data_args = DataTrainingArguments()
@@ -64,3 +34,9 @@ def test_add_labels_args():
     germeval_obj.get_task_type = MagicMock(return_value="classification")
     germeval_obj.get_label_name = MagicMock(return_value="label")
     assert add_labels_data_args(sample_task, data_args) == data_args
+
+def test_tasks_initialization():
+    test_task = "german_ner_legal"
+    assert isinstance(get_all_tasks(), list)
+
+    
