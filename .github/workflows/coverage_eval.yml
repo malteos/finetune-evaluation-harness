@@ -1,0 +1,15 @@
+# This worflow evaluates the completness of the coverage of the code
+
+name: Evaluate Coverage
+
+on:
+  worflow_dispatch:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      -name: Evaluate Coverage
+      run: |
+        pytest --cov-fail-under=80 tests
