@@ -21,7 +21,8 @@ jobs:
         pip install -r ./requirements.txt
     - name: Create Folder
       run: |
-        mkdir -m 777 sample
+        mkdir /sample
+        chmod 777 /sample
     - name: Evaluate Coverage
       run: |
         pytest --cov-fail-under=80 tests
