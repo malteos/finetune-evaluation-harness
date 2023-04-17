@@ -3,7 +3,7 @@
 name: Evaluate Coverage
 
 on:
-  worflow_dispatch:
+  workflow_dispatch:
     branches: [main]
 
 jobs:
