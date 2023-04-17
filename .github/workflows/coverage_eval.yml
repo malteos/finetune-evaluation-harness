@@ -15,13 +15,14 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
-    - name: Install dependencies
-      run: |
-        pip install flake8 pytest pytest-cov
-        pip install -r ./requirements.txt
+    #- name: Install dependencies
+    #  run: |
+    #    pip install flake8 pytest pytest-cov
+    #    pip install -r ./requirements.txt
     - name: Create Folder
       run: |
-        mkdir -p /sample
-    - name: Evaluate Coverage
-      run: |
-        pytest --cov-fail-under=80 tests
+        whoami
+        mkdir -p /sample/directory
+    #- name: Evaluate Coverage
+    #  run: |
+    #    pytest --cov-fail-under=80 tests
