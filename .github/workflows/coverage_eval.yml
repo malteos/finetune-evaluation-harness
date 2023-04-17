@@ -20,6 +20,8 @@ jobs:
         pip install flake8 pytest pytest-cov
         pip install -r ./requirements.txt
     - name: Evaluate Coverage
+      with: 
+        path: |
+          ../
       run: |
-        cd ..
         coverage report -m
