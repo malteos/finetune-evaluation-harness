@@ -21,7 +21,7 @@ File consisting of integeration unit test cases for evaluating each of the tasks
 def test_cls_evaluation():
     data_args = DataTrainingArguments()
     data_args.dataset_name = "akash418/germeval_2017"
-    data_args.base_checkpoint_dir = "/sample/directory"
+    data_args.base_checkpoint_dir = "/tmp/directory"
     data_args.is_task_ner = False
     data_args.label_value = "relevance"
     data_args.peft_choice = "p_tune"
@@ -31,8 +31,8 @@ def test_cls_evaluation():
     model_args.model_revision = "main"
     model_args.use_fast_tokenizer = False
     
-    training_args = TrainingArguments(output_dir="/sample/directory")
-    training_args.output_dir = "/sample/directory"
+    training_args = TrainingArguments(output_dir="/tmp/directory")
+    training_args.output_dir = "/tmp/directory"
     training_args.num_train_epochs = 1
     training_args.do_train = True
     training_args.do_eval = True
@@ -40,7 +40,7 @@ def test_cls_evaluation():
     training_args.per_device_train_batch_size = 128
 
     init_args = InitialArguments()
-    init_args.results_logging_dir = "/sample/directory"
+    init_args.results_logging_dir = "/tmp/directory"
     init_args.task_list = "germeval2017"
 
     metrics_eval = hgf_fine_tune_class.run_task_evaluation(model_args, data_args, training_args, init_args)
@@ -51,7 +51,7 @@ def test_cls_evaluation():
 def test_ner_evaluation():
     data_args = DataTrainingArguments()
     data_args.dataset_name = "elenanereiss/german-ler"
-    data_args.base_checkpoint_dir = "/sample/directory"
+    data_args.base_checkpoint_dir = "/tmp/directory"
     data_args.is_task_ner = True
     # data_args.label_value="multi"
     data_args.peft_choice = "prefix_tune"
@@ -62,8 +62,8 @@ def test_ner_evaluation():
     model_args.model_revision = "main"
     model_args.use_fast_tokenizer = True
 
-    training_args = TrainingArguments(output_dir="/sample/directory")
-    training_args.output_dir = "/sample/directory"
+    training_args = TrainingArguments(output_dir="/tmp/directory")
+    training_args.output_dir = "/tmp/directory"
     training_args.num_train_epochs = 1
     training_args.do_train = True
     training_args.do_eval = True
@@ -71,7 +71,7 @@ def test_ner_evaluation():
     training_args.per_device_train_batch_size=64
 
     init_args = InitialArguments()
-    init_args.results_logging_dir = "/sample/directory"
+    init_args.results_logging_dir = "/tmp/directory"
     init_args.task_list = "german_ner"
 
     metrics_eval = hgf_fine_tune_ner.run_task_evaluation(model_args, data_args, training_args, init_args)
@@ -82,7 +82,7 @@ def test_ner_evaluation():
 def test_qa_evaluation():
     data_args = DataTrainingArguments()
     data_args.dataset_name = "deepset/germanquad"
-    data_args.base_checkpoint_dir = "/sample/directory"
+    data_args.base_checkpoint_dir = "/tmp/directory"
     data_args.is_task_ner = False
     # data_args.label_value="multi"
     data_args.peft_choice = "prompt_tune"
@@ -93,8 +93,8 @@ def test_qa_evaluation():
     model_args.model_revision = "main"
     model_args.use_fast_tokenizer = True
 
-    training_args = TrainingArguments(output_dir="/sample/directory")
-    training_args.output_dir = "/sample/directory"
+    training_args = TrainingArguments(output_dir="/tmp/directory")
+    training_args.output_dir = "/tmp/directory"
     training_args.num_train_epochs = 1
     training_args.do_train = True
     training_args.do_eval = True
@@ -102,7 +102,7 @@ def test_qa_evaluation():
     training_args.overwrite_output_dir = True
 
     init_args = InitialArguments()
-    init_args.results_logging_dir = "/sample/directory"
+    init_args.results_logging_dir = "/tmp/directory"
     init_args.task_list = "german_quad"
 
 
