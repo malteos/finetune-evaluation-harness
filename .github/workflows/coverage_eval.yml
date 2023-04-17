@@ -21,8 +21,8 @@ jobs:
     #    pip install -r ./requirements.txt
     - name: Create Folder
       run: |
-        whoami
-        chown -R runner:runner /path/to/directory
+        mkdir -p /sample/directory
+        pytest --cov-fail-under=80 tests
     #- name: Evaluate Coverage
     #  run: |
     #    pytest --cov-fail-under=80 tests
