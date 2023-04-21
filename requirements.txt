@@ -1,7 +1,6 @@
 pyarrow==6.0.1
 wandb
 jupyter
-pandas
 ipywidgets>=8.0.2
 seqeval
 coverage
