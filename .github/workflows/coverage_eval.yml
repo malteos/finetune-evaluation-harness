@@ -22,5 +22,5 @@ jobs:
     - name: Evaluate Coverage
       working-directory: ../
       run: |
-        echo "$PWD"
-        coverage report -m
+        # echo "$PWD"
+        coverage run -m pytest
