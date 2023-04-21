@@ -24,7 +24,7 @@ jobs:
       env: 
         WANDB_DISABLED: true
       run: |
-        # echo "$PWD"
+        echo "$PWD"
         # coverage run -m pytest
         # pytest tests/test_eval.py
         coverage report -m 
