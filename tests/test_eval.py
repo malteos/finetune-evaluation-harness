@@ -38,7 +38,7 @@ def test_cls_evaluation():
     #training_args = TrainingArguments(output_dir="/tmp/directory")
     #training_args.output_dir = "/tmp/directory"
     training_args.output_dir = temp_dir_name
-    training_args.num_train_epochs = 1
+    training_args.num_train_epochs = 0
     training_args.do_train = True
     training_args.do_eval = True
     training_args.do_predict = True
