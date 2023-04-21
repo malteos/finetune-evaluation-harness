@@ -21,6 +21,8 @@ jobs:
         pip install -r ./requirements.txt
     - name: Evaluate Coverage
       working-directory: ../
+      env: 
+        WANDB_DISABLED: true
       run: |
         # echo "$PWD"
         coverage run -m pytest
