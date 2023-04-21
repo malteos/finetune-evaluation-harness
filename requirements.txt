@@ -3,11 +3,12 @@ wandb
 jupyter
 ipywidgets>=8.0.2
 seqeval
+pandas==1.5.3
 coverage
 pytest
 transformers 
 accelerate 
 evaluate 
-datasets 
+datasets==2.8.0
 loralib 
 git+https://github.com/huggingface/peft
