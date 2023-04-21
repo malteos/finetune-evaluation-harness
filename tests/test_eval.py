@@ -34,7 +34,7 @@ def test_cls_evaluation():
     model_args.model_revision = "main"
     model_args.use_fast_tokenizer = False
     
-    training_args = temp_dir_name
+    training_args = TrainingArguments(output_dir = temp_dir_name)
     #training_args = TrainingArguments(output_dir="/tmp/directory")
     #training_args.output_dir = "/tmp/directory"
     training_args.output_dir = temp_dir_name
