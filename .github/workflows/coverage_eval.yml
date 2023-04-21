@@ -23,5 +23,5 @@ jobs:
       working-directory: ../
       run: |
         # echo "$PWD"
-        # coverage run -m pytest
-        pytest tests/test_eval.py
+        coverage run -m pytest
+        # pytest tests/test_eval.py
