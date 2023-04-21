@@ -1,5 +1,6 @@
 # .coveragerc to control coverage.py
 [run]
+parallel = True
 omit =
     */huggingface/modules/*
     */tasks/classification.py
