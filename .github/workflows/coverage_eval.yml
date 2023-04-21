@@ -23,4 +23,4 @@ jobs:
       working-directory: ../
       run: |
         # echo "$PWD"
-        coverage run -m pytest --omit = tests/test_utils.py
+        coverage run -m pytest
