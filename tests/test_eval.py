@@ -4,7 +4,7 @@ import os
 import pytest
 import unittest
 import process_args
-from transformers import HfArgumentParser, TrainingArguments
+from transformers import HfArgumentParser, TrainingArguments, BertConfig
 from hf_scripts.data_trainining_args import DataTrainingArguments
 from tasks import *
 from hf_scripts.hgf_fine_tune_class import *
@@ -21,15 +21,20 @@ File consisting of integeration unit test cases for evaluating each of the tasks
 def test_cls_evaluation():
     temp_dir_name = tempfile.TemporaryDirectory().name
     data_args = DataTrainingArguments()
-    data_args.dataset_name = "akash418/germeval_2017"
+    data_args.dataset_name = "philschmid/germeval18"
     #data_args.base_checkpoint_dir = "/tmp/directory"
     data_args.base_checkpoint_dir = temp_dir_name
     #print("temp directory ....", tempfile.TemporaryDirectory().name)
     data_args.is_task_ner = False
-    data_args.label_value = "relevance"
+    #data_args.label_value = "relevance"
+    data_args.label_value = "multi"
     data_args.peft_choice = "p_tune"
+    data_args.is_subset=True
 
+    # new custom config for tiny model
+    custom_config = BertConfig(n_layers=2, n_heads=2, n_positions=64, n_emd = 8 )
     model_args = ModelArguments("bert-base-german-cased")
+    model_args.config_name = custom_config
     model_args.model_name_or_path = "bert-base-german-cased"
     model_args.model_revision = "main"
     model_args.use_fast_tokenizer = False
@@ -38,7 +43,7 @@ def test_cls_evaluation():
     #training_args = TrainingArguments(output_dir="/tmp/directory")
     #training_args.output_dir = "/tmp/directory"
     training_args.output_dir = temp_dir_name
-    training_args.num_train_epochs = 0
+    training_args.num_train_epochs = 1
     training_args.do_train = True
     training_args.do_eval = True
     training_args.do_predict = True
@@ -47,10 +52,10 @@ def test_cls_evaluation():
     init_args = InitialArguments()
     #init_args.results_logging_dir = "/tmp/directory"
     init_args.results_logging_dir = temp_dir_name
-    init_args.task_list = "germeval2017"
+    init_args.task_list = "germeval2018"
 
     metrics_eval = hgf_fine_tune_class.run_task_evaluation(model_args, data_args, training_args, init_args)
-    assert metrics_eval['eval_accuracy'] == pytest.approx(0.81, 0.3)
+    assert metrics_eval['eval_accuracy'] == pytest.approx(0.23, 0.3)
 
 
 @pytest.mark.skip()
@@ -93,6 +98,7 @@ def test_qa_evaluation():
     # data_args.label_value="multi"
     data_args.peft_choice = "prompt_tune"
     data_args.version_2_with_negative = True
+    
 
     model_args = ModelArguments("bert-base-german-cased")
     model_args.model_name_or_path = "bert-base-german-cased"

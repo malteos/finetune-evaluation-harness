@@ -529,16 +529,17 @@ def load_save_metrics_predict(
             np.squeeze(predictions) if is_regression else np.argmax(predictions, axis=1)
         )
 
-        output_predict_file = os.path.join(output_dir, f"predict_results_{task}.txt")
-        if trainer.is_world_process_zero():
-            with open(output_predict_file, "w") as writer:
-                writer.write("index\tprediction\n")
-                for index, item in enumerate(predictions):
-                    if is_regression:
-                        writer.write(f"{index}\t{item:3.3f}\n")
-                    else:
-                        item = label_list[item]
-                        writer.write(f"{index}\t{item}\n")
+        if(os.path.isdir(output_dir)):
+            output_predict_file = os.path.join(output_dir, f"predict_results_{task}.txt")
+            if trainer.is_world_process_zero():
+                with open(output_predict_file, "w") as writer:
+                    writer.write("index\tprediction\n")
+                    for index, item in enumerate(predictions):
+                        if is_regression:
+                            writer.write(f"{index}\t{item:3.3f}\n")
+                        else:
+                            item = label_list[item]
+                            writer.write(f"{index}\t{item}\n")
 
 
 def save_metrics_predict_ner(
@@ -801,11 +802,36 @@ def load_raw_dataset(
         logger: object of Logger class
 
     """
+    #raw_datasets = {}
+    #raw_datasets["train"]=[]
+    #raw_datasets["test"]=[]
+
     if data_args.task_name is not None:
         # Downloading and loading a dataset from the hub.
         raw_datasets = load_dataset(
             "glue",
             data_args.task_name,
+            cache_dir=model_args.cache_dir,
+            use_auth_token=True if model_args.use_auth_token else None,
+        )
+    if data_args.is_subset == True:
+        raw_datasets = load_dataset(
+            data_args.dataset_name,
+            data_args.dataset_config_name,
+            cache_dir=model_args.cache_dir,
+            use_auth_token=True if model_args.use_auth_token else None,
+        )
+        raw_datasets["train"] = load_dataset(
+            data_args.dataset_name,
+            data_args.dataset_config_name,
+            split=f"train[:3%]",           # use 4% of the train set
+            cache_dir=model_args.cache_dir,
+            use_auth_token=True if model_args.use_auth_token else None,
+        )
+        raw_datasets["test"] = load_dataset(
+            data_args.dataset_name,
+            data_args.dataset_config_name,
+            split=f"test[:1%]",           # use 1% of the test set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )

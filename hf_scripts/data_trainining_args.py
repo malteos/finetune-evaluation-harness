@@ -229,6 +229,7 @@ class DataTrainingArguments:
             "help": "When splitting up a long document into chunks, how much stride to take between chunks."
         },
     )
+    is_subset: bool = field(default = False, metadata={"help": "Take subset of the datset"})
     train_file: Optional[str] = field(
         default=None,
         metadata={"help": "A csv or a json file containing the training data."},
