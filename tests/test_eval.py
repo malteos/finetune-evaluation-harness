@@ -31,13 +31,18 @@ def test_cls_evaluation():
     data_args.peft_choice = "p_tune"
     data_args.is_subset=True
 
+    
+    #model_args = ModelArguments("bert-base-german-cased")
+    #model_args.model_name_or_path = "bert-base-german-cased"
+    #model_args.model_revision = "main"
+    #model_args.use_fast_tokenizer = False
+
+
     # new custom config for tiny model
-    custom_config = BertConfig(n_layers=2, n_heads=2, n_positions=64, n_emd = 8 )
-    model_args = ModelArguments("bert-base-german-cased")
-    model_args.config_name = custom_config
-    model_args.model_name_or_path = "bert-base-german-cased"
-    model_args.model_revision = "main"
+    model_args = ModelArguments("/custom_model")
+    model_args.model_name_or_path = "/custom_model"
     model_args.use_fast_tokenizer = False
+    model_args.tokenizer_name = "bert-base-german-cased"
     
     training_args = TrainingArguments(output_dir = temp_dir_name)
     #training_args = TrainingArguments(output_dir="/tmp/directory")
@@ -55,7 +60,7 @@ def test_cls_evaluation():
     init_args.task_list = "germeval2018"
 
     metrics_eval = hgf_fine_tune_class.run_task_evaluation(model_args, data_args, training_args, init_args)
-    assert metrics_eval['eval_accuracy'] == pytest.approx(0.23, 0.3)
+    assert metrics_eval['eval_accuracy'] == pytest.approx(0.11, 0.3)
 
 
 @pytest.mark.skip()
