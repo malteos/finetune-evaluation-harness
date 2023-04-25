@@ -70,7 +70,7 @@ def test_cls_evaluation():
     #assert metrics_eval['eval_accuracy'] == pytest.approx(0.64, 0.3)
     assert metrics_eval['eval_accuracy'] == pytest.approx(0.00, 0.3)
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_ner_evaluation():
     data_args = DataTrainingArguments()
     data_args.dataset_name = "elenanereiss/german-ler"
@@ -80,10 +80,20 @@ def test_ner_evaluation():
     data_args.peft_choice = "prefix_tune"
     data_args.return_entity_level_metrics = True
 
-    model_args = ModelArguments("bert-base-german-cased")
-    model_args.model_name_or_path = "bert-base-german-cased"
-    model_args.model_revision = "main"
-    model_args.use_fast_tokenizer = True
+    custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    print("custom_tiny_model_dir", custom_tiny_model_dir)
+
+    model_args = ModelArguments(custom_tiny_model_dir)
+    model_args.model_name_or_path = custom_tiny_model_dir
+    model_args.use_fast_tokenizer = False
+    model_args.tokenizer_name = "bert-base-german-cased"
+    model_args.use_fast_tokenizer = False
+
+
+    #model_args = ModelArguments("bert-base-german-cased")
+    #model_args.model_name_or_path = "bert-base-german-cased"
+    #model_args.model_revision = "main"
+    #model_args.use_fast_tokenizer = True
 
     training_args = TrainingArguments(output_dir="/tmp/directory")
     training_args.output_dir = "/tmp/directory"
@@ -101,7 +111,7 @@ def test_ner_evaluation():
     assert metrics_eval['eval_overall_accuracy'] == pytest.approx(0.90, 0.3)
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_qa_evaluation():
     data_args = DataTrainingArguments()
     data_args.dataset_name = "deepset/germanquad"
@@ -111,11 +121,19 @@ def test_qa_evaluation():
     data_args.peft_choice = "prompt_tune"
     data_args.version_2_with_negative = True
     
+    custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    print("custom_tiny_model_dir", custom_tiny_model_dir)
 
-    model_args = ModelArguments("bert-base-german-cased")
-    model_args.model_name_or_path = "bert-base-german-cased"
-    model_args.model_revision = "main"
-    model_args.use_fast_tokenizer = True
+    model_args = ModelArguments(custom_tiny_model_dir)
+    model_args.model_name_or_path = custom_tiny_model_dir
+    model_args.use_fast_tokenizer = False
+    model_args.tokenizer_name = "bert-base-german-cased"
+    model_args.use_fast_tokenizer = False
+
+    #model_args = ModelArguments("bert-base-german-cased")
+    #model_args.model_name_or_path = "bert-base-german-cased"
+    #model_args.model_revision = "main"
+    #model_args.use_fast_tokenizer = True
 
     training_args = TrainingArguments(output_dir="/tmp/directory")
     training_args.output_dir = "/tmp/directory"
