@@ -74,7 +74,9 @@ def test_cls_evaluation():
 def test_ner_evaluation():
     temp_dir_name = tempfile.TemporaryDirectory().name
     data_args = DataTrainingArguments()
-    data_args.dataset_name = "elenanereiss/german-ler"
+    #data_args.dataset_name = "elenanereiss/german-ler"
+    data_args.dataset_name = "akash418/german_europarl"
+
     data_args.base_checkpoint_dir = temp_dir_name
 
     #data_args.base_checkpoint_dir = "/tmp/directory"
@@ -114,7 +116,8 @@ def test_ner_evaluation():
     init_args = InitialArguments()
     init_args.results_logging_dir = temp_dir_name
     #init_args.results_logging_dir = "/tmp/directory"
-    init_args.task_list = "german_ner"
+    #init_args.task_list = "german_ner"
+    init_args.task_list = "german_europarl"
 
     metrics_eval = hgf_fine_tune_ner.run_task_evaluation(model_args, data_args, training_args, init_args)
     assert metrics_eval['eval_overall_accuracy'] == pytest.approx(0.90, 0.3)
