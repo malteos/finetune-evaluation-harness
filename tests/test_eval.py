@@ -91,7 +91,7 @@ def test_ner_evaluation():
     model_args.model_name_or_path = custom_tiny_model_dir
     model_args.use_fast_tokenizer = False
     model_args.tokenizer_name = "bert-base-german-cased"
-    model_args.use_fast_tokenizer = False
+    model_args.use_fast_tokenizer = True
 
 
     #model_args = ModelArguments("bert-base-german-cased")
