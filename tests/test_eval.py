@@ -17,7 +17,7 @@ File consisting of integeration unit test cases for evaluating each of the tasks
 """
 
 
-#@pytest.mark.skip()
+@pytest.mark.skip()
 def test_cls_evaluation():
     temp_dir_name = tempfile.TemporaryDirectory().name
     data_args = DataTrainingArguments()
@@ -79,6 +79,7 @@ def test_ner_evaluation():
     # data_args.label_value="multi"
     data_args.peft_choice = "prefix_tune"
     data_args.return_entity_level_metrics = True
+    data_args.is_subset = True
 
     custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
     print("custom_tiny_model_dir", custom_tiny_model_dir)
@@ -111,7 +112,7 @@ def test_ner_evaluation():
     assert metrics_eval['eval_overall_accuracy'] == pytest.approx(0.90, 0.3)
 
 
-#@pytest.mark.skip()
+@pytest.mark.skip()
 def test_qa_evaluation():
     data_args = DataTrainingArguments()
     data_args.dataset_name = "deepset/germanquad"

@@ -859,6 +859,28 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
         logger: object of Logger class
 
     """
+    if data_args.is_subset == True:
+        raw_datasets = load_dataset(
+            data_args.dataset_name,
+            data_args.dataset_config_name,
+            cache_dir=model_args.cache_dir,
+            use_auth_token=True if model_args.use_auth_token else None,
+        )
+        raw_datasets["train"] = load_dataset(
+            data_args.dataset_name,
+            data_args.dataset_config_name,
+            split=f"train[:3%]",           # use 4% of the train set
+            cache_dir=model_args.cache_dir,
+            use_auth_token=True if model_args.use_auth_token else None,
+        )
+        raw_datasets["test"] = load_dataset(
+            data_args.dataset_name,
+            data_args.dataset_config_name,
+            split=f"test[:1%]",           # use 1% of the test set
+            cache_dir=model_args.cache_dir,
+            use_auth_token=True if model_args.use_auth_token else None,
+        )
+
     if data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
         raw_datasets = load_dataset(
@@ -867,6 +889,7 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
+        
     '''
     else:
         data_files = {}
