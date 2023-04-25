@@ -876,7 +876,7 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
         raw_datasets["validation"] = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            split=f"test[:1%]",           # use 1% of the test set
+            split=f"validation[:1%]",           # use 1% of the test set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
