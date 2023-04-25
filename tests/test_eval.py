@@ -72,9 +72,12 @@ def test_cls_evaluation():
 
 #@pytest.mark.skip()
 def test_ner_evaluation():
+    temp_dir_name = tempfile.TemporaryDirectory().name
     data_args = DataTrainingArguments()
     data_args.dataset_name = "elenanereiss/german-ler"
-    data_args.base_checkpoint_dir = "/tmp/directory"
+    data_args.base_checkpoint_dir = temp_dir_name
+
+    #data_args.base_checkpoint_dir = "/tmp/directory"
     data_args.is_task_ner = True
     # data_args.label_value="multi"
     data_args.peft_choice = "prefix_tune"
@@ -96,8 +99,12 @@ def test_ner_evaluation():
     #model_args.model_revision = "main"
     #model_args.use_fast_tokenizer = True
 
-    training_args = TrainingArguments(output_dir="/tmp/directory")
-    training_args.output_dir = "/tmp/directory"
+    #training_args = TrainingArguments(output_dir="/tmp/directory")
+
+    training_args = TrainingArguments(output_dir = temp_dir_name)
+    training_args.output_dir = temp_dir_name
+
+    #training_args.output_dir = "/tmp/directory"
     training_args.num_train_epochs = 1
     training_args.do_train = True
     training_args.do_eval = True
@@ -105,7 +112,8 @@ def test_ner_evaluation():
     training_args.per_device_train_batch_size=64
 
     init_args = InitialArguments()
-    init_args.results_logging_dir = "/tmp/directory"
+    init_args.results_logging_dir = temp_dir_name
+    #init_args.results_logging_dir = "/tmp/directory"
     init_args.task_list = "german_ner"
 
     metrics_eval = hgf_fine_tune_ner.run_task_evaluation(model_args, data_args, training_args, init_args)
