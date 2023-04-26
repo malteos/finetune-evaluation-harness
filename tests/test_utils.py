@@ -17,7 +17,7 @@ from hf_scripts.hgf_fine_tune_qa import *
 File consisting of integeration unit test cases for utility functions (implemented logic)
 """
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_add_labels_args():
     data_args = DataTrainingArguments()
     sample_task = "germeval2018"
@@ -29,7 +29,7 @@ def test_add_labels_args():
     assert add_labels_data_args(sample_task, data_args) == data_args
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_prepend_data_args():
     data_args = DataTrainingArguments()
     training_args = TrainingArguments(output_dir="/sample/directory")
@@ -42,7 +42,7 @@ def test_prepend_data_args():
     )
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_freeze():
     model_args = ModelArguments(model_name_or_path="bert-base-german-cased")
     model_args.freeze_layers = True
@@ -50,7 +50,7 @@ def test_freeze():
     assert freeze_layers(model_args, model) == model
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_load_config():
     model_name_or_path = "bert-base-german-cased"
     num_labels = 1
@@ -82,7 +82,7 @@ def test_load_config():
     )
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_load_model():
     model_name_or_path = "bert-base-german-cased"
     finetuning_task = "question-answering"
@@ -121,13 +121,13 @@ def test_load_model():
     )
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_tasks_initialization():
     test_task = "german_ner_legal"
     assert isinstance(get_all_tasks(), list)
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_process_args():
     tasks_mock_obj = tasks
     tasks_mock_obj.get_all_tasks = MagicMock(return_value = ["germeval2018"])
@@ -149,20 +149,20 @@ def test_process_args():
     assert isinstance(process_arguments(sample_cli_args), HfArgumentParser)
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_get_labels():
     label_list = ["binary", "multi"]
     assert isinstance(get_label_list(label_list), list)
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_map_source_file():
     task_name = "gnad10"
     assert type(map_source_file(task_name))
 
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_init():
     germeval_obj = germeval2017.GermEval2017()
     assert isinstance(germeval_obj.get_url(), str)
