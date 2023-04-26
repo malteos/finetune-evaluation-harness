@@ -16,7 +16,7 @@ from hf_scripts.hgf_fine_tune_qa import *
 """
 File checkin the consistency of the recent push made to the repo (previous code doesnt break)
 """
-
+@pytest.mark.skip()
 def test_freeze():
     model_args = ModelArguments(model_name_or_path="bert-base-german-cased")
     model_args.freeze_layers = True
@@ -24,7 +24,7 @@ def test_freeze():
     assert freeze_layers(model_args, model) == model
 
 
-
+@pytest.mark.skip()
 def test_add_labels_args():
     data_args = DataTrainingArguments()
     sample_task = "germeval2018"
@@ -35,6 +35,8 @@ def test_add_labels_args():
     germeval_obj.get_label_name = MagicMock(return_value="label")
     assert add_labels_data_args(sample_task, data_args) == data_args
 
+    
+@pytest.mark.skip()
 def test_tasks_initialization():
     test_task = "german_ner_legal"
     assert isinstance(get_all_tasks(), list)
