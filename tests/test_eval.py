@@ -40,7 +40,8 @@ def test_cls_evaluation():
 
 
     # new custom config for tiny model
-    custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    custom_tiny_model_dir = '/tests/custom_model'
+    #custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
     print("custom_tiny_model_dir", custom_tiny_model_dir)
     #model_args = ModelArguments("/netscratch/agautam/experiments/finetune-evaluation-harness/tests/custom_model")
     #model_args.model_name_or_path = "/netscratch/agautam/experiments/finetune-evaluation-harness/tests/custom_model"
