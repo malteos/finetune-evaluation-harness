@@ -50,7 +50,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         "qa",
     )
     tokenizer = utility_functions.load_tokenizer(
-        model_args.model_name_or_path,
+        model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
         model_args.cache_dir,
         model_args.use_fast_tokenizer,
         model_args.model_revision,
