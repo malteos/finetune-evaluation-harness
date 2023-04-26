@@ -17,14 +17,12 @@ File consisting of integeration unit test cases for evaluating each of the tasks
 """
 
 
-#@pytest.mark.skip()
+
 def test_cls_evaluation():
     temp_dir_name = tempfile.TemporaryDirectory().name
     data_args = DataTrainingArguments()
     data_args.dataset_name = "philschmid/germeval18"
-    #data_args.base_checkpoint_dir = "/tmp/directory"
     data_args.base_checkpoint_dir = temp_dir_name
-    #print("temp directory ....", tempfile.TemporaryDirectory().name)
     data_args.is_task_ner = False
     #data_args.label_value = "relevance"
     data_args.label_value = "multi"
@@ -32,19 +30,10 @@ def test_cls_evaluation():
     data_args.is_subset=True
 
     
-    #model_args = ModelArguments("akash418/bert-tiny-test")
-    #model_args.model_name_or_path = "akash418/bert-tiny-test"
-    #model_args.tokenizer_name = "bert-base-german-cased"
-    #model_args.model_revision = "main"
-    #model_args.use_fast_tokenizer = False
-
 
     # new custom config for tiny model
     custom_tiny_model_dir = os.getcwd() + '/tests/custom_model'
-    #custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
-    print("custom_tiny_model_dir", custom_tiny_model_dir)
-    #model_args = ModelArguments("/netscratch/agautam/experiments/finetune-evaluation-harness/tests/custom_model")
-    #model_args.model_name_or_path = "/netscratch/agautam/experiments/finetune-evaluation-harness/tests/custom_model"
+    
 
     model_args = ModelArguments(custom_tiny_model_dir)
     model_args.model_name_or_path = custom_tiny_model_dir
@@ -87,9 +76,7 @@ def test_ner_evaluation():
     data_args.return_entity_level_metrics = True
     data_args.is_subset = True
 
-    #custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
     custom_tiny_model_dir = os.getcwd() + '/tests/custom_model'
-    print("custom_tiny_model_dir", custom_tiny_model_dir)
 
     model_args = ModelArguments(custom_tiny_model_dir)
     model_args.model_name_or_path = custom_tiny_model_dir
@@ -97,13 +84,6 @@ def test_ner_evaluation():
     model_args.tokenizer_name = "bert-base-german-cased"
     model_args.use_fast_tokenizer = True
 
-
-    #model_args = ModelArguments("bert-base-german-cased")
-    #model_args.model_name_or_path = "bert-base-german-cased"
-    #model_args.model_revision = "main"
-    #model_args.use_fast_tokenizer = True
-
-    #training_args = TrainingArguments(output_dir="/tmp/directory")
 
     training_args = TrainingArguments(output_dir = temp_dir_name)
     training_args.output_dir = temp_dir_name
@@ -139,7 +119,7 @@ def test_qa_evaluation():
     data_args.version_2_with_negative = True
     data_args.is_subset = True
 
-    #custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    
     custom_tiny_model_dir = os.getcwd() + '/tests/custom_model'
     print("custom_tiny_model_dir", custom_tiny_model_dir)
 
@@ -149,13 +129,6 @@ def test_qa_evaluation():
     model_args.use_fast_tokenizer = True
     #model_args.model_revision=True
 
-    #model_args = ModelArguments("bert-base-german-cased")
-    #model_args.model_name_or_path = "bert-base-german-cased"
-    #model_args.model_revision = "main"
-    #model_args.use_fast_tokenizer = True
-
-    #training_args = TrainingArguments(output_dir="/tmp/directory")
-    #training_args.output_dir = "/tmp/directory"
 
     training_args = TrainingArguments(output_dir = temp_dir_name)
     training_args.output_dir = temp_dir_name
