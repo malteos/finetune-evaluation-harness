@@ -38,7 +38,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     # Set seed before initializing model.
     set_seed(training_args.seed)
 
-    raw_datasets = utility_functions.load_raw_dataset_ner(data_args, model_args)
+    raw_datasets = utility_functions.load_raw_dataset_qa(data_args, model_args)
 
     config = utility_functions.load_config(
         model_args.model_name_or_path,
