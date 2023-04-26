@@ -947,6 +947,8 @@ def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArgum
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
+        
+    return raw_datasets
 
 
 
