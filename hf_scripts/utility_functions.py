@@ -939,7 +939,7 @@ def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArgum
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
-    if data_args.dataset_name is not None:
+    elif data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
         raw_datasets = load_dataset(
             data_args.dataset_name,
