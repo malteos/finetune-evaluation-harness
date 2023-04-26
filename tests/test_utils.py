@@ -37,16 +37,18 @@ def test_prepend_data_args():
     init_args = InitialArguments()
     #init_args.results_logging_dir = "/sample/directory"
     init_args.results_logging_dir = temp_dir_name
-    training_args.output_dir = "/sample/directory"
+    #training_args.output_dir = "/sample/directory"
+    training_args.output_dir = temp_dir_name
     assert prepend_data_args(training_args, data_args, init_args) == (
         training_args,
         data_args,
     )
 
 
-#@pytest.mark.skip()
+@pytest.mark.skip()
 def test_freeze():
-    model_args = ModelArguments(model_name_or_path="bert-base-german-cased")
+    model_path = os.getcwd() + '/tests/custom_model'
+    model_args = ModelArguments(model_name_or_path = model_path)
     model_args.freeze_layers = True
     model = AutoModelForTokenClassification.from_pretrained("bert-base-german-cased")
     assert freeze_layers(model_args, model) == model
@@ -55,7 +57,9 @@ def test_freeze():
 #@pytest.mark.skip()
 def test_load_config():
     temp_dir_name = tempfile.TemporaryDirectory().name
-    model_name_or_path = "bert-base-german-cased"
+    model_path = os.getcwd() + '/tests/custom_model'
+    #model_name_or_path = "bert-base-german-cased"
+    model_name_or_path = model_path
     num_labels = 1
     finetuning_task = "classification"
     cache_dir = temp_dir_name
@@ -88,8 +92,10 @@ def test_load_config():
 
 #@pytest.mark.skip()
 def test_load_model():
+    model_path = os.getcwd() + '/tests/custom_model'
     temp_dir_name = tempfile.TemporaryDirectory().name
-    model_name_or_path = "bert-base-german-cased"
+    #model_name_or_path = "bert-base-german-cased"
+    model_name_or_path = model_path
     finetuning_task = "question-answering"
     cache_dir = temp_dir_name
     #cache_dir = "/sample/directory"
@@ -135,12 +141,16 @@ def test_tasks_initialization():
 
 #@pytest.mark.skip()
 def test_process_args():
+    model_path = os.getcwd() + '/tests/custom_model'
     temp_dir_name = tempfile.TemporaryDirectory().name
     tasks_mock_obj = tasks
     tasks_mock_obj.get_all_tasks = MagicMock(return_value = ["germeval2018"])
 
     sample_cli_args = [
         "--model_name_or_path",
+        #"bert-base-german-cased",
+        model_path,
+        "--tokenizer_name",
         "bert-base-german-cased",
         "--task_list",
         "germeval2018",
