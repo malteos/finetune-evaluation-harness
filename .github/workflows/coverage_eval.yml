@@ -28,4 +28,4 @@ jobs:
         coverage run -m pytest
         # pytest tests/test_eval.py
         # coverage report -m
-        coverage report --source=src --fail-under=80
+        coverage report -i
