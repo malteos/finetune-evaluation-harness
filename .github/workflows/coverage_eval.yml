@@ -21,7 +21,7 @@ jobs:
         pip install -r ./requirements.txt
     - name: Evaluate Coverage
       # working-directory: ../
-      - uses: /tests/custom_model
+      - working-directory: /tests/custom_model
       env: 
         WANDB_DISABLED: true
       run: |
