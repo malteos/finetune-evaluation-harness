@@ -27,4 +27,5 @@ jobs:
         echo "$PWD"
         coverage run -m pytest
         # pytest tests/test_eval.py
-        # coverage report -m 
+        # coverage report -m
+        coverage report --fail-under=80
