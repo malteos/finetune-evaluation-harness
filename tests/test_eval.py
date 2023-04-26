@@ -87,7 +87,8 @@ def test_ner_evaluation():
     data_args.return_entity_level_metrics = True
     data_args.is_subset = True
 
-    custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    #custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    custom_tiny_model_dir = os.getcwd() + '/tests/custom_model'
     print("custom_tiny_model_dir", custom_tiny_model_dir)
 
     model_args = ModelArguments(custom_tiny_model_dir)
@@ -138,7 +139,8 @@ def test_qa_evaluation():
     data_args.version_2_with_negative = True
     data_args.is_subset = True
 
-    custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    #custom_tiny_model_dir = "/home/runner/work/finetune-evaluation-harness/finetune-evaluation-harness/tests/custom_model"
+    custom_tiny_model_dir = os.getcwd() + '/tests/custom_model'
     print("custom_tiny_model_dir", custom_tiny_model_dir)
 
     model_args = ModelArguments(custom_tiny_model_dir)
