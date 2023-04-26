@@ -64,3 +64,6 @@ If you fail to understand what any of the paramater does, --help is your friend.
 To implement a new task in eval harness, see [this guide](./docs/task_guide.md).
 
 
+## Evaluating the Coverage of the Current Code
+Please go to Github Actions sections of this repository and start the build named "Evaluate", this would check if the coverage on exisitng code is more than 80%
+
