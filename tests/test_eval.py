@@ -17,7 +17,7 @@ File consisting of integeration unit test cases for evaluating each of the tasks
 """
 
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_cls_evaluation():
     temp_dir_name = tempfile.TemporaryDirectory().name
     data_args = DataTrainingArguments()
@@ -70,7 +70,7 @@ def test_cls_evaluation():
     #assert metrics_eval['eval_accuracy'] == pytest.approx(0.64, 0.3)
     assert metrics_eval['eval_accuracy'] == pytest.approx(0.00, 0.3)
 
-@pytest.mark.skip()
+#@pytest.mark.skip()
 def test_ner_evaluation():
     temp_dir_name = tempfile.TemporaryDirectory().name
     data_args = DataTrainingArguments()
