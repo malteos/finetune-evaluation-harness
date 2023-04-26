@@ -5,10 +5,12 @@ ipywidgets>=8.0.2
 seqeval
 pandas==1.5.3
 coverage
-pytest
 transformers 
 accelerate 
 evaluate 
 datasets==2.8.0
 loralib 
+flake8
+pytest
+pytest-cov
 git+https://github.com/huggingface/peft

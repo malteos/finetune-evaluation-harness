@@ -17,7 +17,6 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        pip install flake8 pytest pytest-cov
         pip install -r ./requirements.txt
     - name: Evaluate Coverage
       # working-directory: ../
@@ -27,5 +26,5 @@ jobs:
         echo "$PWD"
         coverage run -m pytest
         # pytest tests/test_eval.py
-        # coverage report --fail-under 80
+        coverage report --fail-under 80
         
