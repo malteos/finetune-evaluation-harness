@@ -11,7 +11,7 @@ import tasks
 from hf_scripts.hgf_fine_tune_class import *
 from hf_scripts.hgf_fine_tune_ner import *
 from hf_scripts.hgf_fine_tune_qa import *
-
+import tempfile
 
 """
 File consisting of integeration unit test cases for utility functions (implemented logic)
@@ -32,9 +32,11 @@ def test_add_labels_args():
 #@pytest.mark.skip()
 def test_prepend_data_args():
     data_args = DataTrainingArguments()
-    training_args = TrainingArguments(output_dir="/sample/directory")
+    temp_dir_name = tempfile.TemporaryDirectory().name
+    training_args = TrainingArguments(output_dir= temp_dir_name)
     init_args = InitialArguments()
-    init_args.results_logging_dir = "/sample/directory"
+    #init_args.results_logging_dir = "/sample/directory"
+    init_args.results_logging_dir = temp_dir_name
     training_args.output_dir = "/sample/directory"
     assert prepend_data_args(training_args, data_args, init_args) == (
         training_args,
@@ -52,10 +54,12 @@ def test_freeze():
 
 #@pytest.mark.skip()
 def test_load_config():
+    temp_dir_name = tempfile.TemporaryDirectory().name
     model_name_or_path = "bert-base-german-cased"
     num_labels = 1
     finetuning_task = "classification"
-    cache_dir = "/sample/directory"
+    cache_dir = temp_dir_name
+    #cache_dir = "/sample/directory"
     model_revision = "main"
     use_auth_token = False
     model_type = "classification"
@@ -84,9 +88,11 @@ def test_load_config():
 
 #@pytest.mark.skip()
 def test_load_model():
+    temp_dir_name = tempfile.TemporaryDirectory().name
     model_name_or_path = "bert-base-german-cased"
     finetuning_task = "question-answering"
-    cache_dir = "/sample/directory"
+    cache_dir = temp_dir_name
+    #cache_dir = "/sample/directory"
     model_revision = "main"
     use_auth_token = False
     model_type = "qa"
@@ -129,6 +135,7 @@ def test_tasks_initialization():
 
 #@pytest.mark.skip()
 def test_process_args():
+    temp_dir_name = tempfile.TemporaryDirectory().name
     tasks_mock_obj = tasks
     tasks_mock_obj.get_all_tasks = MagicMock(return_value = ["germeval2018"])
 
@@ -138,13 +145,16 @@ def test_process_args():
         "--task_list",
         "germeval2018",
         "--base_checkpoint_dir",
-        "/sample/directory",
+        #"/sample/directory",
+        temp_dir_name,
         "--results_logging_dir",
-        "/sample/directory",
+        #"/sample/directory",
+        temp_dir_name,
         "--peft_choice",
         "lora",
         "--output_dir",
-        "/sample/directory",
+        #"/sample/directory",
+        temp_dir_name,
     ]
     assert isinstance(process_arguments(sample_cli_args), HfArgumentParser)
 
