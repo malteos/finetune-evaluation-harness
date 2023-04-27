@@ -1,5 +1,8 @@
 # Finetune-Evaluation-Harness
 
+![Build Status](https://github.com/malteos/finetune-evaluation-harness/blob/main/.github/workflows/coverage_eval.yml/badge.svg)
+
+
 ## Overview
 This project is a unified framework for evaluation of various LLMs on a large number of different evaluation tasks. Some of the features of this framework:
 
