@@ -1,6 +1,7 @@
 # Finetune-Evaluation-Harness
 
 ![Build Status](https://github.com/malteos/finetune-evaluation-harness/actions/workflows/coverage_eval.yml/badge.svg)
+![Build Status](https://github.com/malteos/finetune-evaluation-harness/actions/workflows/pull_request.yml/badge.svg)
 
 
 ## Overview
