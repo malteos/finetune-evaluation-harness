@@ -9,7 +9,15 @@ setup(
     author="DFKI Berlin",
     author_email="akga01@dfki.de",
     url="https://github.com/malteos/finetune-evaluation-harness",
-    package_dir={"":""},
+    #package_dir={"":""},
+    packages=["finetune-evaluation-harness"],
+    scripts = [
+        'finetune-evaluation-harness/hf_scripts.py',
+        'finetune-evaluation-harness/tasks.py',
+        'finetune-evaluation-harness/templates.py',
+        'finetune-evaluation-harness/main.py',
+        'finetune-evaluation-harness/process_args.py',
+    ]
     python_requires=">=3.7.0",
     install_requires=[
         "pyarrow==6.0.1",
