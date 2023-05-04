@@ -17,7 +17,7 @@ setup(
         'finetune-evaluation-harness/templates.py',
         'finetune-evaluation-harness/main.py',
         'finetune-evaluation-harness/process_args.py',
-    ]
+    ],
     python_requires=">=3.7.0",
     install_requires=[
         "pyarrow==6.0.1",
