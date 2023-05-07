@@ -11,10 +11,10 @@ setup(
     #url="https://github.com/malteos/finetune-evaluation-harness",
     #package_dir={"":""},
     packages=[
-            'finetune-evaluation-harness.hf_scripts', 
-            'finetune-evaluation-harness.tasks',
-            'finetune-evaluation-harness.templates',
-            'finetune-evaluation-harness.tests',
+            'hf_scripts', 
+            'tasks',
+            'templates',
+            'tests',
     ],
     scripts = [
         'finetune-evaluation-harness/process_args.py',
