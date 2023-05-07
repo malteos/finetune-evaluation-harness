@@ -4,7 +4,7 @@ setup(
     name = "finetune-evaluation-harness",
     version="0.1.0dev",
     description="Finetune-Evaluation-Harness",
-    long_description=open("README.md", "r", encoding="utf-8").read(),
+    #long_description=open("README.md", "r", encoding="utf-8").read(),
     keywords="deep learning",
     author="DFKI Berlin",
     author_email="akga01@dfki.de",
