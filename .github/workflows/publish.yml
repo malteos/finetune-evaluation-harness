@@ -11,10 +11,11 @@ jobs:
     #working-directory: finetune-evaluation-harness
     steps: 
     - uses: actions/checkout@v3
-    - name: Build distribution
+    - name: Setup
       uses: actions/setup-python@v4
       with:
         python-version: 3.8
+    - name: Build distribution
       run: |
         python setup.py sdist
     - name: Publish distribution
