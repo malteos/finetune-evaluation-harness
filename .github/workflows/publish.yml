@@ -8,10 +8,11 @@ jobs:
   build-n-publish:
     name: Build and publish 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-latest
-    working-directory: finetune-evaluation-harness
+    #working-directory: finetune-evaluation-harness
     steps: 
     - uses: actions/checkout@v3
     - name: Build distribution
+      uses: actions/setup-python@v4
       with:
         python-version: 3.8
       run: |
