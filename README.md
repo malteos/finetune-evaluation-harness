@@ -70,5 +70,5 @@ To implement a new task in eval harness, see [this guide](./docs/task_guide.md).
 
 ## Evaluating the Coverage of the Current Code
 Please go to Github Actions sections of this repository and start the build named "Evaluate", this would check if the coverage on existing code is more than 80%. The build
-status is also visible on the main repo.
+status is also visible on the main repo page.
 
