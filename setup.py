@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name = "finetune-evaluation-harness",
-    version="0.1.0.dev0",
+    version="0.2.0.dev0",
     description="Finetune-Evaluation-Harness",
     #long_description=open("README.md", "r", encoding="utf-8").read(),
     keywords="deep learning",
