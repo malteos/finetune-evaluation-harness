@@ -17,8 +17,8 @@ setup(
             'tests',
     ],
     scripts = [
-        'finetune-evaluation-harness/process_args.py',
-        'finetune-evaluation-harness/main.py'
+        'process_args.py',
+        'main.py'
     ],
     python_requires=">=3.7.0",
     install_requires=[
