@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name = "finetune-evaluation-harness",
+    name = "finetune_eval_harness",
     version="0.2.0.dev0",
     description="Finetune-Evaluation-Harness",
     #long_description=open("README.md", "r", encoding="utf-8").read(),
