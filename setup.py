@@ -5,6 +5,7 @@ setup(
     version="0.5.0.dev0",
     description="Finetune_Eval_Harness",
     long_description=open("README.md", "r", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
     keywords="deep learning",
     author="DFKI Berlin",
     author_email="akga01@dfki.de",
