@@ -2,7 +2,7 @@
 
 ## please make sure that the vesion numbers are same here and setup.py
 
-__version__ = "0.5.0.dev0"
+__version__ = "0.6.0.dev0"
 
 from .hf_scripts import (
     data_trainining_args,
