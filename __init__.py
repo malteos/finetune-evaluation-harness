@@ -1,4 +1,8 @@
-__version__ = "0.3.0.dev0"
+
+
+## please make sure that the vesion numbers are same here and setup.py
+
+__version__ = "0.4.0.dev0"
 
 from .hf_scripts import (
     data_trainining_args,
