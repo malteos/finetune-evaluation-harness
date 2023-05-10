@@ -72,3 +72,7 @@ To implement a new task in eval harness, see [this guide](./docs/task_guide.md).
 Please go to Github Actions sections of this repository and start the build named "Evaluate", this would check if the coverage on existing code is more than 80%. The build
 status is also visible on the main repo page.
 
+## Guidelines On Running Tasks
+- In some instances for specific tasks, please make sure to specify the exact dataset config depending on your needs
+- If text sequence processing fails for some classification, please try with setting --use_fast_tokenizer as False
+
