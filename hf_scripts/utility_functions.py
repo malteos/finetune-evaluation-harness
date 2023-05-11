@@ -76,6 +76,7 @@ def add_labels_data_args(each_task, data_args):
 
     if TASK_REGISTRY[each_task]().get_task_type() == "ner":
         data_args.is_task_ner = True
+        data_args.label_column_name = TASK_REGISTRY[each_task]().get_label_name()
     data_args.dataset_name = dataset_name
 
     return data_args
@@ -475,7 +476,11 @@ def load_save_metrics_validation(
             # file exists read the prev entry, add new one and then write
             with open(log_file_path, "r") as new_file_path:
                 curr_list = json.load(new_file_path)
-                curr_list = curr_list + [metrics]
+                print("curr_list", curr_list)
+                print("metrics", metrics)
+                curr_list = {**curr_list, **metrics}
+                
+                #curr_list = curr_list + [metrics]
 
             with open(log_file_path, "w") as new_file_path:
                 json.dump(curr_list, new_file_path)

@@ -6,6 +6,19 @@ from . import (
     german_ner,
     german_europarl,
     german_quad,
+    spanish_quad,
+    wiki_cat_es,
+    spanish_conll,
+    flue,
+    spanish_ehealth,
+    szeged_ner,
+    polish_dyk,
+    mapa,
+    eur_lux,
+    ehealth_kd,
+    rucola,
+    klej_dyk,
+    croatian_sentiment,
 )
 
 # mapping task to class objects
@@ -16,6 +29,20 @@ TASK_REGISTRY = {
     "german_ner_legal": german_ner.GermanNerLegal,
     "german_europarl": german_europarl.GermanEuroParl,
     "german_quad": german_quad.GermanQuad,
+    "spanish_quad": spanish_quad.SpanishQuad,
+    "wiki_cat_es": wiki_cat_es.WikiCatEs,
+    "spanish_conll": spanish_conll.SpanishConll,
+    "flue": flue.Flue,
+    "spanish_ehealth": spanish_ehealth.SpanishEhealth,
+    "szeged_ner": szeged_ner.SzegedNer,
+    "polish_dyk": polish_dyk.PolishDyk,
+    "mapa": mapa.Mapa,
+    "eur_lux": eur_lux.EurLux,
+    "ehealth_kd": ehealth_kd.EhealthKd,
+    "rucola": rucola.Rucola,
+    "klej_dyk": klej_dyk.KlejDyk,
+    "croatian_sentiment": croatian_sentiment.CroatianSentiment,
+
 }
 
 # mapping task to type
@@ -26,6 +53,19 @@ TASK_TYPE_REGISTRY = {
     "german_ner_legal": "ner",
     "german_europarl": "ner",
     "german_quad": "qa",
+    "spanish_quad": "qa",
+    "wiki_cat_es": "classification",
+    "spanish_conll": "ner",
+    "flue": "classification",
+    "spanish_ehealth": "ner",
+    "szeged_ner": "ner",
+    "polish_dyk": "qa",
+    "mapa": "ner",
+    "eur_lux": "classification",
+    "ehealth_kd": "ner",
+    "rucola": "classification",
+    "klej_dyk": "classification",
+    "croatian_sentiment": "classification",
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))

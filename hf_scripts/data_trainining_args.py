@@ -64,6 +64,10 @@ class DataTrainingArguments:
     label_value: Optional[str] = field(
         default=None, metadata={"help": "label from the original dataset"}
     )
+    special_task_type: Optional[str] = field(
+        default=None, 
+        metadata={"help": "Is this some special task (eg multi-label classification). Use: multi_label_classification"}   
+    )
     remove_labels: Optional[List[str]] = field(
         default=None,
         metadata={

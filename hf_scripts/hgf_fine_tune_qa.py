@@ -79,7 +79,10 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     new_features = raw_datasets["train"].features.copy()
     new_features["id"] = Value("string")
     raw_datasets["train"] = raw_datasets["train"].cast(new_features)
-    raw_datasets["test"] = raw_datasets["test"].cast(new_features)
+    if "test" not in raw_datasets:
+        raw_datasets["test"] = raw_datasets["validation"].cast(new_features)
+    else:
+        raw_datasets["test"] = raw_datasets["test"].cast(new_features)
 
     if training_args.do_train:
         column_names = raw_datasets["train"].column_names
@@ -143,8 +146,13 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
             train_dataset = train_dataset.select(range(max_train_samples))
 
     if training_args.do_eval:
+        
+        if("test" in raw_datasets):
+            eval_examples = raw_datasets["test"]
+        else:
+            eval_examples = raw_datasets["validation"]
 
-        eval_examples = raw_datasets["test"]
+        #eval_examples = raw_datasets["test"]
         # eval_examples = raw_datasets["validation"]
         if data_args.max_eval_samples is not None:
             # We will select sample from whole data
@@ -180,9 +188,16 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     predict_dataset = None
     predict_examples = None
     if training_args.do_predict:
+        #if "test" not in raw_datasets:
+        #    raise ValueError("--do_predict requires a test dataset")
+
         if "test" not in raw_datasets:
-            raise ValueError("--do_predict requires a test dataset")
-        predict_examples = raw_datasets["test"]
+            predict_examples = raw_datasets["validation"]
+        else:
+            predict_examples = raw_datasets["test"]
+
+        #predict_examples = raw_datasets["test"]
+
         if data_args.max_predict_samples is not None:
             # We will select sample from whole data
             predict_examples = predict_examples.select(

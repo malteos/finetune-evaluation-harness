@@ -6,6 +6,7 @@ from transformers import (
 from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
 from hf_scripts import utility_functions
+import itertools
 
 require_version(
     "datasets>=1.8.0",
@@ -57,7 +58,13 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
             num_labels = 1
         else:
             # label_list = raw_datasets["train"].unique("label")
-            label_list = raw_datasets["train"].unique(label_value)
+            
+            if(isinstance(raw_datasets["train"][label_value][0], list)):
+                concat_list = list(itertools.chain.from_iterable(raw_datasets["train"][label_value]))
+                label_list = list(set(concat_list))
+            else:
+                label_list = raw_datasets["train"].unique(label_value)
+
             label_list.sort()  # Let's sort it for determinism
             num_labels = len(label_list)
 
@@ -219,7 +226,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     )
 
     metrics_eval = utility_functions.train_eval_prediction(
-        "classification",
+        data_args.special_task_type if data_args.special_task_type is not None else "classification",
         model,
         training_args,
         data_args,
