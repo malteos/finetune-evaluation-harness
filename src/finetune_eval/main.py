@@ -1,5 +1,5 @@
 import sys
-from process_args import process_arguments
+from finetune_eval.process_args import process_arguments
 
 
 def main():

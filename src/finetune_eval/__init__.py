@@ -2,7 +2,7 @@
 
 ## please make sure that the vesion numbers are same here and setup.py
 
-__version__ = "0.6.0.dev0"
+__version__ = "0.6.0.dev1"
 
 from .hf_scripts import (
     data_trainining_args,
@@ -28,5 +28,5 @@ from .tasks import (
     german_quad,
 )
 
-import process_args
-import main
+import finetune_eval.process_args as process_args
+import finetune_eval.main as main

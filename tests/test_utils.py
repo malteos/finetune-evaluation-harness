@@ -3,7 +3,7 @@ from hf_scripts.utility_functions import *
 import os
 import pytest
 import unittest
-from process_args import process_arguments
+from finetune_eval.process_args import process_arguments
 from transformers import HfArgumentParser, TrainingArguments
 from hf_scripts.data_trainining_args import DataTrainingArguments
 from tasks import *
