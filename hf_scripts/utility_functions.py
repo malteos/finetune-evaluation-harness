@@ -36,7 +36,7 @@ from tasks import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY
 import json
 from typing import Any, Dict
 from . import utils_qa
-from datasets import load_dataset
+from datasets import load_dataset, DatasetDict
 
 """
 File containing utlility functions used over all the hf_scripts folder for all the tasks
@@ -811,6 +811,13 @@ def load_raw_dataset(
     #raw_datasets["train"]=[]
     #raw_datasets["test"]=[]
 
+    raw_datasets = load_dataset(
+        data_args.dataset_name,
+        data_args.dataset_config_name,
+        cache_dir=model_args.cache_dir,
+        use_auth_token=True if model_args.use_auth_token else None,
+    )
+
     if data_args.task_name is not None:
         # Downloading and loading a dataset from the hub.
         raw_datasets = load_dataset(
@@ -819,6 +826,14 @@ def load_raw_dataset(
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
+    if "train" not in raw_datasets:
+        train_testvalid = raw_datasets.train_test_split(test=0.1)
+        test_valid = train_testvalid['test']
+        raw_datasets = DatasetDict({
+            'train': train_testvalid['train'],
+            'test': train_testvalid['test']
+        })
+
     if data_args.is_subset == True:
         raw_datasets = load_dataset(
             data_args.dataset_name,
@@ -1164,8 +1179,12 @@ def map_train_validation_predict_ds_ner(
 
     if training_args.do_eval:
         if "validation" not in raw_datasets:
-            raise ValueError("--do_eval requires a validation dataset")
-        eval_dataset = raw_datasets["validation"]
+            #raise ValueError("--do_eval requires a validation dataset")
+            eval_dataset = raw_datasets["test"]
+        else:
+            eval_dataset = raw_datasets["validation"]
+        #eval_dataset = raw_datasets["validation"]
+
         if data_args.max_eval_samples is not None:
             max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
             eval_dataset = eval_dataset.select(range(max_eval_samples))

@@ -19,6 +19,16 @@ from . import (
     rucola,
     klej_dyk,
     croatian_sentiment,
+    finish_sentiment,
+    swedish_ner,
+    greek_legal,
+    bulgarian_sentiment,
+    czech_subjectivity,
+    danish_misogyny,
+    slovak_sentiment,
+    maltese_sentiment,
+    dutch_social,
+    
 )
 
 # mapping task to class objects
@@ -42,6 +52,16 @@ TASK_REGISTRY = {
     "rucola": rucola.Rucola,
     "klej_dyk": klej_dyk.KlejDyk,
     "croatian_sentiment": croatian_sentiment.CroatianSentiment,
+    "finish_sentiment": finish_sentiment.FinishSentiment,
+    "swedish_ner": swedish_ner.SwedishNer,
+    "greek_legal": greek_legal.GreekLegal,
+    "bulgarian_sentiment":  bulgarian_sentiment.BulgarianSentiment,
+    "czech_subjectivity": czech_subjectivity.CzechSubjectivity,
+    "danish_misogyny": danish_misogyny.DanishMisogyny,
+    "slovak_sentiment": slovak_sentiment.SlovakSentiment,
+    "maltese_sentiment": maltese_sentiment.MalteseSentiment,
+    "dutch_social": dutch_social.DutchSocial,
+    
 
 }
 
@@ -66,6 +86,16 @@ TASK_TYPE_REGISTRY = {
     "rucola": "classification",
     "klej_dyk": "classification",
     "croatian_sentiment": "classification",
+    "finish_sentiment": "classification",
+    "swedish_ner": "ner",
+    "greek_legal": "classification",
+    "bulgarian_sentiment": "classification",
+    "czech_subjectivity": "classification",
+    "danish_misogyny": "classification",
+    "slovak_sentiment": "classification",
+    "maltese_sentiment": "classification",
+    "dutch_social": "classification",
+    
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))

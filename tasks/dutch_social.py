@@ -2,17 +2,17 @@ from tasks.classification import Classification
 
 
 
-class CroatianSentiment(Classification):
+class DutchSocial(Classification):
 
     """
     Class for GermEval 2017 Classification Task
     """
 
 
-    DATASET_ID = "sepidmnorozy/Croatian_sentiment"  # HF datasets ID
-    TASK_NAME = "croatian_sentiment"
+    DATASET_ID = "dutch_social"  # HF datasets ID
+    TASK_NAME = "dutch_social"
     LABEL_NAME = "label"  # column name from HF dataset
-    HOMEPAGE_URL = "https://huggingface.co/datasets/sepidmnorozy/Croatian_sentiment"
+    HOMEPAGE_URL = "https://huggingface.co/datasets/dutch_social"
 
     def get_dataset_id(self):
         return self.DATASET_ID
