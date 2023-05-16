@@ -26,7 +26,7 @@ jobs:
       run: |
         echo Checking synatix errors in files ...
         # stop the build if there are Python syntax errors or undefined names
-        flake8 ./hf_scripts/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src/finetune_eval/hf_scripts --count --select=E9,F63,F7,F82 --show-source --statistics
         # F63: assertion/comparison errors; F7: break statement outside loop; 
         # F82: undefined variables
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
