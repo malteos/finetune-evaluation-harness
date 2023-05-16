@@ -7,7 +7,7 @@ setup(
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     keywords="deep learning",
-    license="MIT"
+    license="MIT",
     author="DFKI Berlin",
     author_email="akga01@dfki.de",
     #url="https://github.com/malteos/finetune-evaluation-harness",
