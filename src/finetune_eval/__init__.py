@@ -29,8 +29,7 @@ from .tasks import (
     german_quad,
 )
 '''
-import sys 
-sys.path.append('../')
+
 #from . import process_args
 #from . import main
 from src.finetune_eval_harness.tasks.task_registry import get_all_tasks
@@ -39,6 +38,9 @@ from src.finetune_eval_harness.tasks.task_registry import get_all_tasks
 
 
 #import src.finetune_eval.main as main
-import src.finetune_eval_harness.tasks
-import src.finetune_eval_harness.hf_scripts
 
+#import src.finetune_eval.tasks as tasks
+#import src.finetune_eval.hf_scripts as hf_scripts
+
+import src.finetune_eval_harness.tasks as tasks
+import src.finetune_eval_harness.hf_scripts as hf_scripts
