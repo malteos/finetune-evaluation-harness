@@ -33,7 +33,7 @@ import sys
 sys.path.append('../')
 #from . import process_args
 #from . import main
-from src.finetune_eval_harness.tasks.task_registry import get_all_tasks
+from src.finetune_eval_harness.tasks.task_registry import get_all_tasks, get_all_task_types, get_dataset_information
 #from .process_args import process_arguments
 #import src.finetune_eval.process_args as process_args
 
