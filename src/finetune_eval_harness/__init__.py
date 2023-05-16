@@ -41,4 +41,5 @@ from src.finetune_eval_harness.tasks.task_registry import get_all_tasks, get_all
 #import src.finetune_eval.main as main
 import src.finetune_eval_harness.tasks
 import src.finetune_eval_harness.hf_scripts
-
+import src.finetune_eval_harness.tasks as tasks
+import src.finetune_eval_harness.hf_scripts as hf_scripts

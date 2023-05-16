@@ -100,7 +100,7 @@ def get_all_task_types():
 
 def get_dataset_information(dataset_name):
     #task_obj = TASK_REGISTRY[dataset_name]
-    output_dict = {}
+    output_dict = []
     output_dict.append(TASK_REGISTRY[dataset_name]().get_label_name())
     output_dict.append(TASK_REGISTRY[dataset_name]().get_dataset_id())
     output_dict.append(TASK_REGISTRY[dataset_name]().get_url())
