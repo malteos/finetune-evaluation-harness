@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name = "finetune_eval",
+    name = "finetune_eval_harness",
     version="0.6.1.dev1",
     description="Finetune_Eval_Harness",
     long_description=open("README.md", "r", encoding="utf-8").read(),
@@ -24,7 +24,7 @@ setup(
     # ],
     package_dir={"": "src"},
     packages=find_packages("src"),
-    entry_points={"console_scripts": ["finetune-eval=finetune_eval.main:main"]},
+    entry_points={"console_scripts": ["finetune-eval-harness=finetune_eval_harness.main:main"]},
     python_requires=">=3.8.0",
     install_requires=[
         'pyarrow==6.0.1',
