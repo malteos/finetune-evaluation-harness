@@ -33,7 +33,7 @@ from peft import (
 from peft import PrefixTuningConfig, PromptEncoderConfig, PromptTuningConfig, TaskType
 from peft.utils.other import fsdp_auto_wrap_policy
 from os import path
-from tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY 
+from src.finetune_eval_harness.tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY 
 import json
 from typing import Any, Dict
 from . import utils_qa
