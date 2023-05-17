@@ -1,20 +1,9 @@
 import sys
 sys.path.append('./')
 from transformers import HfArgumentParser, TrainingArguments
-#from tasks import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY
 from tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY
 import logging
 sys.path.append('../')
-'''
-from hf_scripts.utility_functions import (
-    map_source_file,
-    peft_choice_list,
-    add_labels_data_args,
-)
-from hf_scripts.model_args import ModelArguments
-from hf_scripts.data_trainining_args import DataTrainingArguments
-from hf_scripts.initial_arguments import InitialArguments
-'''
 
 from hf_scripts.utility_functions import (
     map_source_file,
