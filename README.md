@@ -17,6 +17,8 @@ To evaluate a model (eg GERMAN-BERT) on task, please use something like this:
 
 ```python
 import finetune_eval_harness
+
+
 finetune-eval-harness --model_name_or_path bert-base-german-cased \
 --task_list germeval2018 \
 --results_logging_dir /sample/directory/results \
@@ -78,5 +80,6 @@ status is also visible on the main repo page.
 
 ## Guidelines On Running Tasks
 - In some instances for specific tasks, please make sure to specify the exact dataset config depending on your needs
-- If text sequence processing fails for some classification, please try with setting --use_fast_tokenizer as False
+- If text sequence processing fails for some tasks such as classification, please try with setting --use_fast_tokenizer as False
+- Please make sure that the dataset (i.e task) url is publically visible on huggingface datasets
 
