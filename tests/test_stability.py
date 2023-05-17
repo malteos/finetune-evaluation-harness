@@ -17,12 +17,12 @@ from transformers import HfArgumentParser, TrainingArguments,AutoModelForTokenCl
 # from src.finetune_eval.hf_scripts.initial_arguments import InitialArguments
 # from src.finetune_eval.hf_scripts import hgf_fine_tune_class, hgf_fine_tune_ner, hgf_fine_tune_qa
 
-from finetune_eval_harness.src.finetune_eval_harness.hf_scripts.data_trainining_args import DataTrainingArguments
-from finetune_eval_harness.src.finetune_eval_harness.hf_scripts import hgf_fine_tune_class, hgf_fine_tune_ner, hgf_fine_tune_qa
-from finetune_eval_harness.src.finetune_eval_harness.hf_scripts.model_args import ModelArguments
-from finetune_eval_harness.src.finetune_eval_harness.initial_arguments import InitialArguments
-from finetune_eval_harness.src.finetune_eval_harness.hf_scripts.utility_functions import freeze_layers, add_labels_data_args, get_all_tasks
-from finetune_eval_harness.src.finetune_eval_harness.tasks import germeval2018
+from finetune_eval_harness.hf_scripts.data_trainining_args import DataTrainingArguments
+from finetune_eval_harness.hf_scripts import hgf_fine_tune_class, hgf_fine_tune_ner, hgf_fine_tune_qa
+from finetune_eval_harness.hf_scripts.model_args import ModelArguments
+from finetune_eval_harness.initial_arguments import InitialArguments
+from finetune_eval_harness.hf_scripts.utility_functions import freeze_layers, add_labels_data_args, get_all_tasks
+from finetune_eval_harness.tasks import germeval2018
 
 
 """
