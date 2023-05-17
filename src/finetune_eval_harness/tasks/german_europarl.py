@@ -2,12 +2,24 @@
 from .classification import Classification
 from .ner import NamedEntityRecognition
 
+
+_DESCRIPTION = """
+NER task for german subsplit of the Europarl dataset
+"""
+
+
+_CITATION = """
+
+"""
+
+
+
 class GermanEuroParl(NamedEntityRecognition):
 
     """
     Class for German Europarl Task
     """
-
+    
     DATASET_ID = "akash418/german_europarl"
     TASK_NAME = "german_europarl"
     HOMEPAGE_URL = "https://huggingface.co/datasets/akash418/german_europarl"

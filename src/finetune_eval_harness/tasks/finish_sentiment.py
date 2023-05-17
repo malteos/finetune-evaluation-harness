@@ -2,6 +2,16 @@
 from .classification import Classification
 
 
+DESCRIPTION = """
+Classification task for Finish sentiments 
+"""
+
+
+_CITATION = """
+
+"""
+
+
 class FinishSentiment(Classification):
 
     """

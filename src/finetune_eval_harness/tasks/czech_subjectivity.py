@@ -2,6 +2,24 @@
 from .classification import Classification
 
 
+_DESCRIPTION = """
+Classification task for manually annotated subjective sentences 
+"""
+
+
+_CITATION = """
+@article{pib2022czech,
+    title={Czech Dataset for Cross-lingual Subjectivity Classification},
+    author={Pavel Přibáň and Josef Steinberger},
+    year={2022},
+    eprint={2204.13915},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+}
+"""
+
+
+
 class CzechSubjectivity(Classification):
 
     """

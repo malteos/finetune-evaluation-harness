@@ -1,5 +1,9 @@
-#from tasks.classification import Classification
+# from tasks.classification import Classification
 from .classification import Classification
+
+_DESCRIPTION = """
+
+"""
 
 
 _CITATION = """
@@ -20,9 +24,9 @@ class GermEval2018(Classification):
     Class for GermEval 2018 Classification Task
     """
 
-    DATASET_ID = "philschmid/germeval18"  # HF datasets ID
+    DATASET_ID = "philschmid/germeval18"    # HF datasets ID
     TASK_NAME = "germeval2018"
-    LABEL_NAME = "multi"  # column name from HF dataset
+    LABEL_NAME = "multi"                    # column name from HF dataset
     HOMEPAGE_URL = "https://huggingface.co/datasets/philschmid/germeval18"
 
     def get_task_name(self):
@@ -33,7 +37,6 @@ class GermEval2018(Classification):
 
     def get_label_name(self):
         return self.LABEL_NAME
-    
+
     def get_url(self):
         return self.HOMEPAGE_URL
-    

@@ -1,6 +1,16 @@
 #from tasks.classification import Classification
 from .classification import Classification
 
+_DESCRIPTION = """
+Maltese version of PAWS-X dataset
+"""
+
+
+_CITATION = """
+
+
+"""
+
 
 class MalteseSentiment(Classification):
 

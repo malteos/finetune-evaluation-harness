@@ -1,8 +1,16 @@
-#from tasks.classification import Classification
+# from tasks.classification import Classification
 from .classification import Classification
 
 
+_DESCRIPTION = """
+
+Germeval Task 2017: Shared Task on Aspect-based Sentiment in Social Media Customer Feedback
+
+"""
+
+
 _CITATION = """
+
 @inproceedings{germevaltask2017,
 title = {{GermEval 2017: Shared Task on Aspect-based Sentiment in Social Media Customer Feedback}},
 author = {Michael Wojatzki and Eugen Ruppert and Sarah Holschneider and Torsten Zesch and Chris Biemann},
@@ -11,6 +19,7 @@ booktitle = {Proceedings of the GermEval 2017 - Shared Task on Aspect-based Sent
 address={Berlin, Germany},
 pages={1--12}
 }
+
 """
 
 
@@ -19,7 +28,6 @@ class GermEval2017(Classification):
     """
     Class for GermEval 2017 Classification Task
     """
-
 
     DATASET_ID = "akash418/germeval_2017"  # HF datasets ID
     TASK_NAME = "germeval2017"
@@ -37,4 +45,3 @@ class GermEval2017(Classification):
 
     def get_url(self):
         return self.HOMEPAGE_URL
-    

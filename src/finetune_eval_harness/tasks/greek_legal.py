@@ -2,6 +2,29 @@
 from .classification import Classification
 
 
+_DESCRIPTION = """
+Dataset consisting of greek legal resources from Greek legislation
+"""
+
+
+_CITATION = """
+
+@inproceedings{papaloukas-etal-2021-glc,
+    title = "Multi-granular Legal Topic Classification on Greek Legislation",
+    author = "Papaloukas, Christos and Chalkidis, Ilias and Athinaios, Konstantinos and Pantazi, Despina-Athanasia and Koubarakis, Manolis",
+    booktitle = "Proceedings of the 3rd Natural Legal Language Processing (NLLP) Workshop",
+    year = "2021",
+    address = "Punta Cana, Dominican Republic",
+    publisher = "",
+    url = "https://arxiv.org/abs/2109.15298",
+    doi = "",
+    pages = ""
+}
+
+"""
+
+
+
 class GreekLegal(Classification):
 
     """

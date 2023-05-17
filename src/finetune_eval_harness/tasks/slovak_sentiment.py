@@ -2,6 +2,22 @@
 from .classification import Classification
 
 
+DESCRIPTION = """
+
+Classification dataset for slovak sentiment 
+
+"""
+
+
+_CITATION = """
+
+
+
+"""
+
+
+
+
 class SlovakSentiment(Classification):
 
     """

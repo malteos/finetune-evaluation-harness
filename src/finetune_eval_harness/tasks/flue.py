@@ -2,6 +2,26 @@
 from .classification import Classification
 
 
+_DESCRIPTION = """
+FLUE is an evaluation setup for French NLP systems similar to the popular GLUE benchmark
+"""
+
+
+_CITATION = """
+
+@misc{le2019flaubert,
+    title={FlauBERT: Unsupervised Language Model Pre-training for French},
+    author={Hang Le and Loïc Vial and Jibril Frej and Vincent Segonne and Maximin Coavoux and Benjamin Lecouteux and Alexandre Allauzen and Benoît Crabbé and Laurent Besacier and Didier Schwab},
+    year={2019},
+    eprint={1912.05372},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+}
+
+"""
+
+
+
 class Flue(Classification):
 
     """

@@ -1,7 +1,8 @@
 import logging
 import os
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 import numpy as np
 from dataclasses import dataclass, field
 from . import trainer_qa
@@ -33,7 +34,11 @@ from peft import (
 from peft import PrefixTuningConfig, PromptEncoderConfig, PromptTuningConfig, TaskType
 from peft.utils.other import fsdp_auto_wrap_policy
 from os import path
-from src.finetune_eval_harness.tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY 
+from src.finetune_eval_harness.tasks.task_registry import (
+    get_all_tasks,
+    TASK_REGISTRY,
+    TASK_TYPE_REGISTRY,
+)
 import json
 from typing import Any, Dict
 from . import utils_qa
@@ -104,6 +109,7 @@ def prepend_data_args(
     training_args.overwrite_output_dir = True
     return (training_args, data_args)
 
+
 '''
 def parse_hf_arguments(args):
     """
@@ -131,7 +137,7 @@ def parse_hf_arguments(args):
     return model_args, data_args, training_args
 
 '''
-    
+
 
 def freeze_layers(model_args: ModelArguments, model):
     """
@@ -333,7 +339,6 @@ def load_model_peft(
     task_type_dict = {"SEQ_CLS": TaskType.SEQ_CLS, "TOKEN_CLS": TaskType.TOKEN_CLS}
 
     if data_args.peft_choice == "lora":
-
         peft_config = LoraConfig(
             task_type=task_type_dict[task_type],
             inference_mode="False",
@@ -426,7 +431,6 @@ def load_save_metrics_validation(
     label_value: str,
     results_log_path: str,
 ):
-
     """
     method for saving validation metrics if do_eval is True
 
@@ -480,16 +484,16 @@ def load_save_metrics_validation(
                 print("curr_list", curr_list)
                 print("metrics", metrics)
                 curr_list = {**curr_list, **metrics}
-                
-                #curr_list = curr_list + [metrics]
+
+                # curr_list = curr_list + [metrics]
 
             with open(log_file_path, "w") as new_file_path:
                 json.dump(curr_list, new_file_path)
 
             new_file_path.close()
 
-        #trainer.log_metrics("eval", metrics)
-        #trainer.save_metrics("eval", metrics)
+        # trainer.log_metrics("eval", metrics)
+        # trainer.save_metrics("eval", metrics)
 
         return metrics
 
@@ -503,7 +507,6 @@ def load_save_metrics_predict(
     output_dir: str,
     label_list: list,
 ):
-
     """
     method for saving evaluation metrics incase do_predict = True
 
@@ -535,8 +538,10 @@ def load_save_metrics_predict(
             np.squeeze(predictions) if is_regression else np.argmax(predictions, axis=1)
         )
 
-        if(os.path.isdir(output_dir)):
-            output_predict_file = os.path.join(output_dir, f"predict_results_{task}.txt")
+        if os.path.isdir(output_dir):
+            output_predict_file = os.path.join(
+                output_dir, f"predict_results_{task}.txt"
+            )
             if trainer.is_world_process_zero():
                 with open(output_predict_file, "w") as writer:
                     writer.write("index\tprediction\n")
@@ -555,7 +560,6 @@ def save_metrics_predict_ner(
     output_dir: str,
     label_list: list,
 ):
-
     """
     method for saving prediction metrics for ner
 
@@ -655,7 +659,6 @@ def preprocess_function_classification(
 
 
 def compute_metrics_classification(p: EvalPrediction):
-
     """
     method for computing the classification metrics
     """
@@ -797,7 +800,6 @@ def load_raw_dataset(
     model_args: ModelArguments,
     logger: Any,
 ):
-
     """
     method for handling the downloading of raw dataset
 
@@ -808,9 +810,9 @@ def load_raw_dataset(
         logger: object of Logger class
 
     """
-    #raw_datasets = {}
-    #raw_datasets["train"]=[]
-    #raw_datasets["test"]=[]
+    # raw_datasets = {}
+    # raw_datasets["train"]=[]
+    # raw_datasets["test"]=[]
 
     raw_datasets = load_dataset(
         data_args.dataset_name,
@@ -829,11 +831,10 @@ def load_raw_dataset(
         )
     if "train" not in raw_datasets:
         train_testvalid = raw_datasets.train_test_split(test=0.1)
-        test_valid = train_testvalid['test']
-        raw_datasets = DatasetDict({
-            'train': train_testvalid['train'],
-            'test': train_testvalid['test']
-        })
+        test_valid = train_testvalid["test"]
+        raw_datasets = DatasetDict(
+            {"train": train_testvalid["train"], "test": train_testvalid["test"]}
+        )
 
     if data_args.is_subset == True:
         raw_datasets = load_dataset(
@@ -845,14 +846,14 @@ def load_raw_dataset(
         raw_datasets["train"] = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            split=f"train[:3%]",           # use 4% of the train set
+            split=f"train[:3%]",  # use 4% of the train set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
         raw_datasets["test"] = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            split=f"test[:1%]",           # use 1% of the test set
+            split=f"test[:1%]",  # use 1% of the test set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
@@ -864,7 +865,6 @@ def load_raw_dataset(
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
-    
 
     return raw_datasets
 
@@ -890,14 +890,14 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
         raw_datasets["train"] = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            split=f"train[:3%]",           # use 4% of the train set
+            split=f"train[:3%]",  # use 4% of the train set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
         raw_datasets["validation"] = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            split=f"validation[:1%]",           # use 1% of the test set
+            split=f"validation[:1%]",  # use 1% of the test set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
@@ -919,7 +919,7 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
             use_auth_token=True if model_args.use_auth_token else None,
         )
 
-    '''
+    """
     else:
         data_files = {}
         if data_args.train_file is not None:
@@ -932,12 +932,12 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
         raw_datasets = load_dataset(
             extension, data_files=data_files, cache_dir=model_args.cache_dir
         )
-    '''
+    """
 
     return raw_datasets
 
-def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArguments):
 
+def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArguments):
     if data_args.is_subset == True:
         raw_datasets = load_dataset(
             data_args.dataset_name,
@@ -948,14 +948,14 @@ def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArgum
         raw_datasets["train"] = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            split=f"train[:3%]",           # use 4% of the train set
+            split=f"train[:3%]",  # use 4% of the train set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
         raw_datasets["test"] = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
-            split=f"test[:1%]",           # use 1% of the test set
+            split=f"test[:1%]",  # use 1% of the test set
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
@@ -968,15 +968,13 @@ def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArgum
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
-        
-    return raw_datasets
 
+    return raw_datasets
 
 
 def preprocess_raw_datasets(
     raw_datasets: Any, data_args: DataTrainingArguments, label_value: str
 ):
-
     """
     method for pre-processing raw datasets
 
@@ -1029,7 +1027,6 @@ def get_label_list(labels: list):
 
 
 def tokenize_and_align_labels(examples: Dict[str, Any], **fn_kwargs) -> Dict[str, Any]:
-
     """
     returns object of Tokenizer class
 
@@ -1087,7 +1084,6 @@ def tokenize_and_align_labels(examples: Dict[str, Any], **fn_kwargs) -> Dict[str
 
 
 def check_tokenizer_instance(tokenizer: AutoTokenizer):
-
     """
     check if tokenizer is PretrainedTokenizer
 
@@ -1108,7 +1104,6 @@ def check_tokenizer_instance(tokenizer: AutoTokenizer):
 
 
 def generate_b_to_i_label(feature_file_exists: bool, label_list: list):
-
     """
     method to generate b_to_i_label
 
@@ -1141,7 +1136,6 @@ def map_train_validation_predict_ds_ner(
     raw_datasets: Any,
     fn_kwargs: Any,
 ):
-
     """
     logic for mapping train, test and validation splits for the ner task
 
@@ -1180,11 +1174,11 @@ def map_train_validation_predict_ds_ner(
 
     if training_args.do_eval:
         if "validation" not in raw_datasets:
-            #raise ValueError("--do_eval requires a validation dataset")
+            # raise ValueError("--do_eval requires a validation dataset")
             eval_dataset = raw_datasets["test"]
         else:
             eval_dataset = raw_datasets["validation"]
-        #eval_dataset = raw_datasets["validation"]
+        # eval_dataset = raw_datasets["validation"]
 
         if data_args.max_eval_samples is not None:
             max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
@@ -1200,7 +1194,7 @@ def map_train_validation_predict_ds_ner(
                 load_from_cache_file=not data_args.overwrite_cache,
                 desc="Running tokenizer on validation dataset",
             )
-            
+
     return train_dataset, eval_dataset, predict_dataset
 
 
@@ -1240,7 +1234,6 @@ def generate_label_list(
 def prepare_train_features_qa(
     examples: Dict[str, Any], **fn_kwargs_train
 ) -> Dict[str, Any]:
-
     """
     method to prepare train features for qa task
 
@@ -1349,7 +1342,6 @@ def prepare_train_features_qa(
 def prepare_features_validation_qa(
     examples: Dict[str, Any], **fn_kwargs_validation
 ) -> Dict[str, Any]:
-
     """
     method to generate features for validation dataset for qa task
 
@@ -1421,7 +1413,7 @@ def prepare_features_validation_qa(
 
     return tokenized_examples
 
-    
+
 def train_eval_prediction(
     task_type: str,
     model: Any,
@@ -1442,7 +1434,6 @@ def train_eval_prediction(
     label_list: str,
     is_regression: bool,
 ):
-
     """
     method consisting of training, evaluation and prediction loop logic for each of the task
 
@@ -1552,7 +1543,6 @@ def train_eval_prediction(
 
 
 def map_source_file(task_name: str):
-
     """
     identify the task_type and return the name of the appropriate hf script name
 

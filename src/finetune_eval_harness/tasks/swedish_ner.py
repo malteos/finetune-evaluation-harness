@@ -1,6 +1,20 @@
 #from tasks.ner import NamedEntityRecognition
 from .ner import NamedEntityRecognition
 
+
+DESCRIPTION = """
+
+emi-manually defined in this case as: Bootstrapped from Swedish Gazetters then manually correcte/reviewed by two independent native speaking swedish annotators
+
+"""
+
+
+_CITATION = """
+
+
+"""
+
+
 class SwedishNer(NamedEntityRecognition):
 
     """

@@ -65,8 +65,10 @@ class DataTrainingArguments:
         default=None, metadata={"help": "label from the original dataset"}
     )
     special_task_type: Optional[str] = field(
-        default=None, 
-        metadata={"help": "Is this some special task (eg multi-label classification). Use: multi_label_classification"}   
+        default=None,
+        metadata={
+            "help": "Is this some special task (eg multi-label classification). Use: multi_label_classification"
+        },
     )
     remove_labels: Optional[List[str]] = field(
         default=None,
@@ -233,7 +235,9 @@ class DataTrainingArguments:
             "help": "When splitting up a long document into chunks, how much stride to take between chunks."
         },
     )
-    is_subset: bool = field(default = False, metadata={"help": "Take subset of the datset"})
+    is_subset: bool = field(
+        default=False, metadata={"help": "Take subset of the datset"}
+    )
     train_file: Optional[str] = field(
         default=None,
         metadata={"help": "A csv or a json file containing the training data."},
@@ -247,7 +251,7 @@ class DataTrainingArguments:
         metadata={"help": "A csv or a json file containing the test data."},
     )
 
-    '''
+    """
     def __post_init__(self):
         if self.task_name is not None:
             self.task_name = self.task_name.lower()
@@ -272,4 +276,4 @@ class DataTrainingArguments:
             assert (
                 validation_extension == train_extension
             ), "`validation_file` should have the same extension (csv or json) as `train_file`."
-    '''
+    """
