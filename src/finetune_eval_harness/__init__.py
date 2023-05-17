@@ -43,8 +43,9 @@ import src.finetune_eval_harness.hf_scripts as hf_scripts
 
 import sys
 sys.path.append('./')
-import tasks
-from tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY, get_all_task_types, get_dataset_information
+from .tasks import *
+from .tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY, get_all_task_types, get_dataset_information
+from .hf_scripts import *
 
 sys.path.append('../')
-import hf_scripts
+#import hf_scripts
