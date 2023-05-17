@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name = "finetune_eval_harness",
-    version="0.6.4.dev1",
+    version="0.6.5.dev1",
     description="Finetune_Eval_Harness",
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
@@ -10,18 +10,6 @@ setup(
     license="MIT",
     author="DFKI Berlin",
     author_email="akga01@dfki.de",
-    #url="https://github.com/malteos/finetune-evaluation-harness",
-    #package_dir={"":""},
-    # packages=[
-    #         'hf_scripts', 
-    #         'tasks',
-    #         'templates',
-    #         'tests',
-    # ],
-    # scripts = [
-    #     'process_args.py',
-    #     'main.py'
-    # ],
     package_dir={"": "src"},
     packages=find_packages("src"),
     entry_points={"console_scripts": ["finetune-eval-harness=finetune_eval_harness.main:main"]},
