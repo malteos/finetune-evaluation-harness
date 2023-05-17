@@ -1,16 +1,16 @@
 from unittest.mock import MagicMock
-from hf_scripts.utility_functions import *
+from src.finetune_eval.hf_scripts.utility_functions import *
 import os
 import pytest
 import unittest
-from process_args import process_arguments
+from src.finetune_eval.process_args import process_arguments
 from transformers import HfArgumentParser, TrainingArguments
-from hf_scripts.data_trainining_args import DataTrainingArguments
-from tasks import *
-import tasks
-from hf_scripts.hgf_fine_tune_class import *
-from hf_scripts.hgf_fine_tune_ner import *
-from hf_scripts.hgf_fine_tune_qa import *
+from src.finetune_eval. hf_scripts.data_trainining_args import DataTrainingArguments
+from src.finetune_eval.tasks import *
+import src.finetune_eval.tasks
+from src.finetune_eval.hf_scripts.hgf_fine_tune_class import *
+from src.finetune_eval.hf_scripts.hgf_fine_tune_ner import *
+from src.finetune_eval.hf_scripts.hgf_fine_tune_qa import *
 import tempfile
 
 """
@@ -143,7 +143,7 @@ def test_tasks_initialization():
 def test_process_args():
     model_path = os.getcwd() + '/tests/custom_model'
     temp_dir_name = tempfile.TemporaryDirectory().name
-    tasks_mock_obj = tasks
+    tasks_mock_obj = src.finetune_eval.tasks
     tasks_mock_obj.get_all_tasks = MagicMock(return_value = ["germeval2018"])
 
     sample_cli_args = [

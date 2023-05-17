@@ -1,15 +1,29 @@
 from unittest.mock import MagicMock
-from hf_scripts.utility_functions import *
+#from src.finetune_eval.hf_scripts.utility_functions import *
 import os
 import pytest
 import unittest
-import process_args
+#import src.finetune_eval.process_args
 from transformers import HfArgumentParser, TrainingArguments, BertConfig
-from hf_scripts.data_trainining_args import DataTrainingArguments
-from tasks import *
-from hf_scripts.hgf_fine_tune_class import *
-from hf_scripts.hgf_fine_tune_ner import *
-from hf_scripts.hgf_fine_tune_qa import *
+
+from src.finetune_eval.hf_scripts.data_trainining_args import DataTrainingArguments
+from src.finetune_eval.tasks import *
+from src.finetune_eval.hf_scripts.hgf_fine_tune_class import *
+from src.finetune_eval.hf_scripts.hgf_fine_tune_ner import *
+from src.finetune_eval.hf_scripts.hgf_fine_tune_qa import *
+from src.finetune_eval.hf_scripts.model_args import ModelArguments
+from src.finetune_eval.hf_scripts.data_trainining_args import DataTrainingArguments
+from src.finetune_eval.hf_scripts.initial_arguments import InitialArguments
+from src.finetune_eval.hf_scripts import hgf_fine_tune_class, hgf_fine_tune_ner, hgf_fine_tune_qa
+
+
+
+#from hf_scripts.data_trainining_args import DataTrainingArguments
+#from tasks import *
+#from hf_scripts.hgf_fine_tune_class import *
+#from hf_scripts.hgf_fine_tune_ner import *
+#from hf_scripts.hgf_fine_tune_qa import *
+
 import tempfile
 
 """
