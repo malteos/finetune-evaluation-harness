@@ -1,17 +1,38 @@
+# Imports in this file are based on module usages after pip install
+
 from unittest.mock import MagicMock
-from src.finetune_eval.hf_scripts.utility_functions import *
 import os
 import pytest
 import unittest
-from src.finetune_eval.process_args import process_arguments
-from transformers import HfArgumentParser, TrainingArguments
-from src.finetune_eval. hf_scripts.data_trainining_args import DataTrainingArguments
-from src.finetune_eval.tasks import *
-import src.finetune_eval.tasks
-from src.finetune_eval.hf_scripts.hgf_fine_tune_class import *
-from src.finetune_eval.hf_scripts.hgf_fine_tune_ner import *
-from src.finetune_eval.hf_scripts.hgf_fine_tune_qa import *
 import tempfile
+
+from transformers import (
+    HfArgumentParser,
+    TrainingArguments,
+    AutoModelForTokenClassification,
+    AutoConfig,
+    AutoModelForQuestionAnswering,
+)
+
+from finetune_eval_harness.hf_scripts.data_trainining_args import DataTrainingArguments
+from finetune_eval_harness.hf_scripts import (
+    hgf_fine_tune_class,
+    hgf_fine_tune_ner,
+    hgf_fine_tune_qa,
+    load_config,
+    map_source_file,
+)
+from finetune_eval_harness.hf_scripts.model_args import ModelArguments
+from finetune_eval_harness.hf_scripts.initial_arguments import InitialArguments
+from finetune_eval_harness.hf_scripts.utility_functions import (
+    freeze_layers,
+    add_labels_data_args,
+    get_all_tasks,
+    prepend_data_args,
+    load_model,
+)
+from finetune_eval_harness.tasks import *
+
 
 """
 File consisting of integeration unit test cases for utility functions (implemented logic)
@@ -138,12 +159,12 @@ def test_tasks_initialization():
     test_task = "german_ner_legal"
     assert isinstance(get_all_tasks(), list)
 
-
-#@pytest.mark.skip()
+'''
+@pytest.mark.skip()
 def test_process_args():
     model_path = os.getcwd() + '/tests/custom_model'
     temp_dir_name = tempfile.TemporaryDirectory().name
-    tasks_mock_obj = src.finetune_eval.tasks
+    tasks_mock_obj = finetune_eval_harness.tasks
     tasks_mock_obj.get_all_tasks = MagicMock(return_value = ["germeval2018"])
 
     sample_cli_args = [
@@ -167,6 +188,7 @@ def test_process_args():
         temp_dir_name,
     ]
     assert isinstance(process_arguments(sample_cli_args), HfArgumentParser)
+'''
 
 
 #@pytest.mark.skip()

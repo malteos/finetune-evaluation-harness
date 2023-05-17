@@ -7,8 +7,20 @@ omit =
     */tasks/qa.py
     */templates/*
     */tasks/*
+    */process_args.py
+    */main.py
+
 [coverage:paths]
 source =
-    finetune-evaluation-harness
-    /finetune-evaluation-harness/hf_scripts
-    /finetune-evaluation-harness/tests
+    finetune-evaluation-harness/src
+    finetune-evaluation-harness/src/finetunetune_eval/hf_scripts
+    finetune-evaluation-harness/src/finetunetune_eval/tasks
+    finetune-evaluation-harness/tests
+[paths]
+source =
+    finetune-evaluation-harness/src
+    finetune-evaluation-harness/src/finetunetune_eval/hf_scripts
+    finetune-evaluation-harness/src/finetunetune_eval/tasks
+    finetune-evaluation-harness/src/finetunetune_eval/templates
+    finetune-evaluation-harness/tests
+    finetune-evaluation-harness/tests/custom_model

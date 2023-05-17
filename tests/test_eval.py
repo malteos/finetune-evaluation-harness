@@ -1,20 +1,41 @@
 from unittest.mock import MagicMock
-#from src.finetune_eval.hf_scripts.utility_functions import *
 import os
 import pytest
 import unittest
 #import src.finetune_eval.process_args
-from transformers import HfArgumentParser, TrainingArguments, BertConfig
+#from transformers import HfArgumentParser, TrainingArguments, BertConfig
 
-from src.finetune_eval.hf_scripts.data_trainining_args import DataTrainingArguments
-from src.finetune_eval.tasks import *
-from src.finetune_eval.hf_scripts.hgf_fine_tune_class import *
-from src.finetune_eval.hf_scripts.hgf_fine_tune_ner import *
-from src.finetune_eval.hf_scripts.hgf_fine_tune_qa import *
-from src.finetune_eval.hf_scripts.model_args import ModelArguments
-from src.finetune_eval.hf_scripts.data_trainining_args import DataTrainingArguments
-from src.finetune_eval.hf_scripts.initial_arguments import InitialArguments
-from src.finetune_eval.hf_scripts import hgf_fine_tune_class, hgf_fine_tune_ner, hgf_fine_tune_qa
+# from src.finetune_eval.hf_scripts.data_trainining_args import DataTrainingArguments
+# from src.finetune_eval.tasks import *
+# from src.finetune_eval.hf_scripts.hgf_fine_tune_class import *
+# from src.finetune_eval.hf_scripts.hgf_fine_tune_ner import *
+# from src.finetune_eval.hf_scripts.hgf_fine_tune_qa import *
+# from src.finetune_eval.hf_scripts.model_args import ModelArguments
+# from src.finetune_eval.hf_scripts.data_trainining_args import DataTrainingArguments
+# from src.finetune_eval.hf_scripts.initial_arguments import InitialArguments
+# from src.finetune_eval.hf_scripts import hgf_fine_tune_class, hgf_fine_tune_ner, hgf_fine_tune_qa
+
+
+
+from transformers import (
+    HfArgumentParser,
+    TrainingArguments,
+    AutoModelForTokenClassification,
+)
+from finetune_eval_harness.hf_scripts.data_trainining_args import DataTrainingArguments
+from finetune_eval_harness.hf_scripts import (
+    hgf_fine_tune_class,
+    hgf_fine_tune_ner,
+    hgf_fine_tune_qa,
+)
+from finetune_eval_harness.hf_scripts.model_args import ModelArguments
+from finetune_eval_harness.hf_scripts.initial_arguments import InitialArguments
+from finetune_eval_harness.hf_scripts.utility_functions import (
+    freeze_layers,
+    add_labels_data_args,
+    get_all_tasks,
+)
+from finetune_eval_harness.tasks import *
 
 
 
