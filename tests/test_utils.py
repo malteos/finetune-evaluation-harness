@@ -19,8 +19,6 @@ from finetune_eval_harness.hf_scripts import (
     hgf_fine_tune_class,
     hgf_fine_tune_ner,
     hgf_fine_tune_qa,
-    load_config,
-    map_source_file,
 )
 from finetune_eval_harness.hf_scripts.model_args import ModelArguments
 from finetune_eval_harness.hf_scripts.initial_arguments import InitialArguments
@@ -30,6 +28,9 @@ from finetune_eval_harness.hf_scripts.utility_functions import (
     get_all_tasks,
     prepend_data_args,
     load_model,
+    load_config,
+    map_source_file,
+    get_label_list,
 )
 from finetune_eval_harness.tasks import *
 
