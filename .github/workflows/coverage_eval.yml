@@ -24,6 +24,7 @@ jobs:
         WANDB_DISABLED: true
       run: |
         echo "$PWD"
+        pip install finetune-eval-harness --upgrade
         coverage run -m pytest
         # pytest tests/test_eval.py
         coverage report --fail-under 80
