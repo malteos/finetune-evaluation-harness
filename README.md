@@ -12,16 +12,20 @@ This project is a unified framework for evaluation of various LLMs on a large nu
 - Running mutliple tasks altogether
 
 
-## Basic Usage
-
+## Getting Started
 To evaluate a model (eg GERMAN-BERT) on task, please use something like this:
 
-```
-python main.py --model_name_or_path bert-base-german-cased \
+```python
+import finetune_eval_harness
+finetune-eval-harness --model_name_or_path bert-base-german-cased \
 --task_list germeval2018 \
 --results_logging_dir /sample/directory/results \
---output_dir /sample/directory
-```
+--output_dir /sample/directory/results
+
+
+````
+
+Please refer to the latest package details here: https://pypi.org/project/finetune-eval-harness/
 
 This framework is build on top of Huggingface, hence all the keyword arguments used in regular HF transformers library work here as well: https://github.com/huggingface/transformers/blob/main/src/transformers/trainer.py.
 

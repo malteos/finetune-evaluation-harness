@@ -1,7 +1,5 @@
 import sys
 sys.path.append('./')
-#import .process_args
-# .process_args import process_arguments
 from finetune_eval_harness.process_args import process_arguments
 
 def main():

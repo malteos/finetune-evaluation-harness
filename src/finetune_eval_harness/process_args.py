@@ -1,10 +1,15 @@
 import sys
-sys.path.append('./')
+
+sys.path.append("./")
 from transformers import HfArgumentParser, TrainingArguments
-#from tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY
-from finetune_eval_harness.tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY
+from finetune_eval_harness.tasks.task_registry import (
+    get_all_tasks,
+    TASK_REGISTRY,
+    TASK_TYPE_REGISTRY,
+)
 import logging
-sys.path.append('../')
+
+sys.path.append("../")
 
 from finetune_eval_harness.hf_scripts.utility_functions import (
     map_source_file,
@@ -42,7 +47,6 @@ def process_arguments(args):
         tasks_to_run = get_all_tasks()
     else:
         tasks_to_run = task_list
-    
 
     if len(tasks_to_run) == 1 and data_args.peft_choice in peft_choice_list:
         data_args = add_labels_data_args(tasks_to_run[0], data_args)
