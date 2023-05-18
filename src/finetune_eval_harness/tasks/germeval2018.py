@@ -29,6 +29,7 @@ class GermEval2018(Classification):
     LABEL_NAME = "multi"                    # column name from HF dataset
     HOMEPAGE_URL = "https://huggingface.co/datasets/philschmid/germeval18"
 
+    '''
     def get_task_name(self):
         return self.TASK_NAME
 
@@ -40,3 +41,4 @@ class GermEval2018(Classification):
 
     def get_url(self):
         return self.HOMEPAGE_URL
+    '''

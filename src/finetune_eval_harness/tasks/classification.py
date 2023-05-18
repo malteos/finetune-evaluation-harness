@@ -11,6 +11,7 @@ class Classification(ABC):
     DATASET_ID = None
     TASK_NAME = None
     LABEL_NAME = None
+    HOMEPAGE_URL = None
 
     def get_task_type(self):
         """
@@ -25,21 +26,21 @@ class Classification(ABC):
         """
         return self.DATASET_ID
 
-    @abstractmethod
+    #@abstractmethod
     def get_task_name(self):
         """
         implement method
         """
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def get_label_name(self):
         """
         implement method
         """
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def get_url(self):
         """
         implement method
