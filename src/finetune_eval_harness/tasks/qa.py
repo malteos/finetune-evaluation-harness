@@ -19,6 +19,6 @@ class QuestionAnswering(ABC):
     def get_dataset_id(self):
         return self.DATASET_ID
     
-    @abstractmethod
+    #@abstractmethod
     def get_url(self):
         pass

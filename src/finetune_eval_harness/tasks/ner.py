@@ -26,14 +26,14 @@ class NamedEntityRecognition(ABC):
         """
         return self.DATASET_ID
 
-    @abstractmethod
+    #@abstractmethod
     def get_task_name(self):
         """
         implement
         """
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def get_url(self):
         """
         implement
