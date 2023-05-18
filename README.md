@@ -60,13 +60,24 @@ This framework is build on top of Huggingface, hence all the keyword arguments u
 
 If you fail to understand what any of the paramater does, --help is your friend.
 
-## List of Supported Tasks
+## Some of the Tasks
 
 - GNAD10 (de) https://huggingface.co/datasets/gnad10
 - GermEval 2017 (de) https://huggingface.co/datasets/malteos/germeval2017
 - German Europarl (de) https://huggingface.co/datasets/akash418/german_europarl
 - GermEval 2018 (de) https://huggingface.co/datasets/philschmid/germeval18
 - German XQUAD (de) https://huggingface.co/datasets/deepset/germanquad
+
+
+For a detailed list of tasks, please use
+
+```python
+finetune_eval_harness.get_all_tasks()
+
+
+['germeval2018', 'germeval2017', 'gnad10', 'german_ner_legal', 'german_europarl', 'german_quad', 'spanish_quad', 'wiki_cat_es', 'spanish_conll', 'flue', 'spanish_ehealth', 'szeged_ner', 'polish_dyk', 'mapa', 'eur_lux', 'ehealth_kd', 'rucola', 'klej_dyk', 'croatian_sentiment', 'finish_sentiment', 'swedish_ner', 'greek_legal', 'bulgarian_sentiment', 'czech_subjectivity', 'danish_misogyny', 'slovak_sentiment', 'maltese_sentiment', 'dutch_social']
+
+````
 
 
 ## Implementing New Tasks
