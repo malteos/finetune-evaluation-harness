@@ -11,6 +11,7 @@ class QuestionAnswering(ABC):
     DATASET_ID = None
     TASK_NAME = None
     LABEL_NAME = None
+    HOMEPAGE_URL = None
 
     def get_task_type(self):
         return "qa"
@@ -21,4 +22,10 @@ class QuestionAnswering(ABC):
     
     #@abstractmethod
     def get_url(self):
-        pass
+        return self.HOMEPAGE_URL
+    
+    def get_label_name(self):
+        return self.LABEL_NAME
+    
+    def get_task_name(self):
+        return self.TASK_NAME

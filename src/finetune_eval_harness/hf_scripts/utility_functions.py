@@ -1,7 +1,8 @@
 import logging
 import os
 import sys
-
+import torch
+from sklearn.metrics import f1_score, roc_auc_score, accuracy_score
 sys.path.append("../")
 import numpy as np
 from dataclasses import dataclass, field
@@ -79,6 +80,10 @@ def add_labels_data_args(each_task, data_args):
     if TASK_REGISTRY[each_task]().get_task_type() == "classification":
         label_value = TASK_REGISTRY[each_task]().get_label_name()
         data_args.label_value = label_value
+        if TASK_REGISTRY[each_task]().get_dataset_split()!=None:
+            data_args.dataset_config_name = TASK_REGISTRY[each_task]().get_dataset_split()
+        if TASK_REGISTRY[each_task]().get_problem_type()!=None:
+            data_args.special_task_type = TASK_REGISTRY[each_task]().get_problem_type()
 
     if TASK_REGISTRY[each_task]().get_task_type() == "ner":
         data_args.is_task_ner = True
@@ -110,34 +115,6 @@ def prepend_data_args(
     return (training_args, data_args)
 
 
-'''
-def parse_hf_arguments(args):
-    """
-    method to parse arguments in each of the hf script for each task
-
-    Args:
-        args: command line arguments passed while while running the main.py file
-
-    Returns:
-        triplet consisting of model_args, data_args and training_args
-
-    """
-    parser = HfArgumentParser(
-        (ModelArguments, DataTrainingArguments, TrainingArguments)
-    )
-    if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
-        model_args, data_args, training_args = parser.parse_json_file(
-            json_file=os.path.abspath(sys.argv[1])
-        )
-    else:
-        model_args, data_args, training_args = parser.parse_args_into_dataclasses(
-            args=args
-        )
-
-    return model_args, data_args, training_args
-
-'''
-
 
 def freeze_layers(model_args: ModelArguments, model):
     """
@@ -163,6 +140,7 @@ def load_config(
     model_revision: str,
     use_auth_token: bool,
     model_type: str,
+    data_args,
 ):
     """
     method for returning the model config type
@@ -195,6 +173,7 @@ def load_config(
         config = AutoConfig.from_pretrained(
             model_name_or_path,
             num_labels=num_labels,
+            problem_type = "multi_label_classification" if data_args.special_task_type == "multi_label_classification" else "single_label_classification",
             fine_tuning_task=finetuning_task,
             cache_dir=cache_dir,
             revision=model_revision,
@@ -619,6 +598,31 @@ def save_metrics_predict_qa(data_args, trainer, predict_dataset, predict_example
     return trainer
 
 
+def add_new_labels(
+    examples: Dict[str, Any], **fn_kwargs
+) -> Dict[str, Any]:
+    
+
+    """
+    method for converting a sequence of Class Labels into one hot encoding for multi-label classification
+
+    Args:
+        examples: instances of huggingface datasets
+        **fn_kwargs: extra arguments
+    
+    """
+    one_hot_encoding = []
+    for i in range(fn_kwargs["num_labels"]):
+        if(i in examples[fn_kwargs["label_value"]]):
+            one_hot_encoding.append(float(1.0))
+        else:
+            one_hot_encoding.append(float(0.0))
+
+    examples["new_labels"] = one_hot_encoding
+
+    return examples
+
+
 def preprocess_function_classification(
     examples: Dict[str, Any], **fn_kwargs
 ) -> Dict[str, Any]:
@@ -632,6 +636,7 @@ def preprocess_function_classification(
     max_seq_length = fn_kwargs["max_seq_length"]
     label_value = fn_kwargs["label_value"]
     label_to_id = fn_kwargs["label_to_id"]
+    data_args = fn_kwargs["data_args"]
 
     # Tokenize the texts
     args = (
@@ -643,17 +648,17 @@ def preprocess_function_classification(
     result = tokenizer(
         *args, padding=padding, max_length=max_seq_length, truncation=True
     )
-    # result = tokenizer(text = examples, padding = padding, max_length = max_seq_length, truncation = True)
-    # Map labels to IDs (not necessary for GLUE tasks)
-    if label_to_id is not None and label_value in examples:
-        result[label_value] = [
-            (label_to_id[l] if l != -1 else -1) for l in examples[label_value]
-        ]
 
-    # if label_to_id is not None and "label" in examples:
-    #    result["label"] = [(label_to_id[l] if l != -1 else -1) for l in examples["label"]]
+    print("data_args.special_task_type", data_args.special_task_type)
 
-    result["labels"] = result[label_value].copy()
+    if(data_args.special_task_type!="multi_label_classification"):
+        if label_to_id is not None and label_value in examples:
+            result[label_value] = [
+                (label_to_id[l] if l != -1 else -1) for l in examples[label_value]
+            ]
+
+        
+        result["labels"] = result[label_value].copy()
 
     return result
 
@@ -666,6 +671,37 @@ def compute_metrics_classification(p: EvalPrediction):
     preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
     preds = np.argmax(preds, axis=1)
     return {"accuracy": (preds == p.label_ids).astype(np.float32).mean().item()}
+    
+
+def compute_metrics_class_multi(p: EvalPrediction):
+    """
+    method for computing the classification metrics incase of multi-label classification
+    """
+    preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
+    return multi_label_metrics(predictions=preds, labels=p.label_ids)
+
+
+def multi_label_metrics(predictions, labels, threshold=0.5):
+
+    """
+    compute multu-label metrics for sequence classification, with a set threshold of 0.5
+    """
+
+    sigmoid = torch.nn.Sigmoid()
+    probs = sigmoid(torch.Tensor(predictions))
+    # next, use threshold to turn them into integer predictions
+    y_pred = np.zeros(probs.shape)
+    y_pred[np.where(probs >= threshold)] = 1
+    # finally, compute metrics
+    y_true = labels
+    #f1_micro_average = f1_score(y_true=y_true, y_pred=y_pred, average='micro')
+    #roc_auc = roc_auc_score(y_true, y_pred, average = 'micro')
+    
+    accuracy = accuracy_score(y_true, y_pred)
+    # return as dictionary
+    #metrics = {'f1': f1_micro_average, 'roc_auc': roc_auc, 'accuracy': accuracy}
+    metrics = {'accuracy': accuracy}
+    return metrics
 
 
 def detect_last_checkpoint(logger, training_args):

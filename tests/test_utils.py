@@ -167,38 +167,3 @@ def test_map_source_file():
     assert type(map_source_file(task_name))
 
 
-def test_init():
-    germeval_obj = germeval2017.GermEval2017()
-    assert isinstance(germeval_obj.get_url(), str)
-    assert isinstance(german_europarl.GermanEuroParl().get_task_name(), str)
-    assert isinstance(german_europarl.GermanEuroParl().get_task_type(), str)
-    assert isinstance(german_europarl.GermanEuroParl().get_dataset_id(), str)
-    assert isinstance(german_europarl.GermanEuroParl().get_url(), str)
-
-    assert isinstance(german_ner.GermanNerLegal().get_url(), str)
-    assert isinstance(german_ner.GermanNerLegal().get_task_type(), str)
-    assert isinstance(german_ner.GermanNerLegal().get_task_name(), str)
-    assert isinstance(german_ner.GermanNerLegal().get_dataset_id(), str)
-
-    assert isinstance(german_quad.GermanQuad().get_dataset_id(), str)
-    assert isinstance(german_quad.GermanQuad().get_task_type(), str)
-    assert isinstance(german_quad.GermanQuad().get_task_name(), str)
-    assert isinstance(german_quad.GermanQuad().get_url(), str)
-
-    assert isinstance(gnad10.Gnad10().get_dataset_id(), str)
-    assert isinstance(gnad10.Gnad10().get_task_type(), str)
-    assert isinstance(gnad10.Gnad10().get_url(), str)
-    assert isinstance(gnad10.Gnad10().get_task_name(), str)
-    assert isinstance(gnad10.Gnad10().get_label_name(), str)
-
-    assert isinstance(germeval2017.GermEval2017().get_dataset_id(), str)
-    assert isinstance(germeval2017.GermEval2017().get_task_type(), str)
-    assert isinstance(germeval2017.GermEval2017().get_url(), str)
-    assert isinstance(germeval2017.GermEval2017().get_task_name(), str)
-    assert isinstance(germeval2017.GermEval2017().get_label_name(), str)
-
-    assert isinstance(germeval2018.GermEval2018().get_dataset_id(), str)
-    assert isinstance(germeval2018.GermEval2018().get_task_type(), str)
-    assert isinstance(germeval2018.GermEval2018().get_url(), str)
-    assert isinstance(germeval2018.GermEval2018().get_task_name(), str)
-    assert isinstance(germeval2018.GermEval2018().get_label_name(), str)

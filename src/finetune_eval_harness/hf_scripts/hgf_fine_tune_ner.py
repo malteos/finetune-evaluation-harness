@@ -71,6 +71,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         model_args.model_revision,
         model_args.use_auth_token,
         "ner",
+        data_args,
     )
     tokenizer = utility_functions.load_tokenizer(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,

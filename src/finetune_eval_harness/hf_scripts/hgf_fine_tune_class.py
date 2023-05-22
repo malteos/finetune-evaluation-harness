@@ -7,6 +7,7 @@ from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
 from . import utility_functions
 import itertools
+import torch
 
 require_version(
     "datasets>=1.8.0",
@@ -67,6 +68,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
             label_list.sort()  # Let's sort it for determinism
             num_labels = len(label_list)
+            
 
     all_columns = raw_datasets.column_names
     # column_others = all_columns['train'].remove(data_args.label_value)
@@ -80,6 +82,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         model_args.model_revision,
         model_args.use_auth_token,
         "sequence",
+        data_args,
     )
     tokenizer = utility_functions.load_tokenizer(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
@@ -162,6 +165,18 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         )
     max_seq_length = min(data_args.max_seq_length, tokenizer.model_max_length)
 
+
+    if(data_args.special_task_type == "multi_label_classification"):
+        raw_datasets = raw_datasets.map(
+            utility_functions.add_new_labels,
+            fn_kwargs={"num_labels": num_labels, "label_value": label_value},
+            desc = " Adding new labels for Multi-Class classification",
+        )
+        raw_datasets = raw_datasets.remove_columns(["labels"])
+        raw_datasets = raw_datasets.rename_column("new_labels", "labels")
+
+    print(raw_datasets["train"][56])
+
     fn_kwargs = {
         "tokenizer": tokenizer,
         "sentence1_key": sentence1_key,
@@ -170,6 +185,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         "max_seq_length": max_seq_length,
         "label_value": label_value,
         "label_to_id": label_to_id,
+        "data_args": data_args,
     }
 
     with training_args.main_process_first(desc="dataset map pre-processing"):
@@ -237,7 +253,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         data_collator,
         tokenizer,
         None,
-        utility_functions.compute_metrics_classification,
+        utility_functions.compute_metrics_class_multi if data_args.special_task_type=="multi_label_classification" else utility_functions.compute_metrics_classification,
         last_checkpoint,
         label_value,
         predict_dataset,
@@ -246,9 +262,6 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         is_regression,
     )
 
-    #trainer = utility_functions.set_hub_arguments(
-    #    trainer, model_args, data_args, training_args, "text-classification"
-    #)
 
     logger.info(f"Training Metrics {metrics_eval}")
 

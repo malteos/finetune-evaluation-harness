@@ -31,6 +31,9 @@ TASK_REGISTRY = {
     "slovak_sentiment": slovak_sentiment.SlovakSentiment,
     "maltese_sentiment": maltese_sentiment.MalteseSentiment,
     "dutch_social": dutch_social.DutchSocial,
+    "eur_lux_de": eur_lux.EurLuxDe,
+    "eur_lux_en": eur_lux.EurLuxEn,
+    "eur_lux_fr": eur_lux.EurLuxFr,
     
 
 }
@@ -65,6 +68,9 @@ TASK_TYPE_REGISTRY = {
     "slovak_sentiment": "classification",
     "maltese_sentiment": "classification",
     "dutch_social": "classification",
+    "eur_lux_de": "classification",
+    "eur_lux_en": "classification",
+    "eur_lux_fr": "classification",
     
 }
 
