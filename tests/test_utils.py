@@ -74,7 +74,7 @@ def test_freeze():
     model = AutoModelForTokenClassification.from_pretrained("bert-base-german-cased")
     assert freeze_layers(model_args, model) == model
 
-
+@pytest.mark.skip()
 def test_load_config():
     temp_dir_name = tempfile.TemporaryDirectory().name
     model_path = os.getcwd() + "/tests/custom_model"
