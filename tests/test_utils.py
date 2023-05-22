@@ -87,6 +87,7 @@ def test_load_config():
     model_revision = "main"
     use_auth_token = False
     model_type = "classification"
+    data_args = DataTrainingArguments()
 
     config = AutoConfig.from_pretrained(
         model_name_or_path,
@@ -105,6 +106,7 @@ def test_load_config():
             model_revision,
             use_auth_token,
             model_type,
+            data_args,
         )
         == config
     )
