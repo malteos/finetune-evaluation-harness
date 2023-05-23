@@ -22,7 +22,7 @@ require_version(
 
 def run_task_evaluation(model_args, data_args, training_args, init_args):
 
-    # model_args, data_args, training_args = parse_hf_arguments(args)
+    
     (training_args, data_args) = utility_functions.prepend_data_args(
         training_args, data_args, init_args
     )
@@ -186,9 +186,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     predict_dataset = None
     predict_examples = None
     if training_args.do_predict:
-        #if "test" not in raw_datasets:
-        #    raise ValueError("--do_predict requires a test dataset")
-
+        
         if "test" not in raw_datasets:
             predict_examples = raw_datasets["validation"]
         else:

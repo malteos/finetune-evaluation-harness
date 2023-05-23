@@ -14,7 +14,7 @@ import numpy as np
 
 def run_task_evaluation(model_args, data_args, training_args, init_args):
 
-    #model_args, data_args, training_args = hf_scripts.utility_functions.parse_hf_arguments(args)
+    
     (training_args, data_args) = utility_functions.prepend_data_args(training_args, data_args, init_args)
     send_example_telemetry("run_ner", model_args, data_args)
 
@@ -26,8 +26,6 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     raw_datasets = utility_functions.load_raw_dataset_ner(data_args, model_args)
 
-    # raw_datasets = raw_datasets.map(lambda x: {"ner_tags": [int(i) for i in x["ner_tags"].split(",")]})
-    # raw_datasets = raw_datasets.map(lambda x: {"pos_tags": [int(i) for i in x["pos_tags"].split(",")]})
 
     if training_args.do_train:
         column_names = raw_datasets["train"].column_names
@@ -45,14 +43,12 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     if data_args.label_column_name is not None:
         label_column_name = data_args.label_column_name
-    # elif f"{data_args.task_name}_tags" in column_names:
-    #    label_column_name = f"{data_args.task_name}_tags"
+    
     elif data_args.is_task_ner:
         label_column_name = "ner_tags"
     else:
         label_column_name = column_names[1]
 
-    # label_list = get_label_list(labels)
     # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
     # Otherwise, we have to get the list of labels manually.
 
@@ -107,26 +103,6 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     utility_functions.check_tokenizer_instance(tokenizer)
 
-    '''
-    # Model has labels -> use them.
-    if model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id:
-        if list(sorted(model.config.label2id.keys())) == list(sorted(label_list)):
-            # Reorganize `label_list` to match the ordering of the model.
-            if labels_are_int:
-                label_to_id = {
-                    i: int(model.config.label2id[l]) for i, l in enumerate(label_list)
-                }
-                label_list = [model.config.id2label[i] for i in range(num_labels)]
-            else:
-                label_list = [model.config.id2label[i] for i in range(num_labels)]
-                label_to_id = {l: i for i, l in enumerate(label_list)}
-        else:
-            logger.warning(
-                "Your model seems to have been trained with labels, but they don't match the dataset: ",
-                f"model labels: {list(sorted(model.config.label2id.keys()))}, dataset labels:"
-                f" {list(sorted(label_list))}.\nIgnoring the model labels as a result.",
-            )
-    '''
 
     # Set the correspondences label/ID inside the model config
     model.config.label2id = {l: i for i, l in enumerate(label_list)}
@@ -186,9 +162,6 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         False,
     )
 
-    #trainer = hf_scripts.utility_functions.set_hub_arguments(
-    #    trainer, model_args, data_args, training_args, "token-classification"
-    #)
 
     logger.info(f"Training Metrics {metrics_eval}")
     return metrics_eval
