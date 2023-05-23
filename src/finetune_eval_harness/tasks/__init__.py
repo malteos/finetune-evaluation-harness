@@ -31,6 +31,10 @@ from . import (
     classification,
     ner,
     qa,
+    piaf,
+    xquad,
+    pawsx,
+    xnli,
     
 )
 

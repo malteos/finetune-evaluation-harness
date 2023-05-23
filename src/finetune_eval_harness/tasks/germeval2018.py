@@ -1,4 +1,17 @@
-# from tasks.classification import Classification
+"""
+Overview of the GermEval 2018 Shared Task on the Identification of Offensive Language
+https://epub.oeaw.ac.at/0xc1aa5576_0x003a10d2.pdf
+
+The GermEval2018 task is a benchmark to indetify offensive language. This shared
+task deals with the classification of German tweets from Twitter. It comprises two tasks,
+a coarse-grained binary classification task (OTHER, OFFENSE) and a fine-grained multi-class classification
+task(OTHER, INSULT, ABUSE, PROFANITY). This script focuses on the binary (coarse) classification.
+
+Homepage: https://projects.cai.fbi.h-da.de/iggsa/
+
+"""
+
+
 from .classification import Classification
 
 _DESCRIPTION = """
@@ -20,12 +33,9 @@ _CITATION = """
 
 class GermEval2018(Classification):
 
-    """
-    Class for GermEval 2018 Classification Task
-    """
 
-    DATASET_ID = "philschmid/germeval18"    # HF datasets ID
+    DATASET_ID = "philschmid/germeval18"    
     TASK_NAME = "germeval2018"
-    LABEL_NAME = "multi"                    # column name from HF dataset
+    LABEL_NAME = "multi"                    
     HOMEPAGE_URL = "https://huggingface.co/datasets/philschmid/germeval18"
-
+    LANGUAGE = "de"

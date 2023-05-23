@@ -1,4 +1,4 @@
-# from tasks.classification import Classification
+
 from .classification import Classification
 
 
@@ -38,8 +38,8 @@ class Rucola(Classification):
     Class for Rucola classification task
     """
 
-    DATASET_ID = "RussianNLP/rucola"  # HF datasets ID
+    DATASET_ID = "RussianNLP/rucola"  
     TASK_NAME = "rucola"
-    LABEL_NAME = "label"  # column name from HF dataset
+    LABEL_NAME = "label"  
     HOMEPAGE_URL = "https://huggingface.co/datasets/RussianNLP/rucola"
 

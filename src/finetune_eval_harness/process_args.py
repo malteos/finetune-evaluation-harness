@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("./")
 from transformers import HfArgumentParser, TrainingArguments
 from finetune_eval_harness.tasks.task_registry import (
     get_all_tasks,
@@ -8,8 +7,6 @@ from finetune_eval_harness.tasks.task_registry import (
     TASK_TYPE_REGISTRY,
 )
 import logging
-
-sys.path.append("../")
 
 from finetune_eval_harness.hf_scripts.utility_functions import (
     map_source_file,

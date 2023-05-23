@@ -1,4 +1,16 @@
-#from tasks.classification import Classification
+
+"""
+
+This is a high-quality dataset of annotated posts sampled from social media posts and annotated for misogyny. Danish language.
+
+Online misogyny, a category of online abusive language, has serious and harmful social consequences. 
+Automatic detection of misogynistic language online, while imperative, poses complicated challenges to both data gathering, data annotation, and bias mitigation, as this type of data is linguistically complex and diverse.
+
+See the accompanying ACL paper Annotating Online Misogyny for full details.
+
+
+"""
+
 from .classification import Classification
 
 
@@ -27,14 +39,11 @@ _CITATION = """
 
 class DanishMisogyny(Classification):
 
-    """
-    Class for GermEval 2017 Classification Task
-    """
 
 
-    DATASET_ID = "strombergnlp/bajer_danish_misogyny"  # HF datasets ID
+    DATASET_ID = "strombergnlp/bajer_danish_misogyny"  
     TASK_NAME = "danish_misogyny"
-    LABEL_NAME = "subtask_A"                           # column name from HF dataset
+    LABEL_NAME = "subtask_A"                           
     HOMEPAGE_URL = "https://huggingface.co/datasets/strombergnlp/bajer_danish_misogyny"
-
+    LANGUAGE = "da"
     

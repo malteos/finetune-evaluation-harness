@@ -1,4 +1,14 @@
-# from tasks.classification import Classification
+"""
+Germeval Task 2017: Shared Task on Aspect-based Sentiment in Social Media Customer Feedback
+
+Paper: https://www.inf.uni-hamburg.de/en/inst/ab/lt/publications/2017-wojatzkietal-germeval2017-workshop.pdf
+
+Huggingface dataset: https://huggingface.co/datasets/malteos/germeval2017
+
+Original dataset: http://ltdata1.informatik.uni-hamburg.de/germeval2017/
+"""
+
+
 from .classification import Classification
 
 
@@ -25,12 +35,11 @@ pages={1--12}
 
 class GermEval2017(Classification):
 
-    """
-    Class for GermEval 2017 Classification Task
-    """
+    
 
-    DATASET_ID = "akash418/germeval_2017"  # HF datasets ID
+    DATASET_ID = "akash418/germeval_2017"  
     TASK_NAME = "germeval2017"
-    LABEL_NAME = "relevance"  # column name from HF dataset
+    LABEL_NAME = "relevance"  
     HOMEPAGE_URL = "https://huggingface.co/datasets/malteos/germeval2017"
+    LANGUAGE = "de"
 

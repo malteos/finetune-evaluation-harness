@@ -36,5 +36,5 @@ class SzegedNer(NamedEntityRecognition):
     TASK_NAME = "szeged_ner"
     HOMEPAGE_URL = "https://huggingface.co/datasets/ficsort/SzegedNER"
     LABEL_NAME = "ner"
-
+    LANGUAGE = "hu"
     

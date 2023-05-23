@@ -1,4 +1,6 @@
-#from tasks.classification import Classification
+
+
+
 from .classification import Classification
 
 
@@ -23,4 +25,4 @@ class FinishSentiment(Classification):
     TASK_NAME = "finish_sentiment"
     LABEL_NAME = "label"  # column name from HF dataset
     HOMEPAGE_URL = "https://huggingface.co/datasets/sepidmnorozy/Finnish_sentiment"
-
+    LANGUAGE = "fi"

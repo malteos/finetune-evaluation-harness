@@ -1,4 +1,16 @@
-# from tasks.ner import NamedEntityRecognition
+
+"""
+
+An adaptation of eHealth-KD Challenge 2020 dataset, filtered only for the task of NER. Some adaptation of the original dataset have been made:
+
+- BIO annotations
+- Errors fixing
+- Overlapped entities has been processed as an unique entity
+
+
+"""
+
+
 from .classification import Classification
 from .ner import NamedEntityRecognition
 
@@ -28,12 +40,8 @@ _CITATION = """
 
 class EhealthKd(NamedEntityRecognition):
 
-    """
-    Class for German NER Legal Task
-    """
-
     DATASET_ID = "ehealth_kd"  # HF datasets ID
     TASK_NAME = "ehealth_kd"
     HOMEPAGE_URL = "https://huggingface.co/datasets/fmmolina/eHealth-KD-Adaptation"
     LABEL_NAME = "entities"
-
+    LANGUAGE = "es"

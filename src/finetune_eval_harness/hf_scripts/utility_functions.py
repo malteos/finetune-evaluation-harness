@@ -3,7 +3,6 @@ import os
 import sys
 import torch
 from sklearn.metrics import f1_score, roc_auc_score, accuracy_score
-sys.path.append("../")
 import numpy as np
 from dataclasses import dataclass, field
 from . import trainer_qa
@@ -36,8 +35,12 @@ from peft import PrefixTuningConfig, PromptEncoderConfig, PromptTuningConfig, Ta
 from peft.utils.other import fsdp_auto_wrap_policy
 from os import path
 
-sys.path.append("./")
-from finetune_eval_harness.tasks.task_registry import get_all_tasks, TASK_REGISTRY, TASK_TYPE_REGISTRY, get_all_task_types
+from finetune_eval_harness.tasks.task_registry import (
+    get_all_tasks,
+    TASK_REGISTRY,
+    TASK_TYPE_REGISTRY,
+    get_all_task_types,
+)
 
 
 import json
@@ -80,15 +83,23 @@ def add_labels_data_args(each_task, data_args):
     if TASK_REGISTRY[each_task]().get_task_type() == "classification":
         label_value = TASK_REGISTRY[each_task]().get_label_name()
         data_args.label_value = label_value
-        if TASK_REGISTRY[each_task]().get_dataset_split()!=None:
-            data_args.dataset_config_name = TASK_REGISTRY[each_task]().get_dataset_split()
-        if TASK_REGISTRY[each_task]().get_problem_type()!=None:
+        if TASK_REGISTRY[each_task]().get_dataset_split() != None:
+            data_args.dataset_config_name = TASK_REGISTRY[
+                each_task
+            ]().get_dataset_split()
+        if TASK_REGISTRY[each_task]().get_problem_type() != None:
             data_args.special_task_type = TASK_REGISTRY[each_task]().get_problem_type()
 
     if TASK_REGISTRY[each_task]().get_task_type() == "ner":
         data_args.is_task_ner = True
         data_args.label_column_name = TASK_REGISTRY[each_task]().get_label_name()
     data_args.dataset_name = dataset_name
+
+    if TASK_REGISTRY[each_task]().get_task_type() == "qa":
+        if TASK_REGISTRY[each_task]().get_dataset_split() != None:
+            data_args.dataset_config_name = TASK_REGISTRY[
+                each_task
+            ]().get_dataset_split()
 
     return data_args
 
@@ -113,7 +124,6 @@ def prepend_data_args(
     training_args.do_eval = True
     training_args.overwrite_output_dir = True
     return (training_args, data_args)
-
 
 
 def freeze_layers(model_args: ModelArguments, model):
@@ -173,7 +183,9 @@ def load_config(
         config = AutoConfig.from_pretrained(
             model_name_or_path,
             num_labels=num_labels,
-            problem_type = "multi_label_classification" if data_args.special_task_type == "multi_label_classification" else "single_label_classification",
+            problem_type="multi_label_classification"
+            if data_args.special_task_type == "multi_label_classification"
+            else "single_label_classification",
             fine_tuning_task=finetuning_task,
             cache_dir=cache_dir,
             revision=model_revision,
@@ -598,22 +610,18 @@ def save_metrics_predict_qa(data_args, trainer, predict_dataset, predict_example
     return trainer
 
 
-def add_new_labels(
-    examples: Dict[str, Any], **fn_kwargs
-) -> Dict[str, Any]:
-    
-
+def add_new_labels(examples: Dict[str, Any], **fn_kwargs) -> Dict[str, Any]:
     """
     method for converting a sequence of Class Labels into one hot encoding for multi-label classification
 
     Args:
         examples: instances of huggingface datasets
         **fn_kwargs: extra arguments
-    
+
     """
     one_hot_encoding = []
     for i in range(fn_kwargs["num_labels"]):
-        if(i in examples[fn_kwargs["label_value"]]):
+        if i in examples[fn_kwargs["label_value"]]:
             one_hot_encoding.append(float(1.0))
         else:
             one_hot_encoding.append(float(0.0))
@@ -651,13 +659,12 @@ def preprocess_function_classification(
 
     print("data_args.special_task_type", data_args.special_task_type)
 
-    if(data_args.special_task_type!="multi_label_classification"):
+    if data_args.special_task_type != "multi_label_classification":
         if label_to_id is not None and label_value in examples:
             result[label_value] = [
                 (label_to_id[l] if l != -1 else -1) for l in examples[label_value]
             ]
 
-        
         result["labels"] = result[label_value].copy()
 
     return result
@@ -671,7 +678,7 @@ def compute_metrics_classification(p: EvalPrediction):
     preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
     preds = np.argmax(preds, axis=1)
     return {"accuracy": (preds == p.label_ids).astype(np.float32).mean().item()}
-    
+
 
 def compute_metrics_class_multi(p: EvalPrediction):
     """
@@ -682,7 +689,6 @@ def compute_metrics_class_multi(p: EvalPrediction):
 
 
 def multi_label_metrics(predictions, labels, threshold=0.5):
-
     """
     compute multu-label metrics for sequence classification, with a set threshold of 0.5
     """
@@ -694,13 +700,13 @@ def multi_label_metrics(predictions, labels, threshold=0.5):
     y_pred[np.where(probs >= threshold)] = 1
     # finally, compute metrics
     y_true = labels
-    #f1_micro_average = f1_score(y_true=y_true, y_pred=y_pred, average='micro')
-    #roc_auc = roc_auc_score(y_true, y_pred, average = 'micro')
-    
+    # f1_micro_average = f1_score(y_true=y_true, y_pred=y_pred, average='micro')
+    # roc_auc = roc_auc_score(y_true, y_pred, average = 'micro')
+
     accuracy = accuracy_score(y_true, y_pred)
     # return as dictionary
-    #metrics = {'f1': f1_micro_average, 'roc_auc': roc_auc, 'accuracy': accuracy}
-    metrics = {'accuracy': accuracy}
+    # metrics = {'f1': f1_micro_average, 'roc_auc': roc_auc, 'accuracy': accuracy}
+    metrics = {"accuracy": accuracy}
     return metrics
 
 
@@ -865,11 +871,16 @@ def load_raw_dataset(
             cache_dir=model_args.cache_dir,
             use_auth_token=True if model_args.use_auth_token else None,
         )
+    # if natural train, test split does not exist use this logic
     if "train" not in raw_datasets:
         train_testvalid = raw_datasets.train_test_split(test=0.1)
         test_valid = train_testvalid["test"]
         raw_datasets = DatasetDict(
-            {"train": train_testvalid["train"], "test": train_testvalid["test"]}
+            {
+                "train": train_testvalid["train"],
+                "test": train_testvalid["test"],
+                "validation": train_testvalid["test"],
+            }
         )
 
     if data_args.is_subset == True:
@@ -974,6 +985,32 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
 
 
 def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArguments):
+
+    raw_datasets = load_dataset(
+        data_args.dataset_name,
+        data_args.dataset_config_name,
+        cache_dir=model_args.cache_dir,
+        use_auth_token=True if model_args.use_auth_token else None,
+    )
+    
+    # if natural train and test split does not exist use this logic
+    if "test" not in raw_datasets:
+        if "train" in raw_datasets:
+            train_testvalid = raw_datasets["train"].train_test_split(0.3)
+        else:
+            train_testvalid = raw_datasets["validation"].train_test_split(0.3)
+        test_valid = train_testvalid["test"]
+        raw_datasets = DatasetDict(
+            {
+                "train": train_testvalid["train"],
+                "test": train_testvalid["test"],
+                "validation": train_testvalid["test"],
+            }
+        )
+
+        return raw_datasets
+        
+
     if data_args.is_subset == True:
         raw_datasets = load_dataset(
             data_args.dataset_name,

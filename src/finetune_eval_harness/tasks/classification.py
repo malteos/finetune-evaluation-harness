@@ -14,6 +14,7 @@ class Classification(ABC):
     HOMEPAGE_URL = None
     DATASET_SPLIT = None
     PROBLEM_TYPE = None
+    LANGUAGE = None
 
     def get_task_type(self):
         """
@@ -23,36 +24,26 @@ class Classification(ABC):
 
     
     def get_dataset_id(self):
-        """
-        implement method
-        """
+        
         return self.DATASET_ID
 
     
     def get_task_name(self):
-        """
-        implement method
-        """
+        
         return self.TASK_NAME
 
     
     def get_label_name(self):
-        """
-        implement method
-        """
+        
         return self.LABEL_NAME
 
     
     def get_url(self):
-        """
-        implement method
-        """
+        
         return self.HOMEPAGE_URL
 
     def get_dataset_split(self):
-        """
-        implement method
-        """
+        
         return self.DATASET_SPLIT
 
     def get_problem_type(self):

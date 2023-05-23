@@ -1,4 +1,15 @@
-#from tasks.ner import NamedEntityRecognition
+"""
+
+The dataset consists of 12 documents (9 for Spanish due to parsing errors) taken from EUR-Lex, 
+a multilingual corpus of court decisions and legal dispositions in the 24 official languages of the European Union. 
+The documents have been annotated for named entities following the guidelines of the MAPA project which foresees two annotation level, 
+a general and a more fine-grained one. The annotated corpus can be used for named entity recognition/classification.
+
+
+"""
+
+
+
 from .ner import NamedEntityRecognition
 
 
@@ -26,13 +37,25 @@ year = {2022}
 
 class Mapa(NamedEntityRecognition):
 
-    """
-    Class for German NER Legal Task
-    """
     
-    DATASET_ID = "joelito/mapa"  # HF datasets ID
+    DATASET_ID = "joelito/mapa"  
     TASK_NAME = "mapa"
     HOMEPAGE_URL = "https://huggingface.co/datasets/joelito/mapa"
     LABEL_NAME = "coarse_grained"
 
+
+class MapaDe(Mapa):
+
+    DATASET_SPLIT = "de"
+    TASK_NAME = "mapa_de"
+
+class MapaFr(Mapa):
+
+    DATASET_SPLIT = "fr"
+    TASK_NAME = "mapa_fr"
+
     
+class MapaEn(Mapa):
+
+    DATASET_SPLIT = "en"
+    TASK_NAME = "mapa_en"

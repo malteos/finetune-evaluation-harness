@@ -14,6 +14,7 @@ class NamedEntityRecognition(ABC):
     LABEL_NAME = None
     HOMEPAGE_URL = None
     DATASET_SPLIT = None
+    LANGUAGE = None
 
     def get_task_type(self):
         """
@@ -23,23 +24,17 @@ class NamedEntityRecognition(ABC):
 
     
     def get_dataset_id(self):
-        """
-        implement 
-        """
+        
         return self.DATASET_ID
 
     #@abstractmethod
     def get_task_name(self):
-        """
-        implement
-        """
+        
         return self.TASK_NAME
 
     #@abstractmethod
     def get_url(self):
-        """
-        implement
-        """
+        
         return self.HOMEPAGE_URL
     
     def get_dataset_split(self):

@@ -1,4 +1,3 @@
-#from tasks.classification import Classification
 from .classification import Classification
 
 _DESCRIPTION = """
@@ -13,15 +12,12 @@ _CITATION = """
 
 class BulgarianSentiment(Classification):
 
-    """
-    Class for GermEval 2017 Classification Task
-    """
 
-
-    DATASET_ID = "sepidmnorozy/Bulgarian_sentiment"  # HF datasets ID
+    DATASET_ID = "sepidmnorozy/Bulgarian_sentiment"  
     TASK_NAME = "bulgarian_sentiment"
-    LABEL_NAME = "label"                            # column name from HF dataset
+    LABEL_NAME = "label"                            
     HOMEPAGE_URL = "https://huggingface.co/datasets/sepidmnorozy/Bulgarian_sentiment"
+    LANGUAGE = "bg"
 
 
     

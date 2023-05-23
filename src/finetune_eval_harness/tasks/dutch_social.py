@@ -1,4 +1,17 @@
-# from tasks.classification import Classification
+"""
+The dataset contains 10 files with around 271,342 tweets. 
+The tweets are filtered via the official Twitter API to contain tweets 
+in Dutch language or by users who have specified their location information within Netherlands geographical boundaries. 
+Using natural language processing we have classified the tweets 
+for their HISCO codes. If the user has provided their location within Dutch boundaries, 
+we have also classified them to their respective provinces The objective of 
+this dataset is to make research data available publicly 
+in a FAIR (Findable, Accessible, Interoperable, Reusable) way. Twitter's 
+Terms of Service Licensed under Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) (2020-10-27)
+
+
+"""
+
 from .classification import Classification
 
 
@@ -14,11 +27,9 @@ _CITATION = """
 
 class DutchSocial(Classification):
 
-    """
-    Class for GermEval 2017 Classification Task
-    """
 
     DATASET_ID = "dutch_social"  # HF datasets ID
     TASK_NAME = "dutch_social"
     LABEL_NAME = "label"  # column name from HF dataset
     HOMEPAGE_URL = "https://huggingface.co/datasets/dutch_social"
+    LANGUAGE = "nl"

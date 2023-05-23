@@ -12,6 +12,8 @@ class QuestionAnswering(ABC):
     TASK_NAME = None
     LABEL_NAME = None
     HOMEPAGE_URL = None
+    LANGUAGE = None
+    DATASET_SPLIT = None
 
     def get_task_type(self):
         return "qa"
@@ -29,3 +31,6 @@ class QuestionAnswering(ABC):
     
     def get_task_name(self):
         return self.TASK_NAME
+    
+    def get_dataset_split(self):
+        return self.DATASET_SPLIT

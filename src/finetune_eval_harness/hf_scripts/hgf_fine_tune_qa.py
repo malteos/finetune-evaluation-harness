@@ -73,6 +73,7 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     # this is imp step because the evaluation logic expects id of string
     print(raw_datasets["train"].features)
+    print(raw_datasets["test"].features)
     new_features = raw_datasets["train"].features.copy()
     new_features["id"] = Value("string")
     raw_datasets["train"] = raw_datasets["train"].cast(new_features)
@@ -280,10 +281,6 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         None,
         False,
     )
-
-    #trainer = utility_functions.set_hub_arguments(
-    #    trainer, model_args, data_args, training_args, "question-answering"
-    #)
 
     logger.info(f"Training Metrics {metrics_eval}")
 

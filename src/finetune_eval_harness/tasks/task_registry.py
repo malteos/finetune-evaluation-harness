@@ -34,7 +34,21 @@ TASK_REGISTRY = {
     "eur_lux_de": eur_lux.EurLuxDe,
     "eur_lux_en": eur_lux.EurLuxEn,
     "eur_lux_fr": eur_lux.EurLuxFr,
-    
+    "piaf": piaf.Piaf,
+    "mapa_de": mapa.MapaDe,
+    "mapa_en": mapa.MapaEn,
+    "mapa_fr": mapa.MapaFr,
+    "xquad": xquad.XQuad,
+    "xquad_de": xquad.XQuadDe,
+    "xquad_en": xquad.XQuadEn,
+    "pawsx": pawsx.PawsX,
+    "pawsx_de": pawsx.PawsXDe,
+    "pawsx_en": pawsx.PawsXEn,
+    "paws_es": pawsx.PawsXEs,
+    "xnli_de": xnli.XnliDe,
+    "xnli_es": xnli.XnliEs,
+    "xnli_en": xnli.XnliEn,
+
 
 }
 
@@ -71,23 +85,25 @@ TASK_TYPE_REGISTRY = {
     "eur_lux_de": "classification",
     "eur_lux_en": "classification",
     "eur_lux_fr": "classification",
+    "piaf": "qa",
+    "mapa_fr": "ner",
+    "mapa_de": "ner",
+    "mapa_en": "ner",
+    "xquad": "qa",
+    "xquad_en": "qa",
+    "xquad_de": "qa",
+    "pawsx_de": "classification",
+    "pawsx_en": "classification",
+    "pawsx_es": "classification",
+    "xnli_de": "classification",
+    "xnli_en": "classification",
+    "xnli_es": "classification",
     
 }
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
 ALL_TASK_TYPES = sorted(list(TASK_TYPE_REGISTRY))
 
-'''
-# returning task class
-def get_task(task_name):
-    try:
-        return TASK_REGISTRY[task_name]
-    except KeyError as exc:
-        print("Available tasks:")
-        print(TASK_REGISTRY)
-        raise KeyError(f"Missing task {task_name}") from exc
-
-'''
 
 # return string names of all the tasks for reference
 def get_all_tasks():

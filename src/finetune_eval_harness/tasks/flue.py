@@ -1,4 +1,14 @@
-#from tasks.classification import Classification
+
+"""
+
+FLUE is an evaluation setup for French NLP systems similar to the popular GLUE benchmark. 
+The goal is to enable further reproducible experiments in the future and to share models and progress on the French language. 
+The tasks and data are obtained from existing works, please refer to our Flaubert paper for a complete list of references.
+
+
+"""
+
+
 from .classification import Classification
 
 
@@ -21,17 +31,16 @@ _CITATION = """
 """
 
 
-
 class Flue(Classification):
 
     """
     Class for GermEval 2018 Classification Task
     """
 
-    DATASET_ID = "flue"  # HF datasets ID
+    DATASET_ID = "flue"  
     TASK_NAME = "flue"
-    LABEL_NAME = "label"  # column name from HF dataset
+    LABEL_NAME = "label"  
     HOMEPAGE_URL = "https://huggingface.co/datasets/flue"
-
+    LANGUAGE = "fr"
     
     

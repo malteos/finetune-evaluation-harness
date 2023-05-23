@@ -1,4 +1,4 @@
-#from tasks.classification import Classification
+
 from .classification import Classification
 
 
@@ -11,8 +11,6 @@ Classification dataset for slovak sentiment
 
 _CITATION = """
 
-
-
 """
 
 
@@ -20,14 +18,10 @@ _CITATION = """
 
 class SlovakSentiment(Classification):
 
-    """
-    Class for GermEval 2017 Classification Task
-    """
 
-
-    DATASET_ID = "sepidmnorozy/Slovak_sentiment"  # HF datasets ID
+    DATASET_ID = "sepidmnorozy/Slovak_sentiment"  
     TASK_NAME = "slovak_sentiment"
-    LABEL_NAME = "label"  # column name from HF dataset
+    LABEL_NAME = "label"  
     HOMEPAGE_URL = "https://huggingface.co/datasets/sepidmnorozy/Slovak_sentiment"
-
+    LANGUAGE = "sk"
     

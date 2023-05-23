@@ -1,4 +1,17 @@
-#from tasks.classification import Classification
+
+"""
+
+WikiCAT_ca is a Spanish corpus for thematic Text Classification tasks. 
+It is created automatically from Wikipedia and Wikidata sources, and contains 8401 articles 
+from the Viquipedia classified under 12 different categories.
+
+This dataset was developed by BSC TeMU as part of the PlanTL project, and intended as an 
+evaluation of LT capabilities to generate useful synthetic corpus.
+
+"""
+
+
+
 from .classification import Classification
 
 
@@ -18,14 +31,10 @@ _CITATION = """
 
 class WikiCatEs(Classification):
 
-    """
-    Class for GermEval 2017 Classification Task
-    """
 
-
-    DATASET_ID = "PlanTL-GOB-ES/WikiCAT_esv2"  # HF datasets ID
+    DATASET_ID = "PlanTL-GOB-ES/WikiCAT_esv2"  
     TASK_NAME = "wikicat_es"
-    LABEL_NAME = "label"  # column name from HF dataset
+    LABEL_NAME = "label"  
     HOMEPAGE_URL = "https://huggingface.co/datasets/PlanTL-GOB-ES/WikiCAT_esv2"
-
+    LANGUAGE = "es"
     
