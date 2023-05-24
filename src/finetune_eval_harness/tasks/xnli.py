@@ -46,13 +46,16 @@ class Xnli(Classification):
 class XnliDe(Xnli):
     DATASET_SPLIT = "de"
     TASK_NAME = "xnli_de"
+    LANGUAGE = "de"
 
 
 class XnliEs(Xnli):
     DATASET_SPLIT = "es"
     TASK_NAME = "xnli_es"
+    LANGUAGE = "es"
 
 
 class XnliEn(Xnli):
     DATASET_SPLIT = "em"
     TASK_NAME = "xnli_en"
+    LANGUAGE = "es"

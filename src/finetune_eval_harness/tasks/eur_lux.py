@@ -54,6 +54,7 @@ class EurLuxDe(EurLux):
     """
     DATASET_SPLIT = "de"
     TASK_NAME = "eur_lux_de"
+    LANGUAGE = "de"
     
 
 class EurLuxEn(EurLux):
@@ -63,6 +64,7 @@ class EurLuxEn(EurLux):
 
     DATASET_SPLIT = "en"
     TASK_NAME = "eur_lux_en"
+    LANGUAGE = "en"
 
 
 class EurLuxFr(EurLux):
@@ -73,3 +75,4 @@ class EurLuxFr(EurLux):
 
     DATASET_SPLIT = "fr"
     TASK_NAME = "eur_lux_fr"
+    LANGUAGE = "fr"

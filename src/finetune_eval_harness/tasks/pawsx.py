@@ -56,13 +56,16 @@ class PawsX(Classification):
 class PawsXDe(PawsX):
     DATASET_SPLIT = "de"
     TASK_NAME = "pawsx_de"
+    LANGUAGE = "de"
 
 
 class PawsXEn(PawsX):
     DATASET_SPLIT = "en"
     TASK_NAME = "pawsx_en"
+    LANGUAGE = "en"
 
 
 class PawsXEs(PawsX):
     DATASET_SPLIT = "es"
     TASK_NAME = "pawsx_es"
+    LANGUAGE = "es"

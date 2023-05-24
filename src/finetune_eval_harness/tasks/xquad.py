@@ -29,8 +29,10 @@ class XQuadDe(XQuad):
 
     DATASET_SPLIT = "xquad.de"
     TASK_NAME = "xquad_de"
+    LANGUAGE = "de"
 
 class XQuadEn(XQuad):
 
     DATASET_SPLIT = "xquad.en"
     TASK_NAME = "xquad_en"
+    LANGUAGE = "en"
