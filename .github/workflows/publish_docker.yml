@@ -33,7 +33,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/malteos/eulm
+            ghcr.io/malteos/finetune-evaluation-harness
           tags: |
             type=raw,value=${{github.ref_name}}
             type=raw,value=${{github.sha}}
