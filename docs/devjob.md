@@ -6,7 +6,7 @@ See https://gist.github.com/malteos/5fe791fe10bb55028a02952d5f394bb3
 
 ```bash
 export DEV_PARTITION=batch
-export DEV_PARTITION=RTX6000,RTX3090,GTX1080Ti,RTX280Ti
+export DEV_PARTITION=RTX6000,RTX3090
 
 # with GPU
 srun -K \

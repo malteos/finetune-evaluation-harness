@@ -14,13 +14,13 @@ export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 #export IMAGE=/netscratch/mostendorff/enroot/malteos+oxw+latest.sqsh
 #export IMAGE=/netscratch/mostendorff/enroot/malteos+oxw-bigs+latest.sqsh
 
-export PROJECT_ID=finetune-eval
+export PROJECT_ID=finetune-evaluation-harness
 #export BASE_TAG=22.08-py3
 #export IMAGE=/netscratch/$USER/enroot/malteos+obmd+${BASE_TAG}.sqsh 
 export IMAGE=/netscratch/$USER/enroot/malteos+finetune-eval+latest.sqsh
 
 # Weights & Biases
-export WANDB_PROJECT=$PROJECT_ID
+export WANDB_PROJECT=finetune-eval # $PROJECT_ID
 
 # Default
 export SBATCH="sbatch"

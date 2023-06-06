@@ -1,26 +1,33 @@
-ARG BASE_TAG=21.12-py3
-ARG BASE_IMAGE=nvcr.io/nvidia/pytorch
+# This image is for development/model-training (e.g. sweeps) and will not be deployed on production machines.
 
-FROM $BASE_IMAGE:$BASE_TAG AS main
+FROM nvidia/cuda:11.7.1-cudnn8-devel-ubuntu22.04
 
-RUN mkdir /app
 WORKDIR /app
+SHELL ["/bin/bash", "-c"]
+
+# install git, python & torch
+RUN apt update && \
+    apt install -y vim git python3.10 python3.10-venv && \
+    python3.10 -m venv venv
+
+RUN source venv/bin/activate && \
+    pip install torch==1.13.1
 
 # Install git-lfs for huggingface hub cli
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
 RUN apt-get install git-lfs
 RUN git lfs install
 
+# app files and install dependencies
+RUN apt install -y python3.10-dev
+
 # copy req file first
 COPY requirements.txt /app/requirements.txt
 
 # A hacky but working way to exclude deepspeed, apex and torch from the requirements (we install them manually or they are part of base image)
 RUN sed -i 's/^torch/# &/' /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN source venv/bin/activate && pip install -r /app/requirements.txt
 RUN sed -i 's/^# \(torch\)/\1/' /app/requirements.txt
-
-# install scispacy model
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_sm-0.4.0.tar.gz
 
 # Copy all other project files
 WORKDIR /app
@@ -35,11 +42,8 @@ USER docker
 # expose the Jupyter port 8888
 EXPOSE 8888
 
-# print versions
-RUN nvcc --version
-RUN python --version
-RUN python -c "import torch; print(torch.__version__); print(torch.version.cuda)"
-# RUN python -c "import transformers; print(transformers.__version__);"
-# RUN ds_report
+ENV PATH=/app/venv/bin:$PATH
 
-CMD ["jupyter", "notebook"]
+WORKDIR /app
+
+CMD ["/bin/bash"]
