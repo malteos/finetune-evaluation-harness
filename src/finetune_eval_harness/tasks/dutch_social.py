@@ -12,7 +12,7 @@ Terms of Service Licensed under Attribution-NonCommercial 4.0 International (CC 
 
 """
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -25,9 +25,7 @@ _CITATION = """
 """
 
 
-class DutchSocial(Classification):
-
-
+class DutchSocial(ClassificationTask):
     DATASET_ID = "dutch_social"  # HF datasets ID
     TASK_NAME = "dutch_social"
     LABEL_NAME = "label"  # column name from HF dataset

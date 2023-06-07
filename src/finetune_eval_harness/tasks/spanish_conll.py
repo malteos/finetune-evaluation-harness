@@ -10,9 +10,7 @@ with 4,568 named entities, and 1,518 test sentences with 3,644 named entities.
 """
 
 
-
-from .classification import Classification
-from .ner import NamedEntityRecognition
+from .base.ner_task import NamedEntityRecognitionTask
 
 _DESCRIPTION = """
 
@@ -33,14 +31,13 @@ _CITATION = """
 """
 
 
-class SpanishConll(NamedEntityRecognition):
+class SpanishConll(NamedEntityRecognitionTask):
 
     """
     Class for German NER Legal Task
     """
-    
-    DATASET_ID = "PlanTL-GOB-ES/CoNLL-NERC-es"  
+
+    DATASET_ID = "PlanTL-GOB-ES/CoNLL-NERC-es"
     TASK_NAME = "spanish_conll"
     HOMEPAGE_URL = "https://huggingface.co/datasets/PlanTL-GOB-ES/CoNLL-NERC-es"
     LANGUAGE = "es"
-    

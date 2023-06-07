@@ -26,7 +26,7 @@ and may differ from the ones used by mGPT and XGLM (they do not provide their pr
 
 """
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 _CITATION = """
 @inproceedings{yang-etal-2019-paws,
@@ -46,7 +46,7 @@ _CITATION = """
 }"""
 
 
-class PawsX(Classification):
+class PawsX(ClassificationTask):
     DATASET_ID = "paws-x"  # HF datasets ID
     TASK_NAME = "pawsx"
     LABEL_NAME = "label"  # column name from HF dataset

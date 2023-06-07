@@ -8,7 +8,6 @@ into a 14 different languages (some low-ish resource). As with MNLI, the goal is
 """
 
 
-
 _CITATION = """
 
 @InProceedings{conneau2018xnli,
@@ -32,15 +31,14 @@ _CITATION = """
 """
 
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
-class Xnli(Classification):
-    DATASET_ID = "xnli"           
+class Xnli(ClassificationTask):
+    DATASET_ID = "xnli"
     TASK_NAME = "xnli"
-    LABEL_NAME = "label"            
+    LABEL_NAME = "label"
     HOMEPAGE_URL = "https://huggingface.co/datasets/xnli"
-
 
 
 class XnliDe(Xnli):
@@ -56,6 +54,6 @@ class XnliEs(Xnli):
 
 
 class XnliEn(Xnli):
-    DATASET_SPLIT = "em"
+    DATASET_SPLIT = "en"
     TASK_NAME = "xnli_en"
-    LANGUAGE = "es"
+    LANGUAGE = "en"

@@ -1,4 +1,3 @@
-
 """
 MultiEURLEX comprises 65k EU laws in 23 official EU languages. 
 Each EU law has been annotated with EUROVOC concepts (labels) by the Publication Office of EU. 
@@ -11,8 +10,7 @@ comprising 57k EU laws with the originally assigned gold labels.
 """
 
 
-
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -35,15 +33,15 @@ _CITATION = """
 """
 
 
-class EurLux(Classification):
+class EurLux(ClassificationTask):
 
     """
     Class for Eur lux classification task
     """
 
-    DATASET_ID = "multi_eurlex"         # HF datasets ID
+    DATASET_ID = "multi_eurlex"  # HF datasets ID
     TASK_NAME = "eur_lux"
-    LABEL_NAME = "labels"               # column name from HF dataset
+    LABEL_NAME = "labels"  # column name from HF dataset
     HOMEPAGE_URL = "https://huggingface.co/datasets/multi_eurlex"
     PROBLEM_TYPE = "multi_label_classification"
 
@@ -52,10 +50,11 @@ class EurLuxDe(EurLux):
     """
     Class for German subsplit of Eurlux
     """
+
     DATASET_SPLIT = "de"
     TASK_NAME = "eur_lux_de"
     LANGUAGE = "de"
-    
+
 
 class EurLuxEn(EurLux):
     """

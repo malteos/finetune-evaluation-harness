@@ -1,5 +1,4 @@
-
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -32,14 +31,13 @@ _CITATION = """
 """
 
 
-class Rucola(Classification):
+class Rucola(ClassificationTask):
 
     """
     Class for Rucola classification task
     """
 
-    DATASET_ID = "RussianNLP/rucola"  
+    DATASET_ID = "RussianNLP/rucola"
     TASK_NAME = "rucola"
-    LABEL_NAME = "label"  
+    LABEL_NAME = "label"
     HOMEPAGE_URL = "https://huggingface.co/datasets/RussianNLP/rucola"
-

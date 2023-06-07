@@ -5,26 +5,34 @@
 
 
 ## Overview
-This project is a unified framework for evaluation of various LLMs on a large number of different evaluation tasks. Some of the features of this framework:
+This project is a unified framework for evaluation of various language models on a large number of different evaluation tasks. Some of the features of this framework:
 
-- Different types of tasks supported: Classification, NER tagging, Question-Answering
-- Support for parameter efficient tuning (PEFT)
+- Different types of tasks supported: classification, NER tagging, question-answering
+- Support for parameter efficient tuning (PEFT) and model freezing
 - Running mutliple tasks altogether
 
 
 ## Getting Started
 To evaluate a model (eg GERMAN-BERT) on task, please use something like this:
 
+
+
+### Evaluation via CLI
+
+```bash
+finetune-eval-harness --model_name_or_path bert-base-german-cased \
+    --task_list germeval2018 \
+    --results_logging_dir /sample/directory/results \
+    --output_dir /sample/directory/results
+```
+
+
+### Evaluation via Python
+
 ```python
 import finetune_eval_harness
 
-
-finetune-eval-harness --model_name_or_path bert-base-german-cased \
---task_list germeval2018 \
---results_logging_dir /sample/directory/results \
---output_dir /sample/directory/results
-
-
+finetune_eval_harness.main()
 ````
 
 Please refer to the latest package details here: https://pypi.org/project/finetune-eval-harness/

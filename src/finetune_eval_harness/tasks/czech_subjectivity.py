@@ -1,4 +1,3 @@
-
 """
 Czech subjectivity dataset (Subj-CS) of 10k manually annotated subjective and objective sentences 
 from movie reviews and descriptions. See the paper description https://arxiv.org/abs/2204.13915
@@ -9,7 +8,7 @@ External URL's: https://github.com/pauli31/czech-subjectivity-dataset
 
 """
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -29,13 +28,9 @@ _CITATION = """
 """
 
 
-
-class CzechSubjectivity(Classification):
-
+class CzechSubjectivity(ClassificationTask):
     DATASET_ID = "pauli31/czech-subjectivity-dataset"  # HF datasets ID
     TASK_NAME = "czech_subjectivity"
     LABEL_NAME = "label"  # column name from HF dataset
     HOMEPAGE_URL = "https://huggingface.co/datasets/pauli31/czech-subjectivity-dataset"
     LANGUAGE = "cs"
-
-    

@@ -1,5 +1,4 @@
-
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 DESCRIPTION = """
@@ -14,14 +13,9 @@ _CITATION = """
 """
 
 
-
-
-class SlovakSentiment(Classification):
-
-
-    DATASET_ID = "sepidmnorozy/Slovak_sentiment"  
+class SlovakSentiment(ClassificationTask):
+    DATASET_ID = "sepidmnorozy/Slovak_sentiment"
     TASK_NAME = "slovak_sentiment"
-    LABEL_NAME = "label"  
+    LABEL_NAME = "label"
     HOMEPAGE_URL = "https://huggingface.co/datasets/sepidmnorozy/Slovak_sentiment"
     LANGUAGE = "sk"
-    

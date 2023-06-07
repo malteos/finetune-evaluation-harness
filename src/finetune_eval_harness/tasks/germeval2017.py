@@ -9,7 +9,7 @@ Original dataset: http://ltdata1.informatik.uni-hamburg.de/germeval2017/
 """
 
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -33,13 +33,9 @@ pages={1--12}
 """
 
 
-class GermEval2017(Classification):
-
-    
-
-    DATASET_ID = "akash418/germeval_2017"  
+class GermEval2017(ClassificationTask):
+    DATASET_ID = "akash418/germeval_2017"
     TASK_NAME = "germeval2017"
-    LABEL_NAME = "relevance"  
+    LABEL_NAME = "relevance"
     HOMEPAGE_URL = "https://huggingface.co/datasets/malteos/germeval2017"
     LANGUAGE = "de"
-

@@ -1,4 +1,3 @@
-
 """
 A dataset of Legal Documents from German federal court decisions for Named Entity Recognition.
 https://arxiv.org/abs/2003.13016v1
@@ -10,7 +9,6 @@ NER tags use the BIO tagging scheme.
 Dataset: https://huggingface.co/datasets/elenanereiss/german-ler
 
 """
-
 
 
 _CITATION = """
@@ -27,17 +25,15 @@ _CITATION = """
 """
 
 
+from .base.ner_task import NamedEntityRecognitionTask
 
-from .ner import NamedEntityRecognition
 
-class GermanNerLegal(NamedEntityRecognition):
+class GermanNerLegal(NamedEntityRecognitionTask):
 
     """
     Class for German NER Legal Task
     """
-    
-    DATASET_ID = "elenanereiss/german-ler"  
+
+    DATASET_ID = "elenanereiss/german-ler"
     TASK_NAME = "german_ner"
     HOMEPAGE_URL = "https://huggingface.co/datasets/elenanereiss/german-ler"
-
-    

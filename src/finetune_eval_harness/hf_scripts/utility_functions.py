@@ -2,15 +2,13 @@ import logging
 import os
 import sys
 import torch
-from sklearn.metrics import f1_score, roc_auc_score, accuracy_score
+from sklearn.metrics import accuracy_score
 import numpy as np
-from dataclasses import dataclass, field
 from . import trainer_qa
 from . import hgf_fine_tune_class, hgf_fine_tune_ner, hgf_fine_tune_qa
 from .model_args import ModelArguments
 from .data_trainining_args import DataTrainingArguments
 from .initial_arguments import InitialArguments
-import evaluate
 import transformers
 from transformers import (
     AutoConfig,
@@ -20,7 +18,6 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
     EvalPrediction,
-    HfArgumentParser,
     Trainer,
     PreTrainedTokenizerFast,
     TrainingArguments,
@@ -32,20 +29,12 @@ from peft import (
     LoraConfig,
 )
 from peft import PrefixTuningConfig, PromptEncoderConfig, PromptTuningConfig, TaskType
-from peft.utils.other import fsdp_auto_wrap_policy
 from os import path
 
-from finetune_eval_harness.tasks.task_registry import (
-    get_all_tasks,
-    TASK_REGISTRY,
-    TASK_TYPE_REGISTRY,
-    get_all_task_types,
-)
-
+from datetime import datetime
 
 import json
 from typing import Any, Dict
-from . import utils_qa
 from datasets import load_dataset, DatasetDict
 
 """
@@ -69,39 +58,39 @@ task_to_keys = {
 peft_choice_list = ["lora", "p_tune", "prefix_tune", "prompt_tune"]
 
 
-def add_labels_data_args(each_task, data_args):
-    """
-    method to add labels and dataset name in data_args
+# def add_labels_data_args(each_task, data_args):
+#     """
+#     method to add labels and dataset name in data_args
 
-    Args:
-        each_task: str: type of the task
-        data_args: an object of type DataTrainingArguments
+#     Args:
+#         each_task: str: type of the task
+#         data_args: an object of type DataTrainingArguments
 
-    """
+#     """
 
-    dataset_name = TASK_REGISTRY[each_task]().get_dataset_id()
-    if TASK_REGISTRY[each_task]().get_task_type() == "classification":
-        label_value = TASK_REGISTRY[each_task]().get_label_name()
-        data_args.label_value = label_value
-        if TASK_REGISTRY[each_task]().get_dataset_split() != None:
-            data_args.dataset_config_name = TASK_REGISTRY[
-                each_task
-            ]().get_dataset_split()
-        if TASK_REGISTRY[each_task]().get_problem_type() != None:
-            data_args.special_task_type = TASK_REGISTRY[each_task]().get_problem_type()
+#     dataset_name = TASK_REGISTRY[each_task]().get_dataset_id()
+#     if TASK_REGISTRY[each_task]().get_task_type() == "classification":
+#         label_value = TASK_REGISTRY[each_task]().get_label_name()
+#         data_args.label_value = label_value
+#         if TASK_REGISTRY[each_task]().get_dataset_split() != None:
+#             data_args.dataset_config_name = TASK_REGISTRY[
+#                 each_task
+#             ]().get_dataset_split()
+#         if TASK_REGISTRY[each_task]().get_problem_type() != None:
+#             data_args.special_task_type = TASK_REGISTRY[each_task]().get_problem_type()
 
-    if TASK_REGISTRY[each_task]().get_task_type() == "ner":
-        data_args.is_task_ner = True
-        data_args.label_column_name = TASK_REGISTRY[each_task]().get_label_name()
-    data_args.dataset_name = dataset_name
+#     if TASK_REGISTRY[each_task]().get_task_type() == "ner":
+#         data_args.is_task_ner = True
+#         data_args.label_column_name = TASK_REGISTRY[each_task]().get_label_name()
+#     data_args.dataset_name = dataset_name
 
-    if TASK_REGISTRY[each_task]().get_task_type() == "qa":
-        if TASK_REGISTRY[each_task]().get_dataset_split() != None:
-            data_args.dataset_config_name = TASK_REGISTRY[
-                each_task
-            ]().get_dataset_split()
+#     if TASK_REGISTRY[each_task]().get_task_type() == "qa":
+#         if TASK_REGISTRY[each_task]().get_dataset_split() != None:
+#             data_args.dataset_config_name = TASK_REGISTRY[
+#                 each_task
+#             ]().get_dataset_split()
 
-    return data_args
+#     return data_args
 
 
 def prepend_data_args(
@@ -454,34 +443,43 @@ def load_save_metrics_validation(
         metrics["trainable_parameters_percentage"] = str(remaining_params)
         metrics["problem_description"] = problem_description
         metrics["batch_size"] = per_device_train_batch_size
+        metrics["datetime"] = str(datetime.now())
+
         if label_value is not None:
             metrics["label"] = label_value
 
-        log_file_path = results_log_path + ".json"
+        if results_log_path:
+            log_file_path = results_log_path + ".json"
 
-        # check if file exists
-        # if no then add the first entry
-        if path.isfile(log_file_path) is False:
-            with open(log_file_path, "w") as fp:
-                metrics_list = []
-                metrics_list.append(metrics)
-                json.dump(metrics_list, fp)
-            fp.close()
+            # check if file exists
+            # if no then add the first entry
+            if path.isfile(log_file_path) is False:
+                with open(log_file_path, "w") as fp:
+                    metrics_list = []
+                    metrics_list.append(metrics)
+                    json.dump(metrics_list, fp)
+                fp.close()
 
+            else:
+                # file exists read the prev entry, add new one and then write
+                with open(log_file_path, "r") as new_file_path:
+                    curr_list = json.load(new_file_path)
+                    print("curr_list", curr_list)
+                    print("metrics", metrics)
+                    # curr_list = {**curr_list, **metrics}
+
+                    curr_list += metrics
+
+                    # curr_list = curr_list + [metrics]
+
+                with open(log_file_path, "w") as new_file_path:
+                    json.dump(curr_list, new_file_path)
+
+                new_file_path.close()
         else:
-            # file exists read the prev entry, add new one and then write
-            with open(log_file_path, "r") as new_file_path:
-                curr_list = json.load(new_file_path)
-                print("curr_list", curr_list)
-                print("metrics", metrics)
-                curr_list = {**curr_list, **metrics}
+            print("log_file_path is NONE -> no results written to disk")
 
-                # curr_list = curr_list + [metrics]
-
-            with open(log_file_path, "w") as new_file_path:
-                json.dump(curr_list, new_file_path)
-
-            new_file_path.close()
+            print("metrics", metrics)
 
         # trainer.log_metrics("eval", metrics)
         # trainer.save_metrics("eval", metrics)
@@ -657,7 +655,7 @@ def preprocess_function_classification(
         *args, padding=padding, max_length=max_seq_length, truncation=True
     )
 
-    print("data_args.special_task_type", data_args.special_task_type)
+    # print("data_args.special_task_type", data_args.special_task_type)
 
     if data_args.special_task_type != "multi_label_classification":
         if label_to_id is not None and label_value in examples:
@@ -985,14 +983,13 @@ def load_raw_dataset_ner(data_args: DataTrainingArguments, model_args: ModelArgu
 
 
 def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArguments):
-
     raw_datasets = load_dataset(
         data_args.dataset_name,
         data_args.dataset_config_name,
         cache_dir=model_args.cache_dir,
         use_auth_token=True if model_args.use_auth_token else None,
     )
-    
+
     # if natural train and test split does not exist use this logic
     if "test" not in raw_datasets:
         if "train" in raw_datasets:
@@ -1009,7 +1006,6 @@ def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArgum
         )
 
         return raw_datasets
-        
 
     if data_args.is_subset == True:
         raw_datasets = load_dataset(
@@ -1531,14 +1527,15 @@ def train_eval_prediction(
         is_regression: is the task conccerning regression
 
     """
+    metrics_eval = None
 
     if task_type == "question-answering":
         trainer = trainer_qa.QuestionAnsweringTrainer(
             model=model,
             args=training_args,
-            train_dataset=train_dataset if training_args.do_train else None,
-            eval_dataset=eval_dataset if training_args.do_eval else None,
-            eval_examples=eval_examples if training_args.do_eval else None,
+            train_dataset=train_dataset,  # if training_args.do_train else None,
+            eval_dataset=eval_dataset,  # if training_args.do_eval else None,
+            eval_examples=eval_examples,  # if training_args.do_eval else None,
             tokenizer=tokenizer,
             data_collator=data_collator,
             post_process_function=post_processing_function,
@@ -1548,69 +1545,69 @@ def train_eval_prediction(
         trainer = Trainer(
             model=model,
             args=training_args,
-            train_dataset=train_dataset if training_args.do_train else None,
-            eval_dataset=eval_dataset if training_args.do_eval else None,
+            train_dataset=train_dataset,  # t if training_args.do_train else None,
+            eval_dataset=eval_dataset,  # if training_args.do_eval else None,
             tokenizer=tokenizer,
             data_collator=data_collator,
             compute_metrics=compute_metrics,
         )
 
-    if training_args.do_train:
-        trainer = load_save_metrics_train(
-            train_dataset,
-            training_args.resume_from_checkpoint,
-            trainer,
-            last_checkpoint,
-            data_args.max_train_samples,
-        )
+    # if training_args.do_train:
+    trainer = load_save_metrics_train(
+        train_dataset,
+        training_args.resume_from_checkpoint,
+        trainer,
+        last_checkpoint,
+        data_args.max_train_samples,
+    )
 
-    if training_args.do_eval:
-        tasks = [data_args.task_name]
-        eval_datasets = [eval_dataset]
+    # if training_args.do_eval:
+    tasks = [data_args.task_name]
+    eval_datasets = [eval_dataset]
 
-        metrics_eval = load_save_metrics_validation(
-            model_args.model_name_or_path,
-            tasks,
-            trainer,
-            data_args.max_eval_samples,
-            data_args.dataset_name,
-            task_type,
-            eval_datasets,
-            data_args.peft_choice,
-            print_trainable_parameters(model),
-            model.config.problem_type,
-            training_args.per_device_train_batch_size,
-            label_value,
-            data_args.results_log_path,
-        )
+    metrics_eval = load_save_metrics_validation(
+        model_args.model_name_or_path,
+        tasks,
+        trainer,
+        data_args.max_eval_samples,
+        data_args.dataset_name,
+        task_type,
+        eval_datasets,
+        data_args.peft_choice,
+        print_trainable_parameters(model),
+        model.config.problem_type,
+        training_args.per_device_train_batch_size,
+        label_value,
+        data_args.results_log_path,
+    )
 
-    if training_args.do_predict:
-        tasks = [data_args.task_name]
-        if task_type == "classification" or task_type == "question-answering":
-            predict_datasets = [predict_dataset]
+    # if training_args.do_predict:
+    #     tasks = [data_args.task_name]
+    #     if task_type == "classification" or task_type == "question-answering":
+    #         predict_datasets = [predict_dataset]
 
-        if task_type == "question_answering":
-            trainer = save_metrics_predict_qa(
-                data_args, trainer, predict_dataset, predict_examples
-            )
-        if task_type == "classification":
-            load_save_metrics_predict(
-                trainer,
-                tasks,
-                predict_datasets,
-                label_value,
-                is_regression,
-                training_args.output_dir,
-                label_list,
-            )
-        if task_type == "token-classification":
-            save_metrics_predict_ner(
-                trainer,
-                training_args,
-                predict_dataset,
-                training_args.output_dir,
-                label_list,
-            )
+    #     if task_type == "question_answering":
+    #         trainer = save_metrics_predict_qa(
+    #             data_args, trainer, predict_dataset, predict_examples
+    #         )
+    #     if task_type == "classification":
+    #         load_save_metrics_predict(
+    #             trainer,
+    #             tasks,
+    #             predict_datasets,
+    #             label_value,
+    #             is_regression,
+    #             training_args.output_dir,
+    #             label_list,
+    #         )
+    #     if task_type == "token-classification":
+    #         save_metrics_predict_ner(
+    #             trainer,
+    #             training_args,
+    #             predict_dataset,
+    #             training_args.output_dir,
+    #             label_list,
+    #         )
 
     return metrics_eval
 

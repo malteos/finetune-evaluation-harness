@@ -21,7 +21,7 @@ which appear in the development and/or test, but not in the training documents.
 """
 
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -46,13 +46,9 @@ _CITATION = """
 """
 
 
-
-class GreekLegal(Classification):
-
-
-    DATASET_ID = "greek_legal_code"  
+class GreekLegal(ClassificationTask):
+    DATASET_ID = "greek_legal_code"
     TASK_NAME = "greek_legal"
-    LABEL_NAME = "label"  
+    LABEL_NAME = "label"
     HOMEPAGE_URL = "https://huggingface.co/datasets/greek_legal_code"
     LANGUAGE = "el"
-    

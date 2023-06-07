@@ -6,11 +6,11 @@ Piaf is a reading comprehension dataset. This version, published in February 202
 """
 
 
-from .qa import QuestionAnswering
+from .base.qa_task import QuestionAnsweringTask
 
-class Piaf(QuestionAnswering):
 
-    DATASET_ID = "etalab-ia/piaf"           
+class Piaf(QuestionAnsweringTask):
+    DATASET_ID = "etalab-ia/piaf"
     TASK_NAME = "piaf"
     HOMEPAGE_URL = "https://huggingface.co/datasets/etalab-ia/piaf"
     LANGUAGE = "fr"

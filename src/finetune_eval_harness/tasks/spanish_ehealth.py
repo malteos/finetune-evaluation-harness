@@ -24,13 +24,11 @@ _CITATION = """
 
 """
 
-from .ner import NamedEntityRecognition
+from .base.ner_task import NamedEntityRecognitionTask
 
-class SpanishEhealth(NamedEntityRecognition):
 
-    
-    DATASET_ID = "ehealth_kd"  
+class SpanishEhealth(NamedEntityRecognitionTask):
+    DATASET_ID = "ehealth_kd"
     TASK_NAME = "spanish_ehealth"
     HOMEPAGE_URL = "https://huggingface.co/datasets/ehealth_kd"
     LANGUAGE = "es"
-    

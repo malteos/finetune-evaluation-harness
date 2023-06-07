@@ -1,4 +1,3 @@
-
 """
 German Europarl NER data (PPL only)
 http://www.nlpado.de/~sebastian/pub/papers/konvens10_faruqui.pdf
@@ -15,8 +14,7 @@ NOTE: This dataset is used as language modeling tasks (perplexity) and NOT named
 
 """
 
-from .classification import Classification
-from .ner import NamedEntityRecognition
+from .base.ner_task import NamedEntityRecognitionTask
 
 
 _DESCRIPTION = """
@@ -36,13 +34,12 @@ _CITATION = """
 """
 
 
-
-class GermanEuroParl(NamedEntityRecognition):
+class GermanEuroParl(NamedEntityRecognitionTask):
 
     """
     Class for German Europarl Task
     """
-    
+
     DATASET_ID = "akash418/german_europarl"
     TASK_NAME = "german_europarl"
     HOMEPAGE_URL = "https://huggingface.co/datasets/akash418/german_europarl"

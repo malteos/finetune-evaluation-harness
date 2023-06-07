@@ -1,5 +1,5 @@
-#from tasks.ner import NamedEntityRecognition
-from .ner import NamedEntityRecognition
+# from tasks.ner import NamedEntityRecognition
+from .base.ner_task import NamedEntityRecognitionTask
 
 
 DESCRIPTION = """
@@ -24,17 +24,14 @@ _CITATION = """
 """
 
 
-
-
-class SzegedNer(NamedEntityRecognition):
+class SzegedNer(NamedEntityRecognitionTask):
 
     """
     Class for German NER Legal Task
     """
-    
+
     DATASET_ID = "ficsort/SzegedNER"  # HF datasets ID
     TASK_NAME = "szeged_ner"
     HOMEPAGE_URL = "https://huggingface.co/datasets/ficsort/SzegedNER"
     LABEL_NAME = "ner"
     LANGUAGE = "hu"
-    

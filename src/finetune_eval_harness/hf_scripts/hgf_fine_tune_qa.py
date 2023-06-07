@@ -21,8 +21,6 @@ require_version(
 
 
 def run_task_evaluation(model_args, data_args, training_args, init_args):
-
-    
     (training_args, data_args) = utility_functions.prepend_data_args(
         training_args, data_args, init_args
     )
@@ -47,7 +45,9 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
         data_args,
     )
     tokenizer = utility_functions.load_tokenizer(
-        model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
+        model_args.tokenizer_name
+        if model_args.tokenizer_name
+        else model_args.model_name_or_path,
         model_args.cache_dir,
         model_args.use_fast_tokenizer,
         model_args.model_revision,
@@ -84,16 +84,15 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
 
     if training_args.do_train:
         column_names = raw_datasets["train"].column_names
-    
+
     # no need of elif and else logic as train split will always have column names
-    '''
+    """
     elif training_args.do_eval:
         # column_names = raw_datasets["validation"].column_names
         column_names = raw_datasets["test"].column_names
     else:
         column_names = raw_datasets["test"].column_names
-    '''
-
+    """
 
     question_column_name = "question" if "question" in column_names else column_names[0]
     context_column_name = "context" if "context" in column_names else column_names[1]
@@ -144,13 +143,12 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
             train_dataset = train_dataset.select(range(max_train_samples))
 
     if training_args.do_eval:
-        
-        if("test" in raw_datasets):
+        if "test" in raw_datasets:
             eval_examples = raw_datasets["test"]
         else:
             eval_examples = raw_datasets["validation"]
 
-        #eval_examples = raw_datasets["test"]
+        # eval_examples = raw_datasets["test"]
         # eval_examples = raw_datasets["validation"]
         if data_args.max_eval_samples is not None:
             # We will select sample from whole data
@@ -186,13 +184,12 @@ def run_task_evaluation(model_args, data_args, training_args, init_args):
     predict_dataset = None
     predict_examples = None
     if training_args.do_predict:
-        
         if "test" not in raw_datasets:
             predict_examples = raw_datasets["validation"]
         else:
             predict_examples = raw_datasets["test"]
 
-        #predict_examples = raw_datasets["test"]
+        # predict_examples = raw_datasets["test"]
 
         if data_args.max_predict_samples is not None:
             # We will select sample from whole data

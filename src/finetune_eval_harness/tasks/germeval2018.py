@@ -12,7 +12,7 @@ Homepage: https://projects.cai.fbi.h-da.de/iggsa/
 """
 
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 _DESCRIPTION = """
 
@@ -31,11 +31,9 @@ _CITATION = """
 }"""
 
 
-class GermEval2018(Classification):
-
-
-    DATASET_ID = "philschmid/germeval18"    
+class GermEval2018(ClassificationTask):
+    DATASET_ID = "philschmid/germeval18"
     TASK_NAME = "germeval2018"
-    LABEL_NAME = "multi"                    
+    LABEL_NAME = "multi"
     HOMEPAGE_URL = "https://huggingface.co/datasets/philschmid/germeval18"
     LANGUAGE = "de"

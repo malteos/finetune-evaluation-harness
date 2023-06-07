@@ -1,4 +1,3 @@
-
 """
 
 An adaptation of eHealth-KD Challenge 2020 dataset, filtered only for the task of NER. Some adaptation of the original dataset have been made:
@@ -11,8 +10,8 @@ An adaptation of eHealth-KD Challenge 2020 dataset, filtered only for the task o
 """
 
 
-from .classification import Classification
-from .ner import NamedEntityRecognition
+from .base.classification_task import ClassificationTask
+from .base.ner_task import NamedEntityRecognitionTask
 
 
 _DESCRIPTION = """
@@ -38,8 +37,7 @@ _CITATION = """
 """
 
 
-class EhealthKd(NamedEntityRecognition):
-
+class EhealthKd(NamedEntityRecognitionTask):
     DATASET_ID = "ehealth_kd"  # HF datasets ID
     TASK_NAME = "ehealth_kd"
     HOMEPAGE_URL = "https://huggingface.co/datasets/fmmolina/eHealth-KD-Adaptation"

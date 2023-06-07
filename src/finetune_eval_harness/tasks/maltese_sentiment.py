@@ -27,7 +27,7 @@ and may differ from the ones used by mGPT and XGLM (they do not provide their pr
 """
 
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 _DESCRIPTION = """
 Maltese version of PAWS-X dataset
@@ -40,16 +40,14 @@ _CITATION = """
 """
 
 
-class MalteseSentiment(Classification):
+class MalteseSentiment(ClassificationTask):
 
     """
     Class for GermEval 2017 Classification Task
     """
 
-
-    DATASET_ID = "amitness/PAWS-X-maltese"  
+    DATASET_ID = "amitness/PAWS-X-maltese"
     TASK_NAME = "maltese_sentiment"
-    LABEL_NAME = "label"  
+    LABEL_NAME = "label"
     HOMEPAGE_URL = "https://huggingface.co/datasets/amitness/PAWS-X-maltese"
     LANGUAGE = "mt"
-    

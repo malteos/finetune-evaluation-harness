@@ -6,7 +6,7 @@ by two independent native speaking swedish annotators. No annotator agreement ca
 """
 
 
-from .ner import NamedEntityRecognition
+from .base.ner_task import NamedEntityRecognitionTask
 
 
 DESCRIPTION = """
@@ -22,9 +22,8 @@ _CITATION = """
 """
 
 
-class SwedishNer(NamedEntityRecognition):
-    
-    DATASET_ID = "swedish_ner_corpus"  
+class SwedishNer(NamedEntityRecognitionTask):
+    DATASET_ID = "swedish_ner_corpus"
     TASK_NAME = "swedish_ner"
     HOMEPAGE_URL = "https://huggingface.co/datasets/swedish_ner_corpus"
     LABEL_NAME = "ner_tags"

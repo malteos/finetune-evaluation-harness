@@ -15,7 +15,7 @@ Additionally, this dataset can be used as a benchmark dataset for German topic c
 """
 
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -39,13 +39,13 @@ _CITATION = """
 """
 
 
-class Gnad10(Classification):
+class Gnad10(ClassificationTask):
 
     """
     Class for GNAD10 Classification Task
     """
-    
-    DATASET_ID = "gnad10"  
+
+    DATASET_ID = "gnad10"
     TASKNAME = "gnad10"
     LABEL_NAME = "label"
     HOMEPAGE_URL = "https://huggingface.co/datasets/gnad10"

@@ -1,5 +1,40 @@
 from typing import List, Union
-from . import *
+
+from . import (
+    germeval2018,
+    germeval2017,
+    gnad10,
+    german_ner,
+    german_europarl,
+    german_quad,
+    spanish_quad,
+    wiki_cat_es,
+    spanish_conll,
+    flue,
+    spanish_ehealth,
+    szeged_ner,
+    polish_dyk,
+    mapa,
+    eur_lux,
+    ehealth_kd,
+    rucola,
+    klej_dyk,
+    croatian_sentiment,
+    finish_sentiment,
+    swedish_ner,
+    greek_legal,
+    bulgarian_sentiment,
+    czech_subjectivity,
+    danish_misogyny,
+    slovak_sentiment,
+    maltese_sentiment,
+    dutch_social,
+    piaf,
+    xquad,
+    pawsx,
+    xnli,
+    xstance,
+)
 
 # mapping task to class objects
 TASK_REGISTRY = {
@@ -25,7 +60,7 @@ TASK_REGISTRY = {
     "finish_sentiment": finish_sentiment.FinishSentiment,
     "swedish_ner": swedish_ner.SwedishNer,
     "greek_legal": greek_legal.GreekLegal,
-    "bulgarian_sentiment":  bulgarian_sentiment.BulgarianSentiment,
+    "bulgarian_sentiment": bulgarian_sentiment.BulgarianSentiment,
     "czech_subjectivity": czech_subjectivity.CzechSubjectivity,
     "danish_misogyny": danish_misogyny.DanishMisogyny,
     "slovak_sentiment": slovak_sentiment.SlovakSentiment,
@@ -41,6 +76,7 @@ TASK_REGISTRY = {
     "xquad": xquad.XQuad,
     "xquad_de": xquad.XQuadDe,
     "xquad_en": xquad.XQuadEn,
+    "xquad_es": xquad.XQuadEs,
     "pawsx": pawsx.PawsX,
     "pawsx_de": pawsx.PawsXDe,
     "pawsx_en": pawsx.PawsXEn,
@@ -48,61 +84,14 @@ TASK_REGISTRY = {
     "xnli_de": xnli.XnliDe,
     "xnli_es": xnli.XnliEs,
     "xnli_en": xnli.XnliEn,
-
-
+    "xstance_fr": xstance.XStanceFR,
+    "xstance_de": xstance.XStanceDE,
+    "xstance_it": xstance.XStanceIT,
 }
 
-# mapping task to type
-TASK_TYPE_REGISTRY = {
-    "germeval2018": "classification",
-    "germeval2017": "classification",
-    "gnad10": "classification",
-    "german_ner_legal": "ner",
-    "german_europarl": "ner",
-    "german_quad": "qa",
-    "spanish_quad": "qa",
-    "wiki_cat_es": "classification",
-    "spanish_conll": "ner",
-    "flue": "classification",
-    "spanish_ehealth": "ner",
-    "szeged_ner": "ner",
-    "polish_dyk": "qa",
-    "mapa": "ner",
-    "eur_lux": "classification",
-    "ehealth_kd": "ner",
-    "rucola": "classification",
-    "klej_dyk": "classification",
-    "croatian_sentiment": "classification",
-    "finish_sentiment": "classification",
-    "swedish_ner": "ner",
-    "greek_legal": "classification",
-    "bulgarian_sentiment": "classification",
-    "czech_subjectivity": "classification",
-    "danish_misogyny": "classification",
-    "slovak_sentiment": "classification",
-    "maltese_sentiment": "classification",
-    "dutch_social": "classification",
-    "eur_lux_de": "classification",
-    "eur_lux_en": "classification",
-    "eur_lux_fr": "classification",
-    "piaf": "qa",
-    "mapa_fr": "ner",
-    "mapa_de": "ner",
-    "mapa_en": "ner",
-    "xquad": "qa",
-    "xquad_en": "qa",
-    "xquad_de": "qa",
-    "pawsx_de": "classification",
-    "pawsx_en": "classification",
-    "pawsx_es": "classification",
-    "xnli_de": "classification",
-    "xnli_en": "classification",
-    "xnli_es": "classification",
-    
-}
 
 ALL_TASKS = sorted(list(TASK_REGISTRY))
-ALL_TASK_TYPES = sorted(list(TASK_TYPE_REGISTRY))
+# ALL_TASK_TYPES = sorted(list(TASK_TYPE_REGISTRY))
 
 
 # return string names of all the tasks for reference
@@ -113,15 +102,17 @@ def get_all_tasks():
 
     return all_task_str
 
-def get_all_task_types():
-    all_task_str = {}
-    for key in TASK_TYPE_REGISTRY:
-        all_task_str[key] = TASK_REGISTRY[key]
-    
-    return all_task_str
+
+# def get_all_task_types():
+#     all_task_str = {}
+#     for key in TASK_TYPE_REGISTRY:
+#         all_task_str[key] = TASK_REGISTRY[key]
+
+#     return all_task_str
+
 
 def get_dataset_information(dataset_name):
-    #task_obj = TASK_REGISTRY[dataset_name]
+    # task_obj = TASK_REGISTRY[dataset_name]
     output_dict = []
     output_dict.append(TASK_REGISTRY[dataset_name]().get_label_name())
     output_dict.append(TASK_REGISTRY[dataset_name]().get_dataset_id())

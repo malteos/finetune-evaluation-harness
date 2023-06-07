@@ -1,4 +1,3 @@
-
 """
 
 WikiCAT_ca is a Spanish corpus for thematic Text Classification tasks. 
@@ -11,8 +10,7 @@ evaluation of LT capabilities to generate useful synthetic corpus.
 """
 
 
-
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 DESCRIPTION = """
@@ -28,13 +26,9 @@ _CITATION = """
 """
 
 
-
-class WikiCatEs(Classification):
-
-
-    DATASET_ID = "PlanTL-GOB-ES/WikiCAT_esv2"  
+class WikiCatEs(ClassificationTask):
+    DATASET_ID = "PlanTL-GOB-ES/WikiCAT_esv2"
     TASK_NAME = "wikicat_es"
-    LABEL_NAME = "label"  
+    LABEL_NAME = "label"
     HOMEPAGE_URL = "https://huggingface.co/datasets/PlanTL-GOB-ES/WikiCAT_esv2"
     LANGUAGE = "es"
-    

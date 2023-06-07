@@ -17,7 +17,9 @@ export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export PROJECT_ID=finetune-evaluation-harness
 #export BASE_TAG=22.08-py3
 #export IMAGE=/netscratch/$USER/enroot/malteos+obmd+${BASE_TAG}.sqsh 
-export IMAGE=/netscratch/$USER/enroot/malteos+finetune-eval+latest.sqsh
+#export IMAGE=/netscratch/$USER/enroot/malteos+finetune-eval+latest.sqsh
+export IMAGE=/netscratch/$USER/enroot/malteos_finetune-evaluation-harness.sqsh
+export DEV_IMAGE=/netscratch/$USER/enroot/malteos_finetune-evaluation-harness_dev.sqsh
 
 # Weights & Biases
 export WANDB_PROJECT=finetune-eval # $PROJECT_ID
@@ -47,7 +49,7 @@ export SLURM_BASE_DIR=${SLURM_REPOS_DIR}/$PROJECT_ID
 export SLURM_DATASETS_DIR=/netscratch/mostendorff/datasets
 export SLURM_MEM=200G
 export SLURM_CPUS=12
-export ANY_PARTITION=RTX6000,RTX3090,RTXA6000-SLT,A100,V100-32GB,GTX1080Ti,RTX2080Ti,V100-16GB
+export ANY_PARTITION=RTX6000,RTX3090,RTXA6000-SLT,A100-40GB,V100-32GB,V100-16GB
 alias dfki_sbatch="sbatch --ntasks-per-node=1 --nodes=4 --gres=gpu:4 --cpus-per-task=20 --mem=150G --partition=A100 --time=0-12:00:00"
 
 

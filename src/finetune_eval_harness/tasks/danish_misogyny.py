@@ -1,4 +1,3 @@
-
 """
 
 This is a high-quality dataset of annotated posts sampled from social media posts and annotated for misogyny. Danish language.
@@ -11,7 +10,7 @@ See the accompanying ACL paper Annotating Online Misogyny for full details.
 
 """
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -37,13 +36,9 @@ _CITATION = """
 """
 
 
-class DanishMisogyny(Classification):
-
-
-
-    DATASET_ID = "strombergnlp/bajer_danish_misogyny"  
+class DanishMisogyny(ClassificationTask):
+    DATASET_ID = "strombergnlp/bajer_danish_misogyny"
     TASK_NAME = "danish_misogyny"
-    LABEL_NAME = "subtask_A"                           
+    LABEL_NAME = "subtask_A"
     HOMEPAGE_URL = "https://huggingface.co/datasets/strombergnlp/bajer_danish_misogyny"
     LANGUAGE = "da"
-    

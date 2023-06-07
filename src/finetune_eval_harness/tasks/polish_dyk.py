@@ -8,8 +8,7 @@ In huggingface version of this dataset, they chose the negatives which have the 
 """
 
 
-
-from .qa import QuestionAnswering
+from .base.qa_task import QuestionAnsweringTask
 
 
 _DESCRIPTION = """
@@ -32,14 +31,13 @@ _CITATION = """
 """
 
 
-class PolishDyk(QuestionAnswering):
+class PolishDyk(QuestionAnsweringTask):
 
     """
     Class for German Quad Task
     """
 
-    DATASET_ID = "allegro/klej-dyk"  
+    DATASET_ID = "allegro/klej-dyk"
     TASK_NAME = "polish_dyk"
     HOMEPAGE_URL = "https://huggingface.co/datasets/allegro/klej-dyk"
     LANGUAGE = "pl"
-

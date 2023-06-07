@@ -7,7 +7,7 @@ In order to raise the bar for non-English QA, we are releasing a high-quality, h
 Homepage: https://www.deepset.ai/germanquad
 """
 
-from .qa import QuestionAnswering
+from .base.qa_task import QuestionAnsweringTask
 
 _DESCRIPTION = """
 German version of QUAD dataset inspired by SQuAD
@@ -28,7 +28,7 @@ _CITATION = """
 """
 
 
-class GermanQuad(QuestionAnswering):
+class GermanQuad(QuestionAnsweringTask):
 
     """
     Class for German Quad Task

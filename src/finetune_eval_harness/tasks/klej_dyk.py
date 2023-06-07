@@ -28,7 +28,7 @@ Output: 1 (the answer is correct)
 """
 
 
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 _DESCRIPTION = """
@@ -49,17 +49,14 @@ _CITATION = """
 """
 
 
-
-class KlejDyk(Classification):
+class KlejDyk(ClassificationTask):
 
     """
     Class for Klej Dyk Classification Task
     """
 
-
-    DATASET_ID = "allegro/klej-dyk"  
+    DATASET_ID = "allegro/klej-dyk"
     TASK_NAME = "klej_dyk"
-    LABEL_NAME = "target"  
+    LABEL_NAME = "target"
     HOMEPAGE_URL = "https://huggingface.co/datasets/allegro/klej-dyk"
     LANGUAGE = "pl"
-    

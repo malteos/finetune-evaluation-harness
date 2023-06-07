@@ -1,7 +1,4 @@
-
-
-
-from .classification import Classification
+from .base.classification_task import ClassificationTask
 
 
 DESCRIPTION = """
@@ -14,12 +11,11 @@ _CITATION = """
 """
 
 
-class FinishSentiment(Classification):
+class FinishSentiment(ClassificationTask):
 
     """
     Class for Finish Sentiment Classification
     """
-
 
     DATASET_ID = "sepidmnorozy/Finnish_sentiment"  # HF datasets ID
     TASK_NAME = "finish_sentiment"

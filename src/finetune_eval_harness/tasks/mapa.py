@@ -9,8 +9,7 @@ a general and a more fine-grained one. The annotated corpus can be used for name
 """
 
 
-
-from .ner import NamedEntityRecognition
+from .base.ner_task import NamedEntityRecognitionTask
 
 
 _DESCRIPTION = """
@@ -35,27 +34,23 @@ year = {2022}
 """
 
 
-class Mapa(NamedEntityRecognition):
-
-    
-    DATASET_ID = "joelito/mapa"  
+class Mapa(NamedEntityRecognitionTask):
+    DATASET_ID = "joelito/mapa"
     TASK_NAME = "mapa"
     HOMEPAGE_URL = "https://huggingface.co/datasets/joelito/mapa"
     LABEL_NAME = "coarse_grained"
 
 
 class MapaDe(Mapa):
-
     DATASET_SPLIT = "de"
     TASK_NAME = "mapa_de"
 
-class MapaFr(Mapa):
 
+class MapaFr(Mapa):
     DATASET_SPLIT = "fr"
     TASK_NAME = "mapa_fr"
 
-    
-class MapaEn(Mapa):
 
+class MapaEn(Mapa):
     DATASET_SPLIT = "en"
     TASK_NAME = "mapa_en"

@@ -1,4 +1,3 @@
-
 """
 
 Automatic translation of the Stanford Question Answering Dataset (SQuAD) v2 into Spanish
@@ -7,8 +6,7 @@ Automatic translation of the Stanford Question Answering Dataset (SQuAD) v2 into
 """
 
 
-
-from .qa import QuestionAnswering
+from .base.qa_task import QuestionAnsweringTask
 
 DESCRIPTION = """
 
@@ -34,10 +32,8 @@ archivePrefix = {arXiv},
 """
 
 
-
-class SpanishQuad(QuestionAnswering):
-
-    DATASET_ID = "squad_es"  
+class SpanishQuad(QuestionAnsweringTask):
+    DATASET_ID = "squad_es"
     TASK_NAME = "es_squad"
     HOMEPAGE_URL = "https://huggingface.co/datasets/squad_es"
     LANGUAGE = "es"
