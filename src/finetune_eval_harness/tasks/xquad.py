@@ -8,6 +8,7 @@ Rajpurkar et al., 2016) together with their professional translations
 into ten languages: Spanish, German, Greek, Russian, Turkish, Arabic, Vietnamese, 
 Thai, Chinese, and Hindi. Consequently, the dataset is entirely parallel across 11 languages.
 
+====> deprecated: XQUAD has no train set!
 
 """
 

@@ -11,6 +11,7 @@ import logging
 import evaluate
 
 from transformers import EvalPrediction
+from datasets import load_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +24,15 @@ class QuestionAnsweringTask(BaseTask):
     def get_task_type(self) -> str:
         return "qa"
 
-    def run_task_evaluation(self, model_args, data_args, training_args, init_args):
-        return hgf_fine_tune_qa.run_task_evaluation(
-            self.model_args, self.data_args, self.training_args, self.init_args
+    def load_raw_datasets(self):
+        self.raw_datasets = load_dataset(
+            self.data_args.dataset_name,
+            self.data_args.dataset_config_name,
+            cache_dir=self.model_args.cache_dir,
+            use_auth_token=True if self.model_args.use_auth_token else None,
         )
 
-    def load_raw_datasets(self):
-        return utility_functions.load_raw_dataset_qa(self.data_args, self.model_args)
+        return self.raw_datasets
 
     def get_config(self):
         return utility_functions.load_config(
@@ -62,7 +65,7 @@ class QuestionAnsweringTask(BaseTask):
         return self.model
 
     def preprocess_datasets(self):
-        column_names = self.raw_datasets["train"].column_names
+        column_names = self.raw_datasets[self.get_train_dataset_name()].column_names
 
         self.question_column_name = (
             "question" if "question" in column_names else column_names[0]
@@ -169,9 +172,9 @@ class QuestionAnsweringTask(BaseTask):
         trainer = trainer_qa.QuestionAnsweringTrainer(
             model=self.model,
             args=self.training_args,
-            train_dataset=self.tokenized_train_dataset,  # if training_args.do_train else None,
-            eval_dataset=self.tokenized_eval_dataset,  # if training_args.do_eval else None,
-            eval_examples=self.eval_dataset,  # if training_args.do_eval else None,
+            train_dataset=self.tokenized_train_dataset,
+            eval_dataset=self.tokenized_eval_dataset,
+            eval_examples=self.eval_dataset,  # For matching with original text inputs
             tokenizer=self.tokenizer,
             data_collator=self.get_data_collator(),
             post_process_function=self.post_processing_function,

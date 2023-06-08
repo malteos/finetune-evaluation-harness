@@ -1,8 +1,12 @@
 import logging
+import json
+import os
+
+from datetime import datetime
 
 from hf_scripts import hgf_fine_tune_class, utility_functions
 
-from transformers import set_seed
+from transformers import set_seed, Trainer, AutoTokenizer
 
 
 logger = logging.getLogger(__name__)
@@ -19,9 +23,11 @@ class BaseTask(object):
 
     tokenizer = None
     model = None
+    config = None
     raw_datasets = None
     train_dataset = None
     eval_dataset = None
+    label_column_name = None
 
     tokenized_train_dataset = None
     tokenized_eval_dataset = None
@@ -49,8 +55,11 @@ class BaseTask(object):
     def get_data_collator(self):
         raise NotImplementedError()
 
-    def get_dataset_id(self):
-        return self.DATASET_ID
+    def get_config(self):
+        raise NotImplementedError()
+
+    def get_model(self):
+        raise NotImplementedError()
 
     def get_url(self):
         return self.HOMEPAGE_URL
@@ -73,6 +82,12 @@ class BaseTask(object):
     def get_label_column_name(self):
         return None
 
+    def get_train_dataset_name(self):
+        return "train"
+
+    def get_eval_dataset_name(self):
+        return "test"
+
     def add_labels_data_args(self, data_args):
         data_args.label_value = self.get_label_name()
         data_args.dataset_config_name = self.get_dataset_split()
@@ -89,27 +104,58 @@ class BaseTask(object):
     def get_max_seq_length(self):
         return self.data_args.max_seq_length  # self.get_tokenizer().model_max_length
 
+    # def get_tokenizer(self):
+    #     if self.tokenizer is None:
+    #         self.tokenizer = utility_functions.load_tokenizer(
+    #             self.model_args.tokenizer_name
+    #             if self.model_args.tokenizer_name
+    #             else self.model_args.model_name_or_path,
+    #             self.model_args.cache_dir,
+    #             self.model_args.use_fast_tokenizer,
+    #             self.model_args.model_revision,
+    #             self.model_args.use_auth_token,
+    #             "left",
+    #             None,
+    #         )
+    #         if self.tokenizer.pad_token is None:
+    #             self.tokenizer.pad_token = self.tokenizer.eos_token
+
+    #     return self.tokenizer
+
     def get_tokenizer(self):
         if self.tokenizer is None:
-            self.tokenizer = utility_functions.load_tokenizer(
+            tokenizer_name_or_path = (
                 self.model_args.tokenizer_name
                 if self.model_args.tokenizer_name
-                else self.model_args.model_name_or_path,
-                self.model_args.cache_dir,
-                self.model_args.use_fast_tokenizer,
-                self.model_args.model_revision,
-                self.model_args.use_auth_token,
-                "left",
-                None,
+                else self.model_args.model_name_or_path
             )
-            if self.tokenizer.pad_token is None:
+
+            if self.get_config().model_type in {"bloom", "gpt2", "roberta"}:
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    tokenizer_name_or_path,
+                    cache_dir=self.model_args.cache_dir,
+                    use_fast=True,
+                    revision=self.model_args.model_revision,
+                    use_auth_token=True if self.model_args.use_auth_token else None,
+                    add_prefix_space=True,
+                )
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    tokenizer_name_or_path,
+                    cache_dir=self.model_args.cache_dir,
+                    use_fast=True,
+                    revision=self.model_args.model_revision,
+                    use_auth_token=True if self.model_args.use_auth_token else None,
+                )
+
+            if self.tokenizer.pad_token is None and self.tokenizer.eos_token:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
 
         return self.tokenizer
 
     def get_train_dataset(self):
         if self.train_dataset is None:
-            self.train_dataset = self.raw_datasets["train"]
+            self.train_dataset = self.raw_datasets[self.get_train_dataset_name()]
 
             if self.data_args.max_train_samples is not None:
                 max_train_samples = min(
@@ -123,10 +169,7 @@ class BaseTask(object):
 
     def get_eval_dataset(self):
         if self.eval_dataset is None:
-            if "validation" in self.raw_datasets:
-                eval_dataset = self.raw_datasets["validation"]
-            else:
-                eval_dataset = self.raw_datasets["test"]
+            eval_dataset = self.raw_datasets[self.get_eval_dataset_name()]
 
             if self.data_args.max_eval_samples is not None:
                 max_eval_samples = min(
@@ -140,6 +183,33 @@ class BaseTask(object):
 
         return self.eval_dataset
 
+    def get_trainer(self):
+        trainer = Trainer(
+            model=self.model,
+            args=self.training_args,
+            train_dataset=self.tokenized_train_dataset,
+            eval_dataset=self.tokenized_eval_dataset,
+            tokenizer=self.tokenizer,
+            data_collator=self.get_data_collator(),
+            compute_metrics=self.get_compute_metrics(),
+        )
+
+        return trainer
+
+    def train(self):
+        trainer = self.get_trainer()
+        train_result = trainer.train()
+        metrics = train_result.metrics
+        metrics["train_samples"] = len(self.train_dataset)
+
+        # trainer.save_model()  # Saves the tokenizer too for easy upload
+
+        trainer.log_metrics("train", metrics)
+        trainer.save_metrics("train", metrics)
+        # trainer.save_state()
+
+        return trainer
+
     def evaluate(self):
         # Set seed before initializing model.
         set_seed(self.training_args.seed)
@@ -148,241 +218,64 @@ class BaseTask(object):
         self.raw_datasets = self.load_raw_datasets()
 
         # task.run_task_evaluation()
+        self.get_config()
         self.get_tokenizer()
         self.get_model()
 
         # Dataset
         self.preprocess_datasets()
 
-        trainer = self.get_trainer()
+        trainer = self.train()
 
-        # if training_args.do_train:
-        trainer = utility_functions.load_save_metrics_train(
-            self.train_dataset,
-            self.training_args.resume_from_checkpoint,
-            trainer,
-            None,
-            self.data_args.max_train_samples,
+        eval_dataset = self.eval_dataset
+
+        metrics = trainer.evaluate()
+
+        metrics["eval_samples"] = len(eval_dataset)
+        metrics["model_name"] = self.model_args.model_name_or_path
+        metrics["task_name"] = self.data_args.task_name
+        metrics["task_type"] = self.get_task_type()
+        metrics["peft_choice"] = str(self.data_args.peft_choice)
+        metrics["trainable_parameters_percentage"] = str(
+            utility_functions.print_trainable_parameters(self.model)
         )
+        metrics["batch_size"] = self.training_args.per_device_train_batch_size
+        metrics["datetime"] = str(datetime.now())
 
-        eval_metrics = utility_functions.load_save_metrics_validation(
-            self.model_args.model_name_or_path,
-            [self.data_args.task_name],
-            trainer,
-            self.data_args.max_eval_samples,
-            self.data_args.dataset_name,
-            self.get_task_type(),
-            [self.eval_dataset],
-            self.data_args.peft_choice,
-            utility_functions.print_trainable_parameters(self.model),
-            self.model.config.problem_type,
-            self.training_args.per_device_train_batch_size,
-            self.get_label_column_name(),
-            self.data_args.results_log_path,
-        )
+        if self.label_column_name is not None:
+            metrics["label_column_name"] = self.label_column_name
 
-        return eval_metrics
+        if self.data_args.results_log_path:
+            log_file_path = self.data_args.results_log_path + ".json"
 
+            # check if file exists
+            # if no then add the first entry
+            if os.path.isfile(log_file_path) is False:
+                with open(log_file_path, "w") as fp:
+                    metrics_list = []
+                    metrics_list.append(metrics)
+                    json.dump(metrics_list, fp)
+                fp.close()
 
-# def run_task_evaluation(self, model_args, data_args, training_args, init_args):
-#     from hf_scripts import utility_functions
-#     import itertools
-#     from transformers import (
-#         PretrainedConfig,
-#         set_seed,
-#     )
+            else:
+                # file exists read the prev entry, add new one and then write
+                with open(log_file_path, "r") as new_file_path:
+                    curr_list = json.load(new_file_path)
+                    print("curr_list", curr_list)
+                    print("metrics", metrics)
+                    # curr_list = {**curr_list, **metrics}
 
-#     # model_args, data_args, training_args = parse_hf_arguments(args)
-#     (training_args, data_args) = utility_functions.prepend_data_args(
-#         training_args, data_args, init_args
-#     )
+                    curr_list += metrics
 
-#     last_checkpoint = utility_functions.detect_last_checkpoint(
-#         logger, training_args
-#     )
+                    # curr_list = curr_list + [metrics]
 
-#     # Set seed before initializing model.
-#     set_seed(training_args.seed)
+                with open(log_file_path, "w") as new_file_path:
+                    json.dump(curr_list, new_file_path)
 
-#     raw_datasets = utility_functions.load_raw_dataset(
-#         data_args, training_args, model_args, logger
-#     )
+                new_file_path.close()
+        else:
+            print("log_file_path is NONE -> no results written to disk")
 
-#     # Labels
-#     if data_args.label_value is not None:
-#         label_value = data_args.label_value
-#     elif "label" in raw_datasets.column_names:
-#         label_value = "label"
-#     else:
-#         label_value = str(raw_datasets.column_names["train"][-1])
+            print("metrics", metrics)
 
-#     logger.info(f"label_value {label_value}")
-
-#     if data_args.task_name is not None:
-#         is_regression = data_args.task_name == "stsb"
-#         if not is_regression:
-#             # label_list = raw_datasets["train"].features["label"].names
-#             label_list = raw_datasets["train"].features[label_value].names
-#             num_labels = len(label_list)
-#         else:
-#             num_labels = 1
-#     else:
-#         # is_regression = raw_datasets["train"].features["label"].dtype in ["float32", "float64"]
-#         is_regression = raw_datasets["train"].features[label_value].dtype in [
-#             "float32",
-#             "float64",
-#         ]
-#         if is_regression:
-#             num_labels = 1
-#         else:
-#             # label_list = raw_datasets["train"].unique("label")
-
-#             if isinstance(raw_datasets["train"][label_value][0], list):
-#                 concat_list = list(
-#                     itertools.chain.from_iterable(
-#                         raw_datasets["train"][label_value]
-#                     )
-#                 )
-#                 label_list = list(set(concat_list))
-#             else:
-#                 label_list = raw_datasets["train"].unique(label_value)
-
-#             label_list.sort()  # Let's sort it for determinism
-#             num_labels = len(label_list)
-
-#     all_columns = raw_datasets.column_names
-#     # column_others = all_columns['train'].remove(data_args.label_value)
-#     column_others = all_columns["train"].remove(label_value)
-
-#     tokenizer = utility_functions.load_tokenizer(
-#         model_args.tokenizer_name
-#         if model_args.tokenizer_name
-#         else model_args.model_name_or_path,
-#         model_args.cache_dir,
-#         model_args.use_fast_tokenizer,
-#         model_args.model_revision,
-#         model_args.use_auth_token,
-#         "left",
-#         None,
-#     )
-
-#     sentence1_key, sentence2_key = utility_functions.preprocess_raw_datasets(
-#         raw_datasets, data_args, label_value
-#     )
-
-#     # Padding strategy
-#     if data_args.pad_to_max_length:
-#         padding = "max_length"
-#     else:
-#         # We will pad later, dynamically at batch creation, to the max sequence length in each batch
-#         padding = False
-
-#     max_seq_length = min(data_args.max_seq_length, tokenizer.model_max_length)
-
-#     if data_args.special_task_type == "multi_label_classification":
-#         raw_datasets = raw_datasets.map(
-#             utility_functions.add_new_labels,
-#             fn_kwargs={"num_labels": num_labels, "label_value": label_value},
-#             desc=" Adding new labels for Multi-Class classification",
-#         )
-#         raw_datasets = raw_datasets.remove_columns(["labels"])
-#         raw_datasets = raw_datasets.rename_column("new_labels", "labels")
-
-#     print(raw_datasets["train"][56])
-
-#     logger.info(f"#########")
-
-#     logger.info(f"#########")
-
-#     fn_kwargs = {
-#         "tokenizer": tokenizer,
-#         "sentence1_key": sentence1_key,
-#         "sentence2_key": sentence2_key,
-#         "padding": padding,
-#         "max_seq_length": max_seq_length,
-#         "label_value": label_value,
-#         "label_to_id": label_to_id,
-#         "data_args": data_args,
-#     }
-
-#     with training_args.main_process_first(desc="dataset map pre-processing"):
-#         raw_datasets = raw_datasets.map(
-#             utility_functions.preprocess_function_classification,
-#             batched=True,
-#             fn_kwargs=fn_kwargs,
-#             remove_columns=column_others,
-#             load_from_cache_file=not data_args.overwrite_cache,
-#             desc="Running tokenizer on dataset",
-#         )
-#     if training_args.do_train:
-#         if "train" not in raw_datasets:
-#             raise ValueError("--do_train requires a train dataset")
-#         train_dataset = raw_datasets["train"]
-#         if data_args.max_train_samples is not None:
-#             max_train_samples = min(len(train_dataset), data_args.max_train_samples)
-#             train_dataset = train_dataset.select(range(max_train_samples))
-
-#     if training_args.do_eval:
-#         if "validation" in raw_datasets:
-#             eval_dataset = raw_datasets["validation"]
-#         else:
-#             eval_dataset = raw_datasets["test"]
-
-#         # eval_dataset = raw_datasets["validation_matched" if data_args.task_name == "mnli" else "validation"]
-#         if data_args.max_eval_samples is not None:
-#             max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
-#             eval_dataset = eval_dataset.select(range(max_eval_samples))
-
-#     predict_dataset = None
-#     if (
-#         training_args.do_predict
-#         or data_args.task_name is not None
-#         or data_args.test_file is not None
-#     ):
-#         if "test" not in raw_datasets and "test_matched" not in raw_datasets:
-#             raise ValueError("--do_predict requires a test dataset")
-#         predict_dataset = raw_datasets[
-#             "test_matched" if data_args.task_name == "mnli" else "test"
-#         ]
-#         if data_args.max_predict_samples is not None:
-#             max_predict_samples = min(
-#                 len(predict_dataset), data_args.max_predict_samples
-#             )
-#             predict_dataset = predict_dataset.select(range(max_predict_samples))
-
-#     data_collator = utility_functions.data_collator_sequence_classification(
-#         data_args, training_args, tokenizer
-#     )
-
-#     logger.info(
-#         f"remaining trainable paramaters{utility_functions.print_trainable_parameters(model)}"
-#     )
-
-#     metrics_eval = utility_functions.train_eval_prediction(
-#         data_args.special_task_type
-#         if data_args.special_task_type is not None
-#         else "classification",
-#         model,
-#         training_args,
-#         data_args,
-#         model_args,
-#         train_dataset,
-#         eval_dataset,
-#         None,
-#         data_collator,
-#         tokenizer,
-#         None,
-#         utility_functions.compute_metrics_class_multi
-#         if data_args.special_task_type == "multi_label_classification"
-#         else utility_functions.compute_metrics_classification,
-#         last_checkpoint,
-#         label_value,
-#         predict_dataset,
-#         None,
-#         label_list,
-#         is_regression,
-#     )
-
-#     logger.info(f"Training Metrics {metrics_eval}")
-
-#     return metrics_eval
+        return metrics

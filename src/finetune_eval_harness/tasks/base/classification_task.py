@@ -2,8 +2,14 @@ from hf_scripts import utility_functions
 from tasks.base import BaseTask, logger
 
 
-from transformers import Trainer, set_seed
-
+from transformers import (
+    Trainer,
+    set_seed,
+    AutoConfig,
+    PretrainedConfig,
+    BertForSequenceClassification,
+)
+from datasets import load_dataset
 
 import itertools
 
@@ -12,7 +18,6 @@ class ClassificationTask(BaseTask):
     is_regression = False
     label_list = None
     num_labels = None
-    label_column_name = None
     text_column_names = None
     label_to_id = None
 
@@ -25,7 +30,7 @@ class ClassificationTask(BaseTask):
                 self.label_column_name = "label"
             else:
                 self.label_column_name = str(
-                    self.raw_datasets.column_names["train"][-1]
+                    self.raw_datasets.column_names[self.get_train_dataset_name()][-1]
                 )
 
             logger.info(f"get_label_column_name {self.label_column_name}")
@@ -48,7 +53,9 @@ class ClassificationTask(BaseTask):
             # non_label_column_names = [name for name in raw_datasets["train"].column_names if name != "label"]
             non_label_column_names = [
                 name
-                for name in self.raw_datasets["train"].column_names
+                for name in self.raw_datasets[
+                    self.get_train_dataset_name()
+                ].column_names
                 if name != self.get_label_column_name()
             ]
             # print("non_label_columns", non_label_column_names)
@@ -69,18 +76,23 @@ class ClassificationTask(BaseTask):
     def get_label_list(self):
         if self.label_list is None:
             if isinstance(
-                self.raw_datasets["train"][self.get_label_column_name()][0], list
+                self.raw_datasets[self.get_train_dataset_name()][
+                    self.get_label_column_name()
+                ][0],
+                list,
             ):
                 concat_list = list(
                     itertools.chain.from_iterable(
-                        self.raw_datasets["train"][self.get_label_column_name()]
+                        self.raw_datasets[self.get_train_dataset_name()][
+                            self.get_label_column_name()
+                        ]
                     )
                 )
                 self.label_list = list(set(concat_list))
             else:
-                self.label_list = self.raw_datasets["train"].unique(
-                    self.get_label_column_name()
-                )
+                self.label_list = self.raw_datasets[
+                    self.get_train_dataset_name()
+                ].unique(self.get_label_column_name())
                 self.label_list.sort()  # Let's sort it for determinism
 
         return self.label_list
@@ -89,20 +101,21 @@ class ClassificationTask(BaseTask):
         return "classification"
 
     def get_config(self):
-        return utility_functions.load_config(
-            self.model_args.model_name_or_path,
-            self.get_num_labels(),
-            self.data_args.task_name,
-            self.model_args.cache_dir,
-            self.model_args.model_revision,
-            self.model_args.use_auth_token,
-            "sequence",
-            self.data_args,
-        )
+        if self.config is None:
+            self.config = AutoConfig.from_pretrained(
+                self.model_args.model_name_or_path,
+                num_labels=self.get_num_labels(),
+                problem_type="multi_label_classification"
+                if self.data_args.special_task_type == "multi_label_classification"
+                else "single_label_classification",
+                fine_tuning_task="sequence",
+                cache_dir=self.model_args.cache_dir,
+                revision=self.model_args.model_revision,
+                use_auth_token=self.model_args.use_auth_token,
+            )
+        return self.config
 
     def get_model(self):
-        from transformers import PretrainedConfig
-
         if self.model is None:
             config = self.get_config()
 
@@ -174,21 +187,23 @@ class ClassificationTask(BaseTask):
                 model.config.id2label = {
                     id: label for label, id in config.label2id.items()
                 }
-
-            # if data_args.max_seq_length > tokenizer.model_max_length:
-            #     logger.warning(
-            #         f"The max_seq_length passed ({data_args.max_seq_length}) is larger than the maximum length for the"
-            #         f"model ({tokenizer.model_max_length}). Using max_seq_length={tokenizer.model_max_length}."
-            #     )
-
             self.model = model
-
         return self.model
 
     def load_raw_datasets(self):
-        return utility_functions.load_raw_dataset(
-            self.data_args, self.training_args, self.model_args, logger
+        # return utility_functions.load_raw_dataset(
+        #     self.data_args, self.training_args, self.model_args, logger
+        # )
+        raw_datasets = load_dataset(
+            self.data_args.dataset_name,
+            self.data_args.dataset_config_name,
+            cache_dir=self.model_args.cache_dir,
+            use_auth_token=True if self.model_args.use_auth_token else None,
         )
+
+        self.raw_datasets = raw_datasets
+
+        return self.raw_datasets
 
     def preprocess_datasets(self):
         padding = "max_length" if self.data_args.pad_to_max_length else False
@@ -203,9 +218,21 @@ class ClassificationTask(BaseTask):
             logger.info("Filtering dataset ...")
             self.raw_datasets = self.raw_datasets.filter(self.filter_dataset)
 
-        all_columns = self.raw_datasets.column_names
+        all_columns = self.raw_datasets[self.get_train_dataset_name()].column_names
         # column_others = all_columns['train'].remove(data_args.label_value)
-        column_others = all_columns["train"].remove(self.get_label_column_name())
+        column_others = all_columns.remove(self.get_label_column_name())
+
+        if self.data_args.special_task_type == "multi_label_classification":
+            self.raw_datasets = self.raw_datasets.map(
+                utility_functions.add_new_labels,
+                fn_kwargs={
+                    "num_labels": self.get_num_labels(),
+                    "label_value": self.get_label_column_name(),
+                },
+                desc=" Adding new labels for Multi-Class classification",
+            )
+            self.raw_datasets = self.raw_datasets.remove_columns(["labels"])
+            self.raw_datasets = self.raw_datasets.rename_column("new_labels", "labels")
 
         fn_kwargs = {
             "tokenizer": self.get_tokenizer(),
@@ -249,16 +276,3 @@ class ClassificationTask(BaseTask):
             if self.data_args.special_task_type == "multi_label_classification"
             else utility_functions.compute_metrics_classification
         )
-
-    def get_trainer(self):
-        trainer = Trainer(
-            model=self.model,
-            args=self.training_args,
-            train_dataset=self.tokenized_train_dataset,  # t if training_args.do_train else None,
-            eval_dataset=self.tokenized_eval_dataset,  # if training_args.do_eval else None,
-            tokenizer=self.tokenizer,
-            data_collator=self.get_data_collator(),
-            compute_metrics=self.get_compute_metrics(),
-        )
-
-        return trainer

@@ -1356,9 +1356,21 @@ def prepare_train_features_qa(
     tokenized_examples["end_positions"] = []
 
     for i, offsets in enumerate(offset_mapping):
-        # We will label impossible answers with the index of the CLS token.
+        # We will label impossible answers with the index of the CLS token or BOS token (GPT2 etc).
         input_ids = tokenized_examples["input_ids"][i]
-        cls_index = input_ids.index(tokenizer.cls_token_id)
+
+        if hasattr(tokenizer, "cls_token_id") and tokenizer.cls_token_id is not None:
+            cls_token_id = tokenizer.cls_token_id
+        elif hasattr(tokenizer, "bos_token_id") and tokenizer.bos_token_id is not None:
+            cls_token_id = tokenizer.bos_token_id
+        else:
+            raise ValueError("Cannot find CLS or BOS token id in tokenizer")
+
+        try:
+            cls_index = input_ids.index(cls_token_id)
+        except ValueError:
+            # cls token not found (TODO hacky bug fix for GPT2 models)
+            cls_index = 0
 
         # Grab the sequence corresponding to that example (to know what is the context and what is the question).
         sequence_ids = tokenized_examples.sequence_ids(i)

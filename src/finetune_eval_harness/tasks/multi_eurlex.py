@@ -33,45 +33,42 @@ _CITATION = """
 """
 
 
-class EurLux(ClassificationTask):
-
+class MultiEURLexBase(ClassificationTask):
     """
     Class for Eur lux classification task
     """
 
     DATASET_ID = "multi_eurlex"  # HF datasets ID
-    TASK_NAME = "eur_lux"
     LABEL_NAME = "labels"  # column name from HF dataset
     HOMEPAGE_URL = "https://huggingface.co/datasets/multi_eurlex"
     PROBLEM_TYPE = "multi_label_classification"
 
 
-class EurLuxDe(EurLux):
-    """
-    Class for German subsplit of Eurlux
-    """
-
+class MultiEURLexDE(MultiEURLexBase):
     DATASET_SPLIT = "de"
-    TASK_NAME = "eur_lux_de"
+    TASK_NAME = "multi_eurlex_de"
     LANGUAGE = "de"
 
 
-class EurLuxEn(EurLux):
-    """
-    Class for English subsplit of Eurlux
-    """
-
+class MultiEURLexEN(MultiEURLexBase):
     DATASET_SPLIT = "en"
-    TASK_NAME = "eur_lux_en"
+    TASK_NAME = "multi_eurlex_en"
     LANGUAGE = "en"
 
 
-class EurLuxFr(EurLux):
-
-    """
-    Class for French subsplit of Eurlux
-    """
-
+class MultiEURLexFR(MultiEURLexBase):
     DATASET_SPLIT = "fr"
     TASK_NAME = "eur_lux_fr"
     LANGUAGE = "fr"
+
+
+class MultiEURLexES(MultiEURLexBase):
+    DATASET_SPLIT = "es"
+    TASK_NAME = "eur_lux_es"
+    LANGUAGE = "es"
+
+
+class MultiEURLexIT(MultiEURLexBase):
+    DATASET_SPLIT = "it"
+    TASK_NAME = "eur_lux_it"
+    LANGUAGE = "it"
