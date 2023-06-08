@@ -1,5 +1,6 @@
 import sys
 
+import json
 import sys
 
 from transformers import HfArgumentParser, TrainingArguments, set_seed
@@ -60,7 +61,9 @@ def process_arguments(args):
         task = task_cls(model_args, data_args, training_args, init_args)
         task_metrics = task.evaluate()
 
-        logger.info(f"Task metrics {task_metrics}")
+        logger.info(
+            f"Task metrics {json.dumps(task_metrics, sort_keys=True, indent=4)}"
+        )
 
     return parser
 

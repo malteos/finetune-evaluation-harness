@@ -47,8 +47,8 @@ alias juwels_sbatch="cd $JUWELS_RUN; sbatch --ntasks-per-node=1 --nodes=4 --gres
 export SLURM_REPOS_DIR=/netscratch/mostendorff/experiments
 export SLURM_BASE_DIR=${SLURM_REPOS_DIR}/$PROJECT_ID
 export SLURM_DATASETS_DIR=/netscratch/mostendorff/datasets
-export SLURM_MEM=200G
-export SLURM_CPUS=12
+export SLURM_MEM=150G
+export SLURM_CPUS=8
 export ANY_PARTITION=RTX6000,RTX3090,RTXA6000-SLT,A100-40GB,V100-32GB,V100-16GB
 alias dfki_sbatch="sbatch --ntasks-per-node=1 --nodes=4 --gres=gpu:4 --cpus-per-task=20 --mem=150G --partition=A100 --time=0-12:00:00"
 
@@ -84,10 +84,11 @@ export TAURUS_RUN=/beegfs/ws/1/maos247e-gptx/BigScience-Setup_TUD/setup-opengptx
 [[ -d ${TAURUS_BASE_DIR} ]] && export DATASETS_DIR=${TAURUS_DATASETS_DIR}
 
 # default PY
-# 1xA100 (40GB)
+# <strike>1xA100 (40GB)</strike>
+# RTX6000 (24GB)
 export SRUN="srun -K \
   --container-mounts=/netscratch:/netscratch,$HOME:$HOME --container-workdir=${BASE_DIR} --container-image=$IMAGE \
-  --ntasks=1 --nodes=1 -p A100 --gpus=1 --cpus-per-gpu=${SLURM_CPUS} --mem=${SLURM_MEM} --export ALL "
+  --ntasks=1 --nodes=1 -p RTX6000 --gpus=1 --cpus-per-gpu=${SLURM_CPUS} --mem=${SLURM_MEM} --export ALL "
 
 export SRUN_CPU="srun -K \
   --container-mounts=/netscratch:/netscratch,$HOME:$HOME --container-workdir=${BASE_DIR} --container-image=$IMAGE \
@@ -120,8 +121,11 @@ export BIGS_WORKING_DIR=${BASE_DIR}/data/bigs
 export TRANSFORMERS_CACHE="${DATASETS_DIR}/transformers_cache"
 export HF_DATASETS_CACHE="${DATASETS_DIR}/hf_datasets_cache"
 export FLAIR_CACHE_ROOT="${DATASETS_DIR}/flair_cache"
-export EXP_DIR=${BASE_DIR}/data/gpt2_oscar_unshuffled_deduplicated_de_4gb
 export TENSORBOARD_DIR=${BASE_DIR}/data/tensorboard
+export MODELS_DIR="${DATASETS_DIR}/huggingface_transformers/pytorch"
+
+export VERIFY_DIR=${BASE_DIR}/output/verify
+
 
 # Path to neox fork
 export NEOX_DIR=${REPOS_DIR}/gpt-neox-oxw

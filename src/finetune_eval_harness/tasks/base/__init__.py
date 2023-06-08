@@ -1,6 +1,7 @@
 import logging
 import json
 import os
+import time
 
 from datetime import datetime
 
@@ -199,16 +200,16 @@ class BaseTask(object):
     def train(self):
         trainer = self.get_trainer()
         train_result = trainer.train()
-        metrics = train_result.metrics
-        metrics["train_samples"] = len(self.train_dataset)
+        # metrics = train_result.metrics
+        # metrics["train_samples"] = len(self.train_dataset)
 
         # trainer.save_model()  # Saves the tokenizer too for easy upload
 
-        trainer.log_metrics("train", metrics)
-        trainer.save_metrics("train", metrics)
+        # trainer.log_metrics("train", metrics)
+        # trainer.save_metrics("train", metrics)
         # trainer.save_state()
 
-        return trainer
+        return trainer, train_result
 
     def evaluate(self):
         # Set seed before initializing model.
@@ -225,57 +226,46 @@ class BaseTask(object):
         # Dataset
         self.preprocess_datasets()
 
-        trainer = self.train()
+        trainer, train_result = self.train()
 
-        eval_dataset = self.eval_dataset
-
+        # Evaluation metrics
         metrics = trainer.evaluate()
 
-        metrics["eval_samples"] = len(eval_dataset)
-        metrics["model_name"] = self.model_args.model_name_or_path
-        metrics["task_name"] = self.data_args.task_name
+        model_name = self.model_args.model_name_or_path.split("/")[-1]
+
+        metrics["train_metrics"] = train_result.metrics
+        metrics["train_samples"] = len(self.train_dataset)
+        metrics["eval_samples"] = len(self.eval_dataset)
+
+        metrics["model_name"] = model_name
+        metrics["task_name"] = self.TASK_NAME
         metrics["task_type"] = self.get_task_type()
         metrics["peft_choice"] = str(self.data_args.peft_choice)
         metrics["trainable_parameters_percentage"] = str(
             utility_functions.print_trainable_parameters(self.model)
         )
-        metrics["batch_size"] = self.training_args.per_device_train_batch_size
+        metrics["training_args"] = self.training_args.to_dict()
         metrics["datetime"] = str(datetime.now())
+
+        if self.LANGUAGE is not None:
+            metrics["language"] = self.LANGUAGE
 
         if self.label_column_name is not None:
             metrics["label_column_name"] = self.label_column_name
 
-        if self.data_args.results_log_path:
-            log_file_path = self.data_args.results_log_path + ".json"
+        # Save metrics to disk
+        if self.data_args.results_dir:
+            if not os.path.exists(self.data_args.results_dir):
+                os.makedirs(self.data_args.results_dir)
 
-            # check if file exists
-            # if no then add the first entry
-            if os.path.isfile(log_file_path) is False:
-                with open(log_file_path, "w") as fp:
-                    metrics_list = []
-                    metrics_list.append(metrics)
-                    json.dump(metrics_list, fp)
-                fp.close()
+            output_path = os.path.join(
+                self.data_args.results_dir,
+                f"{int(time.time())}_{self.TASK_NAME}_{model_name}.json",
+            )
 
-            else:
-                # file exists read the prev entry, add new one and then write
-                with open(log_file_path, "r") as new_file_path:
-                    curr_list = json.load(new_file_path)
-                    print("curr_list", curr_list)
-                    print("metrics", metrics)
-                    # curr_list = {**curr_list, **metrics}
+            with open(output_path, "w") as f:
+                json.dump(metrics, f, indent=4)
 
-                    curr_list += metrics
-
-                    # curr_list = curr_list + [metrics]
-
-                with open(log_file_path, "w") as new_file_path:
-                    json.dump(curr_list, new_file_path)
-
-                new_file_path.close()
-        else:
-            print("log_file_path is NONE -> no results written to disk")
-
-            print("metrics", metrics)
+            logger.info("Metrics saved to {output_path}")
 
         return metrics

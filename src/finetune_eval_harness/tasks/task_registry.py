@@ -35,6 +35,7 @@ from . import (
     xnli,
     xstance,
     conll2003,
+    xtreme_panx_ner,
 )
 
 # mapping task to class objects
@@ -89,6 +90,11 @@ TASK_REGISTRY = {
     "xstance_de": xstance.XStanceDE,
     "xstance_it": xstance.XStanceIT,
     "conll2003": conll2003.Conll2003,
+    "xtreme_panxs_ner_en": xtreme_panx_ner.XtremePanxEN,
+    "xtreme_panxs_ner_de": xtreme_panx_ner.XtremePanxDE,
+    "xtreme_panxs_ner_fr": xtreme_panx_ner.XtremePanxFR,
+    "xtreme_panxs_ner_es": xtreme_panx_ner.XtremePanxES,
+    "xtreme_panxs_ner_it": xtreme_panx_ner.XtremePanxIT,
 }
 
 

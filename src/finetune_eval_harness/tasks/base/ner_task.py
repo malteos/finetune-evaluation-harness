@@ -120,6 +120,8 @@ class NamedEntityRecognitionTask(BaseTask):
                 ignore_mismatched_sizes=self.model_args.ignore_mismatched_sizes,
             )
 
+            model = utility_functions.freeze_layers(self.model_args, model)
+
             # Model has labels -> use them.
             if (
                 model.config.label2id

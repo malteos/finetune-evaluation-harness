@@ -46,7 +46,7 @@ class DataTrainingArguments:
         },
     )
     max_seq_length: int = field(
-        default=128,
+        default=512,
         metadata={
             "help": (
                 "The maximum total input sequence length after tokenization. Sequences longer "
@@ -58,24 +58,14 @@ class DataTrainingArguments:
         default=False,
         metadata={"help": "Overwrite the cached preprocessed datasets or not."},
     )
-    train_batch_size: int = field(
-        default=2, metadata={"help": "Size of train batch size"}
-    )
-    label_value: Optional[str] = field(
-        default=None, metadata={"help": "label from the original dataset"}
-    )
+
     special_task_type: Optional[str] = field(
         default=None,
         metadata={
             "help": "Is this some special task (eg multi-label classification). Use: multi_label_classification"
         },
     )
-    remove_labels: Optional[List[str]] = field(
-        default=None,
-        metadata={
-            "help": "Labels which have to removed (please verify these from the original dataset)"
-        },
-    )
+
     peft_choice: Optional[str] = field(
         default=None,
         metadata={
@@ -162,10 +152,6 @@ class DataTrainingArguments:
             "help": "Whether to return all the entity levels during evaluation or just the overall ones."
         },
     )
-    epochs: int = field(default=1, metadata={"help": "Number of epochs"})
-    save_after_steps: int = field(
-        default=3500, metadata={"help": "Steps after which to save model checkpoints"}
-    )
     version_2_with_negative: bool = field(
         default=False,
         metadata={"help": "If true, some of the examples do not have an answer."},
@@ -198,18 +184,6 @@ class DataTrainingArguments:
             )
         },
     )
-    text_column_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "The column name of text to input in the file (a csv or JSON file)."
-        },
-    )
-    label_column_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "The column name of label to input in the file (a csv or JSON file)."
-        },
-    )
     max_predict_samples: Optional[int] = field(
         default=None,
         metadata={
@@ -220,10 +194,10 @@ class DataTrainingArguments:
         },
     )
     is_task_ner: bool = field(default=False, metadata={"help": "Is the task NER"})
-    results_log_path: Optional[str] = field(
+    results_dir: Optional[str] = field(
         default=None,
         metadata={
-            "help": "Path to store the results json file (to be used later for visualization)"
+            "help": "Path to store the results JSON files (to be used later for visualization)"
         },
     )
     base_checkpoint_dir: Optional[str] = field(
@@ -238,42 +212,3 @@ class DataTrainingArguments:
     is_subset: bool = field(
         default=False, metadata={"help": "Take subset of the datset"}
     )
-    train_file: Optional[str] = field(
-        default=None,
-        metadata={"help": "A csv or a json file containing the training data."},
-    )
-    validation_file: Optional[str] = field(
-        default=None,
-        metadata={"help": "A csv or a json file containing the validation data."},
-    )
-    test_file: Optional[str] = field(
-        default=None,
-        metadata={"help": "A csv or a json file containing the test data."},
-    )
-
-    """
-    def __post_init__(self):
-        if self.task_name is not None:
-            self.task_name = self.task_name.lower()
-            if self.task_name not in task_to_keys.keys():
-                raise ValueError(
-                    "Unknown task, you should pick one in "
-                    + ",".join(task_to_keys.keys())
-                )
-        elif self.dataset_name is not None:
-            pass
-        elif self.dataset_name is None:
-            pass
-        # elif self.train_file is None or self.validation_file is None:
-        #    raise ValueError("Need either a GLUE task, a training/validation file or a dataset name.")
-        else:
-            train_extension = self.train_file.split(".")[-1]
-            assert train_extension in [
-                "csv",
-                "json",
-            ], "`train_file` should be a csv or a json file."
-            validation_extension = self.validation_file.split(".")[-1]
-            assert (
-                validation_extension == train_extension
-            ), "`validation_file` should have the same extension (csv or json) as `train_file`."
-    """

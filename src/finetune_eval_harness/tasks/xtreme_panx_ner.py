@@ -42,31 +42,31 @@ class XtremePanxBase(NamedEntityRecognitionTask):
     LABEL_NAME = "ner_tags"
 
 
-class XtremePanxBaseEN(XtremePanxBase):
+class XtremePanxEN(XtremePanxBase):
     DATASET_SPLIT = "PAN-X.en"
-    TASK_NAME = "xtreme_panxs_en"
+    TASK_NAME = "xtreme_panxs_ner_en"
     LANGUAGE = "en"
 
 
-class XtremePanxBaseDE(XtremePanxBase):
+class XtremePanxDE(XtremePanxBase):
     DATASET_SPLIT = "PAN-X.de"
-    TASK_NAME = "xtreme_panxs_de"
+    TASK_NAME = "xtreme_panxs_ner_de"
     LANGUAGE = "de"
 
 
-class XtremePanxBaseFR(XtremePanxBase):
+class XtremePanxFR(XtremePanxBase):
     DATASET_SPLIT = "PAN-X.fr"
-    TASK_NAME = "xtreme_panxs_fr"
+    TASK_NAME = "xtreme_panxs_ner_fr"
     LANGUAGE = "fr"
 
 
-class XtremePanxBaseES(XtremePanxBase):
+class XtremePanxES(XtremePanxBase):
     DATASET_SPLIT = "PAN-X.es"
-    TASK_NAME = "xtreme_panxs_es"
+    TASK_NAME = "xtreme_panxs_ner_es"
     LANGUAGE = "es"
 
 
-class XtremePanxBaseIT(XtremePanxBase):
+class XtremePanxIT(XtremePanxBase):
     DATASET_SPLIT = "PAN-X.it"
-    TASK_NAME = "xtreme_panxs_it"
+    TASK_NAME = "xtreme_panxs_ner_it"
     LANGUAGE = "it"
