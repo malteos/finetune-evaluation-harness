@@ -2,13 +2,7 @@
 
 XTREME: A Massively Multilingual Multi-task Benchmark for Evaluating Cross-lingual Generalization
 
-For NER, we use the Wikiann (Pan et al., 2017)
-dataset. Named entities in Wikipedia were automatically
-annotated with LOC, PER, and ORG tags in IOB2 format
-using a combination of knowledge base properties, cross-
-lingual and anchor links, self-training, and data selection.
-We use the balanced train, dev, and test splits from Rahimi
-et al. (2019).
+MLQA
 
 """
 
@@ -36,7 +30,7 @@ _CITATION = """
 """
 
 
-class XtremePanxBase(NamedEntityRecognitionTask):
+class XtremeMLQABase(NamedEntityRecognitionTask):
     DATASET_ID = "xtreme"
     HOMEPAGE_URL = "https://huggingface.co/datasets/xtreme"
     LABEL_NAME = "ner_tags"

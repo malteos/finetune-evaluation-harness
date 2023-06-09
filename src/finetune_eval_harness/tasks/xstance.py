@@ -24,10 +24,8 @@ from .base.classification_task import ClassificationTask
 
 class XStanceBase(ClassificationTask):
     DATASET_ID = "x_stance"
-    TASK_NAME = "xstance"
     LABEL_NAME = "label"
     HOMEPAGE_URL = "https://github.com/ZurichNLP/xstance"
-
     LANGUAGE = None
 
     def get_text_column_names(self):
@@ -41,12 +39,14 @@ class XStanceBase(ClassificationTask):
 
 
 class XStanceDE(XStanceBase):
+    TASK_NAME = "xstance_de"
     LANGUAGE = "de"
 
 
 class XStanceFR(XStanceBase):
+    TASK_NAME = "xstance_fr"
     LANGUAGE = "fr"
 
 
-class XStanceIT(XStanceBase):
-    LANGUAGE = "it"
+# class XStanceIT(XStanceBase):
+#     LANGUAGE = "it"  # Italian has no train set

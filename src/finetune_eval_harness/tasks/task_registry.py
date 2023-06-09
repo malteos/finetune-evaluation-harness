@@ -66,7 +66,7 @@ TASK_REGISTRY = {
     "slovak_sentiment": slovak_sentiment.SlovakSentiment,
     "maltese_sentiment": maltese_sentiment.MalteseSentiment,
     "dutch_social": dutch_social.DutchSocial,
-    "multi_eurlex_en": multi_eurlex.MultiEURLexES,
+    "multi_eurlex_en": multi_eurlex.MultiEURLexEN,
     "multi_eurlex_de": multi_eurlex.MultiEURLexDE,
     "multi_eurlex_fr": multi_eurlex.MultiEURLexFR,
     "multi_eurlex_es": multi_eurlex.MultiEURLexES,
@@ -88,13 +88,13 @@ TASK_REGISTRY = {
     "xnli_en": xnli.XnliEn,
     "xstance_fr": xstance.XStanceFR,
     "xstance_de": xstance.XStanceDE,
-    "xstance_it": xstance.XStanceIT,
+    # "xstance_it": xstance.XStanceIT,
     "conll2003": conll2003.Conll2003,
-    "xtreme_panxs_ner_en": xtreme_panx_ner.XtremePanxEN,
-    "xtreme_panxs_ner_de": xtreme_panx_ner.XtremePanxDE,
-    "xtreme_panxs_ner_fr": xtreme_panx_ner.XtremePanxFR,
-    "xtreme_panxs_ner_es": xtreme_panx_ner.XtremePanxES,
-    "xtreme_panxs_ner_it": xtreme_panx_ner.XtremePanxIT,
+    "xtreme_panx_ner_en": xtreme_panx_ner.XtremePanxEN,
+    "xtreme_panx_ner_de": xtreme_panx_ner.XtremePanxDE,
+    "xtreme_panx_ner_fr": xtreme_panx_ner.XtremePanxFR,
+    "xtreme_panx_ner_es": xtreme_panx_ner.XtremePanxES,
+    "xtreme_panx_ner_it": xtreme_panx_ner.XtremePanxIT,
 }
 
 

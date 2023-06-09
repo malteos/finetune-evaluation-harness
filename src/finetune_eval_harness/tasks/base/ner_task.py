@@ -43,16 +43,12 @@ class NamedEntityRecognitionTask(BaseTask):
         column_names = raw_datasets[self.get_train_dataset_name()].column_names
         features = raw_datasets[self.get_train_dataset_name()].features
 
-        if self.data_args.text_column_name is not None:
-            self.text_column_name = self.data_args.text_column_name
-        elif "tokens" in column_names:
+        if "tokens" in column_names:
             self.text_column_name = "tokens"
         else:
             self.text_column_name = column_names[0]
 
-        if self.data_args.label_column_name is not None:
-            label_column_name = self.data_args.label_column_name
-        elif self.LABEL_NAME:
+        if self.LABEL_NAME:
             label_column_name = self.LABEL_NAME
         elif self.data_args.is_task_ner:
             label_column_name = "ner_tags"
