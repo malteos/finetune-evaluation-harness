@@ -15,11 +15,15 @@ import itertools
 
 
 class ClassificationTask(BaseTask):
-    is_regression = False
+    PROBLEM_TYPE = "single_label_classification"
     label_list = None
     num_labels = None
     text_column_names = None
     label_to_id = None
+
+    @property
+    def is_regression(self):
+        return self.PROBLEM_TYPE == "regression"
 
     def get_label_column_name(self):
         if self.label_column_name is None:
@@ -29,9 +33,7 @@ class ClassificationTask(BaseTask):
             elif "label" in self.raw_datasets.column_names:
                 self.label_column_name = "label"
             else:
-                self.label_column_name = str(
-                    self.raw_datasets.column_names[self.get_train_dataset_name()][-1]
-                )
+                self.label_column_name = str(self.raw_datasets.column_names[self.get_train_dataset_name()][-1])
 
             logger.info(f"get_label_column_name {self.label_column_name}")
 
@@ -53,16 +55,11 @@ class ClassificationTask(BaseTask):
             # non_label_column_names = [name for name in raw_datasets["train"].column_names if name != "label"]
             non_label_column_names = [
                 name
-                for name in self.raw_datasets[
-                    self.get_train_dataset_name()
-                ].column_names
+                for name in self.raw_datasets[self.get_train_dataset_name()].column_names
                 if name != self.get_label_column_name()
             ]
             # print("non_label_columns", non_label_column_names)
-            if (
-                "sentence1" in non_label_column_names
-                and "sentence2" in non_label_column_names
-            ):
+            if "sentence1" in non_label_column_names and "sentence2" in non_label_column_names:
                 sentence1_key, sentence2_key = "sentence1", "sentence2"
             else:
                 if len(non_label_column_names) >= 2:
@@ -76,23 +73,17 @@ class ClassificationTask(BaseTask):
     def get_label_list(self):
         if self.label_list is None:
             if isinstance(
-                self.raw_datasets[self.get_train_dataset_name()][
-                    self.get_label_column_name()
-                ][0],
+                self.raw_datasets[self.get_train_dataset_name()][self.get_label_column_name()][0],
                 list,
             ):
                 concat_list = list(
                     itertools.chain.from_iterable(
-                        self.raw_datasets[self.get_train_dataset_name()][
-                            self.get_label_column_name()
-                        ]
+                        self.raw_datasets[self.get_train_dataset_name()][self.get_label_column_name()]
                     )
                 )
                 self.label_list = list(set(concat_list))
             else:
-                self.label_list = self.raw_datasets[
-                    self.get_train_dataset_name()
-                ].unique(self.get_label_column_name())
+                self.label_list = self.raw_datasets[self.get_train_dataset_name()].unique(self.get_label_column_name())
                 self.label_list.sort()  # Let's sort it for determinism
 
         return self.label_list
@@ -105,9 +96,10 @@ class ClassificationTask(BaseTask):
             self.config = AutoConfig.from_pretrained(
                 self.model_args.model_name_or_path,
                 num_labels=self.get_num_labels(),
-                problem_type="multi_label_classification"
-                if self.data_args.special_task_type == "multi_label_classification"
-                else "single_label_classification",
+                problem_type=self.PROBLEM_TYPE,  # single_label_classification, multi_label_classification, regression
+                # problem_type="multi_label_classification"
+                # if self.data_args.special_task_type == "multi_label_classification"
+                # else "single_label_classification",
                 fine_tuning_task="sequence",
                 cache_dir=self.model_args.cache_dir,
                 revision=self.model_args.model_revision,
@@ -129,19 +121,21 @@ class ClassificationTask(BaseTask):
                 "sequence",
             )
 
-            logger.info(
-                f"parameters before {utility_functions.print_trainable_parameters(model)}"
-            )
+            logger.info(f"parameters before {utility_functions.print_trainable_parameters(model)}")
 
             if self.data_args.peft_choice in utility_functions.peft_choice_list:
-                model = utility_functions.load_model_peft(
-                    model, self.data_args, "SEQ_CLS"
-                )
+                model = utility_functions.load_model_peft(model, self.data_args, "SEQ_CLS")
 
             model = utility_functions.freeze_layers(self.model_args, model)
 
+            if self.data_args.bitfit:
+                model.base_model = utility_functions.deactivate_bias_gradients(model.base_model)
+
             model.config.pad_token_id = model.config.eos_token_id
-            model.resize_token_embeddings(len(self.get_tokenizer()))
+
+            if self.model_args.resize_token_embeddings:
+                logger.warning(f"Resizing token embeddings size to {len(self.get_tokenizer())}")
+                model.resize_token_embeddings(len(self.get_tokenizer()))
 
             # Label index
             ######
@@ -150,21 +144,15 @@ class ClassificationTask(BaseTask):
             self.label_to_id = None
 
             if (
-                model.config.label2id
-                != PretrainedConfig(num_labels=self.get_num_labels()).label2id
+                model.config.label2id != PretrainedConfig(num_labels=self.get_num_labels()).label2id
                 and self.data_args.task_name is not None
                 and not self.is_regression
             ):
                 # Some have all caps in their config, some don't.
-                label_name_to_id = {
-                    k.lower(): v for k, v in model.config.label2id.items()
-                }
-                if list(sorted(label_name_to_id.keys())) == list(
-                    sorted(self.get_label_list())
-                ):
+                label_name_to_id = {k.lower(): v for k, v in model.config.label2id.items()}
+                if list(sorted(label_name_to_id.keys())) == list(sorted(self.get_label_list())):
                     self.label_to_id = {
-                        i: int(label_name_to_id[self.get_label_list()[i]])
-                        for i in range(self.get_num_labels())
+                        i: int(label_name_to_id[self.get_label_list()[i]]) for i in range(self.get_num_labels())
                     }
                 else:
                     logger.warning(
@@ -177,16 +165,10 @@ class ClassificationTask(BaseTask):
 
             if self.label_to_id is not None:
                 model.config.label2id = self.label_to_id
-                model.config.id2label = {
-                    id: label for label, id in config.label2id.items()
-                }
+                model.config.id2label = {id: label for label, id in config.label2id.items()}
             elif self.data_args.task_name is not None and not self.is_regression:
-                model.config.label2id = {
-                    l: i for i, l in enumerate(self.get_label_list())
-                }
-                model.config.id2label = {
-                    id: label for label, id in config.label2id.items()
-                }
+                model.config.label2id = {l: i for i, l in enumerate(self.get_label_list())}
+                model.config.id2label = {id: label for label, id in config.label2id.items()}
             self.model = model
         return self.model
 
@@ -243,6 +225,7 @@ class ClassificationTask(BaseTask):
             "label_value": self.get_label_column_name(),
             "label_to_id": self.label_to_id,
             "data_args": self.data_args,
+            "is_regression": self.is_regression,
         }
 
         with self.training_args.main_process_first(desc="dataset map pre-processing"):

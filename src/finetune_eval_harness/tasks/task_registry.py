@@ -36,6 +36,7 @@ from . import (
     xstance,
     conll2003,
     xtreme_panx_ner,
+    glue,
 )
 
 # mapping task to class objects
@@ -95,6 +96,10 @@ TASK_REGISTRY = {
     "xtreme_panx_ner_fr": xtreme_panx_ner.XtremePanxFR,
     "xtreme_panx_ner_es": xtreme_panx_ner.XtremePanxES,
     "xtreme_panx_ner_it": xtreme_panx_ner.XtremePanxIT,
+    "glue_cola": glue.GlueColaTask,
+    "glue_sst2": glue.GlueSST2Task,
+    "glue_stsb": glue.GlueSTSBTask,
+    "glue_wnli": glue.GlueWNLITask,
 }
 
 

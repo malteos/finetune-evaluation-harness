@@ -131,26 +131,75 @@ class BaseTask(object):
                 else self.model_args.model_name_or_path
             )
 
-            if self.get_config().model_type in {"bloom", "gpt2", "roberta"}:
-                self.tokenizer = AutoTokenizer.from_pretrained(
-                    tokenizer_name_or_path,
-                    cache_dir=self.model_args.cache_dir,
-                    use_fast=True,
-                    revision=self.model_args.model_revision,
-                    use_auth_token=True if self.model_args.use_auth_token else None,
-                    add_prefix_space=True,
-                )
+            if self.model_args.tokenizer_type == "hf":
+                # Huggingface tokenizer
+                if self.get_config().model_type in {"bloom", "gpt2", "roberta"}:
+                    self.tokenizer = AutoTokenizer.from_pretrained(
+                        tokenizer_name_or_path,
+                        cache_dir=self.model_args.cache_dir,
+                        use_fast=True,
+                        revision=self.model_args.model_revision,
+                        use_auth_token=True if self.model_args.use_auth_token else None,
+                        add_prefix_space=True,
+                    )
+                else:
+                    self.tokenizer = AutoTokenizer.from_pretrained(
+                        tokenizer_name_or_path,
+                        cache_dir=self.model_args.cache_dir,
+                        use_fast=True,
+                        revision=self.model_args.model_revision,
+                        use_auth_token=True if self.model_args.use_auth_token else None,
+                    )
+            elif self.model_args.tokenizer_type.startswith("gptx_"):
+                # OpenGPTX tokenizer
+                # from gptx_tokenizers.opengptx_tokenizer import GPTXTokenizerForHF, GPTXTokenizerSPForHF
+
+                # from gptxdata.tokenization import HFTokenizer, SPTokenizer
+
+                if not self.model_args.tokenizer_name:
+                    raise ValueError("Argument --tokenizer_name must be set for all `gptx_` tokenizer types.")
+
+                if self.model_args.tokenizer_type == "gptx_hf":
+                    # gptx_tokenizer = HFTokenizer.instantiate_from_file_or_name(
+                    #     model_file_or_name=tokenizer_name_or_path
+                    # )
+                    raise NotImplementedError
+                elif self.model_args.tokenizer_type == "gptx_sp_bpe":
+                    from gptx_tokenizers.sp_bpe_tokenizer import GPTXSentencePieceBPETokenizer
+
+                    self.tokenizer = GPTXSentencePieceBPETokenizer.from_pretrained(
+                        tokenizer_name_or_path,
+                        separator_seq=[10],  # <placeholder_tok_5>
+                    )
+
+                    # elif self.model_args.tokenizer_type == "gptx_sp":
+                    #     # self.tokenizer = GPTXTokenizerSPForHF.instantiate_from_file_or_name(
+                    #     #     model_file_or_name=tokenizer_name_or_path
+                    #     # )
+                    #     from transformers import T5TokenizerFast
+
+                    #     self.tokenizer = T5TokenizerFast(
+                    #         vocab_file=tokenizer_name_or_path,
+                    #         eos_token="</s>",
+                    #         unk_token="<unk>",
+                    #         pad_token="<pad>",
+                    #         extra_ids=100,
+                    #     )
+
+                    # self.tokenizer = GPTXTokenizerForHF(gptx_tokenizer=gptx_tokenizer)
+                else:
+                    raise ValueError(f"Unsupported tokenizer type: {self.model_args.tokenizer_type}")
+
+                # self.tokenizer = GPTXTokenizerForHF(gptx_tokenizer=gptx_tokenizer)
+
             else:
-                self.tokenizer = AutoTokenizer.from_pretrained(
-                    tokenizer_name_or_path,
-                    cache_dir=self.model_args.cache_dir,
-                    use_fast=True,
-                    revision=self.model_args.model_revision,
-                    use_auth_token=True if self.model_args.use_auth_token else None,
-                )
+                raise ValueError(f"Unsupported tokenizer type: {self.model_args.tokenizer_type}")
 
             if self.tokenizer.pad_token is None and self.tokenizer.eos_token:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
+
+            # if self.tokenizer.pad_token_id is None and self.tokenizer.eos_token_id:
+            #     self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
 
         return self.tokenizer
 
@@ -159,9 +208,7 @@ class BaseTask(object):
             self.train_dataset = self.raw_datasets[self.get_train_dataset_name()]
 
             if self.data_args.max_train_samples is not None:
-                max_train_samples = min(
-                    len(self.train_dataset), self.data_args.max_train_samples
-                )
+                max_train_samples = min(len(self.train_dataset), self.data_args.max_train_samples)
                 self.train_dataset = self.train_dataset.select(range(max_train_samples))
 
                 logger.info(f"Train dataset limited to: {max_train_samples:,}")
@@ -173,9 +220,7 @@ class BaseTask(object):
             eval_dataset = self.raw_datasets[self.get_eval_dataset_name()]
 
             if self.data_args.max_eval_samples is not None:
-                max_eval_samples = min(
-                    len(eval_dataset), self.data_args.max_eval_samples
-                )
+                max_eval_samples = min(len(eval_dataset), self.data_args.max_eval_samples)
                 eval_dataset = eval_dataset.select(range(max_eval_samples))
 
                 logger.info(f"Eval dataset limited to: {max_eval_samples:,}")
@@ -223,6 +268,10 @@ class BaseTask(object):
         self.get_tokenizer()
         self.get_model()
 
+        logger.info(
+            f"Trainable parameters: {utility_functions.print_trainable_parameters(self.model)} (absolute, relative)"
+        )
+
         # Dataset
         self.preprocess_datasets()
 
@@ -240,11 +289,12 @@ class BaseTask(object):
         metrics["model_name"] = model_name
         metrics["task_name"] = self.TASK_NAME
         metrics["task_type"] = self.get_task_type()
-        metrics["peft_choice"] = str(self.data_args.peft_choice)
-        metrics["trainable_parameters_percentage"] = str(
-            utility_functions.print_trainable_parameters(self.model)
-        )
+        metrics["trainable_parameters"] = utility_functions.print_trainable_parameters(self.model)
+
         metrics["training_args"] = self.training_args.to_dict()
+        metrics["model_args"] = self.model_args.to_dict()
+        metrics["data_args"] = self.data_args.to_dict()
+
         metrics["datetime"] = str(datetime.now())
 
         if self.LANGUAGE is not None:

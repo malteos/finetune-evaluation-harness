@@ -58,6 +58,10 @@ class QuestionAnsweringTask(BaseTask):
                 "qa",
             )
 
+            if self.model_args.resize_token_embeddings:
+                logger.warning(f"Resizing token embeddings size to {len(self.get_tokenizer())}")
+                model.resize_token_embeddings(len(self.get_tokenizer()))
+
             model = utility_functions.freeze_layers(self.model_args, model)
 
             self.model = model
@@ -67,15 +71,9 @@ class QuestionAnsweringTask(BaseTask):
     def preprocess_datasets(self):
         column_names = self.raw_datasets[self.get_train_dataset_name()].column_names
 
-        self.question_column_name = (
-            "question" if "question" in column_names else column_names[0]
-        )
-        self.context_column_name = (
-            "context" if "context" in column_names else column_names[1]
-        )
-        self.answer_column_name = (
-            "answers" if "answers" in column_names else column_names[2]
-        )
+        self.question_column_name = "question" if "question" in column_names else column_names[0]
+        self.context_column_name = "context" if "context" in column_names else column_names[1]
+        self.answer_column_name = "answers" if "answers" in column_names else column_names[2]
 
         pad_on_right = True
 
@@ -90,9 +88,7 @@ class QuestionAnsweringTask(BaseTask):
             "answer_column_name": self.answer_column_name,
         }
 
-        with self.training_args.main_process_first(
-            desc="train dataset map pre-processing"
-        ):
+        with self.training_args.main_process_first(desc="train dataset map pre-processing"):
             self.tokenized_train_dataset = self.get_train_dataset().map(
                 utility_functions.prepare_train_features_qa,
                 batched=True,
@@ -112,9 +108,7 @@ class QuestionAnsweringTask(BaseTask):
             "pad_on_right": pad_on_right,
         }
 
-        with self.training_args.main_process_first(
-            desc="eval dataset map pre-processing"
-        ):
+        with self.training_args.main_process_first(desc="eval dataset map pre-processing"):
             self.tokenized_eval_dataset = self.get_eval_dataset().map(
                 utility_functions.prepare_features_validation_qa,
                 batched=True,
@@ -148,23 +142,16 @@ class QuestionAnsweringTask(BaseTask):
         # Format the result to the format the metric expects.
         if self.data_args.version_2_with_negative:
             formatted_predictions = [
-                {"id": k, "prediction_text": v, "no_answer_probability": 0.0}
-                for k, v in predictions.items()
+                {"id": k, "prediction_text": v, "no_answer_probability": 0.0} for k, v in predictions.items()
             ]
         else:
-            formatted_predictions = [
-                {"id": k, "prediction_text": v} for k, v in predictions.items()
-            ]
+            formatted_predictions = [{"id": k, "prediction_text": v} for k, v in predictions.items()]
 
-        references = [
-            {"id": ex["id"], "answers": ex[self.answer_column_name]} for ex in examples
-        ]
+        references = [{"id": ex["id"], "answers": ex[self.answer_column_name]} for ex in examples]
         return EvalPrediction(predictions=formatted_predictions, label_ids=references)
 
     def get_trainer(self):
-        metric = evaluate.load(
-            "squad_v2" if self.data_args.version_2_with_negative else "squad"
-        )
+        metric = evaluate.load("squad_v2" if self.data_args.version_2_with_negative else "squad")
 
         def compute_metrics(p: EvalPrediction):
             return metric.compute(predictions=p.predictions, references=p.label_ids)

@@ -32,9 +32,7 @@ def process_arguments(args):
     """
 
     logger.info(f"args {args}")
-    parser = HfArgumentParser(
-        (ModelArguments, DataTrainingArguments, TrainingArguments)
-    )
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
     logger.info(f"parser {parser}")
     parser._add_dataclass_arguments(InitialArguments)
     (
@@ -51,7 +49,7 @@ def process_arguments(args):
 
     logger.info(f"Tasks to evaluate: {tasks_to_run}")
 
-    logger.info(f"Training Args: {training_args}")
+    # logger.info(f"Training Args: {training_args}")
 
     for task_i, task_name in enumerate(tasks_to_run, 1):
         logger.info(f"Current task: {task_name} ({task_i}/{len(tasks_to_run)})")
@@ -61,9 +59,7 @@ def process_arguments(args):
         task = task_cls(model_args, data_args, training_args, init_args)
         task_metrics = task.evaluate()
 
-        logger.info(
-            f"Task metrics {json.dumps(task_metrics, sort_keys=True, indent=4)}"
-        )
+        logger.info(f"Task metrics {json.dumps(task_metrics, sort_keys=True, indent=4)}")
 
     return parser
 

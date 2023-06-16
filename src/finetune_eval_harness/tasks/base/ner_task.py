@@ -72,9 +72,7 @@ class NamedEntityRecognitionTask(BaseTask):
             label_list = features[label_column_name].feature.names
             label_to_id = {i: i for i in range(len(label_list))}
         else:
-            label_list = get_label_list(
-                raw_datasets[self.get_train_dataset_name()][label_column_name]
-            )
+            label_list = get_label_list(raw_datasets[self.get_train_dataset_name()][label_column_name])
             label_to_id = {l: i for i, l in enumerate(label_list)}
 
         num_labels = len(label_list)
@@ -93,9 +91,7 @@ class NamedEntityRecognitionTask(BaseTask):
     def get_config(self):
         if self.config is None:
             self.config = AutoConfig.from_pretrained(
-                self.model_args.config_name
-                if self.model_args.config_name
-                else self.model_args.model_name_or_path,
+                self.model_args.config_name if self.model_args.config_name else self.model_args.model_name_or_path,
                 num_labels=self.num_labels,
                 finetuning_task=self.data_args.task_name,
                 cache_dir=self.model_args.cache_dir,
@@ -116,27 +112,24 @@ class NamedEntityRecognitionTask(BaseTask):
                 ignore_mismatched_sizes=self.model_args.ignore_mismatched_sizes,
             )
 
+            if self.model_args.resize_token_embeddings:
+                logger.warning(f"Resizing token embeddings size to {len(self.get_tokenizer())}")
+                model.resize_token_embeddings(len(self.get_tokenizer()))
+
+            if self.data_args.peft_choice in utility_functions.peft_choice_list:
+                model = utility_functions.load_model_peft(self.model, self.data_args, "TOKEN_CLS")
+
             model = utility_functions.freeze_layers(self.model_args, model)
 
             # Model has labels -> use them.
-            if (
-                model.config.label2id
-                != PretrainedConfig(num_labels=self.num_labels).label2id
-            ):
+            if model.config.label2id != PretrainedConfig(num_labels=self.num_labels).label2id:
                 if sorted(model.config.label2id.keys()) == sorted(self.label_list):
                     # Reorganize `label_list` to match the ordering of the model.
                     if self.labels_are_int:
-                        self.label_to_id = {
-                            i: int(model.config.label2id[l])
-                            for i, l in enumerate(self.label_list)
-                        }
-                        self.label_list = [
-                            model.config.id2label[i] for i in range(self.num_labels)
-                        ]
+                        self.label_to_id = {i: int(model.config.label2id[l]) for i, l in enumerate(self.label_list)}
+                        self.label_list = [model.config.id2label[i] for i in range(self.num_labels)]
                     else:
-                        self.abel_list = [
-                            model.config.id2label[i] for i in range(self.num_labels)
-                        ]
+                        self.abel_list = [model.config.id2label[i] for i in range(self.num_labels)]
                         self.label_to_id = {l: i for i, l in enumerate(self.label_list)}
                 else:
                     logger.warning(
@@ -152,13 +145,8 @@ class NamedEntityRecognitionTask(BaseTask):
             # Map that sends B-Xxx label to its I-Xxx counterpart
             self.b_to_i_label = []
             for idx, label in enumerate(self.label_list):
-                if (
-                    label.startswith("B-")
-                    and label.replace("B-", "I-") in self.label_list
-                ):
-                    self.b_to_i_label.append(
-                        self.label_list.index(label.replace("B-", "I-"))
-                    )
+                if label.startswith("B-") and label.replace("B-", "I-") in self.label_list:
+                    self.b_to_i_label.append(self.label_list.index(label.replace("B-", "I-")))
                 else:
                     self.b_to_i_label.append(idx)
 
@@ -203,9 +191,7 @@ class NamedEntityRecognitionTask(BaseTask):
                     # the label_all_tokens flag.
                     else:
                         if self.data_args.label_all_tokens:
-                            label_ids.append(
-                                self.b_to_i_label[self.label_to_id[label[word_idx]]]
-                            )
+                            label_ids.append(self.b_to_i_label[self.label_to_id[label[word_idx]]])
                         else:
                             label_ids.append(-100)
                     previous_word_idx = word_idx
@@ -216,14 +202,10 @@ class NamedEntityRecognitionTask(BaseTask):
 
         train_dataset = self.raw_datasets[self.get_train_dataset_name()]
         if self.data_args.max_train_samples is not None:
-            max_train_samples = min(
-                len(train_dataset), self.data_args.max_train_samples
-            )
+            max_train_samples = min(len(train_dataset), self.data_args.max_train_samples)
             train_dataset = train_dataset.select(range(max_train_samples))
 
-        with self.training_args.main_process_first(
-            desc="train dataset map pre-processing"
-        ):
+        with self.training_args.main_process_first(desc="train dataset map pre-processing"):
             train_dataset = train_dataset.map(
                 tokenize_and_align_labels,
                 batched=True,
@@ -238,9 +220,7 @@ class NamedEntityRecognitionTask(BaseTask):
             max_eval_samples = min(len(eval_dataset), self.data_args.max_eval_samples)
             eval_dataset = eval_dataset.select(range(max_eval_samples))
 
-        with self.training_args.main_process_first(
-            desc="eval dataset map pre-processing"
-        ):
+        with self.training_args.main_process_first(desc="eval dataset map pre-processing"):
             eval_dataset = eval_dataset.map(
                 tokenize_and_align_labels,
                 batched=True,
@@ -274,9 +254,7 @@ class NamedEntityRecognitionTask(BaseTask):
                 for prediction, label in zip(predictions, labels)
             ]
 
-            results = metric.compute(
-                predictions=true_predictions, references=true_labels
-            )
+            results = metric.compute(predictions=true_predictions, references=true_labels)
             if self.data_args.return_entity_level_metrics:
                 # Unpack nested dictionaries
                 final_results = {}

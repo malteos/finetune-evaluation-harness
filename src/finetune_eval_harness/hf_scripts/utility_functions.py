@@ -23,6 +23,7 @@ from transformers import (
     TrainingArguments,
     default_data_collator,
 )
+from typing import Tuple
 from transformers.trainer_utils import get_last_checkpoint
 from peft import (
     get_peft_model,
@@ -37,10 +38,13 @@ import json
 from typing import Any, Dict
 from datasets import load_dataset, DatasetDict
 
+from torch import nn
+
 """
 File containing utlility functions used over all the hf_scripts folder for all the tasks
 """
 
+logger = logging.getLogger(__name__)
 
 # dict used in sequence classification task
 task_to_keys = {
@@ -276,7 +280,7 @@ def load_model(
     return model
 
 
-def print_trainable_parameters(model: Any):
+def print_trainable_parameters(model: Any) -> Tuple[int, float]:
     """
     Prints the number of trainable parameters in the model.
 
@@ -284,6 +288,7 @@ def print_trainable_parameters(model: Any):
         model: object of AutoModel class
 
     Returns:
+        int: absolute number of trainable parameters
         float: percentage of parameters which are left trainable in the model
 
     """
@@ -294,7 +299,7 @@ def print_trainable_parameters(model: Any):
         if param.requires_grad:
             trainable_params += param.numel()
 
-    return 100 * trainable_params / all_param
+    return trainable_params, 100 * trainable_params / all_param
 
 
 def load_model_peft(
@@ -319,12 +324,16 @@ def load_model_peft(
     task_type_dict = {"SEQ_CLS": TaskType.SEQ_CLS, "TOKEN_CLS": TaskType.TOKEN_CLS}
 
     if data_args.peft_choice == "lora":
+        logger.info("LoRa enabled")
+
         peft_config = LoraConfig(
             task_type=task_type_dict[task_type],
-            inference_mode="False",
-            # target_modules=["query", "value"],
+            inference_mode=False,
+            target_modules=data_args.lora_target_modules.split(",")
+            if isinstance(data_args.lora_target_modules, str)
+            else data_args.lora_target_modules,
             bias="none",
-            r=data_args.r,
+            r=data_args.lora_r,
             lora_alpha=data_args.lora_alpha,
             lora_dropout=data_args.lora_dropout,
         )
@@ -358,9 +367,7 @@ def load_model_peft(
         return model
 
 
-def load_save_metrics_train(
-    train_dataset, resume_from_checkpoint, trainer, last_checkpoint, max_train_samples
-):
+def load_save_metrics_train(train_dataset, resume_from_checkpoint, trainer, last_checkpoint, max_train_samples):
     """
     method for saving train metrics if do_train is True
 
@@ -383,9 +390,7 @@ def load_save_metrics_train(
         checkpoint = last_checkpoint
     train_result = trainer.train(resume_from_checkpoint=checkpoint)
     metrics = train_result.metrics
-    max_train_samples = (
-        max_train_samples if max_train_samples is not None else len(train_dataset)
-    )
+    max_train_samples = max_train_samples if max_train_samples is not None else len(train_dataset)
     metrics["train_samples"] = min(max_train_samples, len(train_dataset))
 
     trainer.save_model()  # Saves the tokenizer too for easy upload
@@ -432,9 +437,7 @@ def load_save_metrics_validation(
 
     for eval_dataset in eval_datasets:
         metrics = trainer.evaluate()
-        max_eval_samples = (
-            max_eval_samples if max_eval_samples is not None else len(eval_dataset)
-        )
+        max_eval_samples = max_eval_samples if max_eval_samples is not None else len(eval_dataset)
         metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
         metrics["model_name"] = model_name_or_path
         metrics["dataset_name"] = dataset_name
@@ -520,17 +523,11 @@ def load_save_metrics_predict(
         # Removing the `label` columns because it contains -1 and Trainer won't like that.
         # predict_dataset = predict_dataset.remove_columns("label")
         predict_dataset = predict_dataset.remove_columns(label_value)
-        predictions = trainer.predict(
-            predict_dataset, metric_key_prefix="predict"
-        ).predictions
-        predictions = (
-            np.squeeze(predictions) if is_regression else np.argmax(predictions, axis=1)
-        )
+        predictions = trainer.predict(predict_dataset, metric_key_prefix="predict").predictions
+        predictions = np.squeeze(predictions) if is_regression else np.argmax(predictions, axis=1)
 
         if os.path.isdir(output_dir):
-            output_predict_file = os.path.join(
-                output_dir, f"predict_results_{task}.txt"
-            )
+            output_predict_file = os.path.join(output_dir, f"predict_results_{task}.txt")
             if trainer.is_world_process_zero():
                 with open(output_predict_file, "w") as writer:
                     writer.write("index\tprediction\n")
@@ -569,9 +566,7 @@ def save_metrics_predict_ner(
 
     """
 
-    predictions, labels, metrics = trainer.predict(
-        predict_dataset, metric_key_prefix="predict"
-    )
+    predictions, labels, metrics = trainer.predict(predict_dataset, metric_key_prefix="predict")
     predictions = np.argmax(predictions, axis=2)
 
     # Remove ignored index (special tokens)
@@ -596,9 +591,7 @@ def save_metrics_predict_qa(data_args, trainer, predict_dataset, predict_example
     metrics = results.metrics
 
     max_predict_samples = (
-        data_args.max_predict_samples
-        if data_args.max_predict_samples is not None
-        else len(predict_dataset)
+        data_args.max_predict_samples if data_args.max_predict_samples is not None else len(predict_dataset)
     )
     metrics["predict_samples"] = min(max_predict_samples, len(predict_dataset))
 
@@ -629,9 +622,7 @@ def add_new_labels(examples: Dict[str, Any], **fn_kwargs) -> Dict[str, Any]:
     return examples
 
 
-def preprocess_function_classification(
-    examples: Dict[str, Any], **fn_kwargs
-) -> Dict[str, Any]:
+def preprocess_function_classification(examples: Dict[str, Any], **fn_kwargs) -> Dict[str, Any]:
     """
     pre-process function for the classification task
     """
@@ -643,25 +634,22 @@ def preprocess_function_classification(
     label_value = fn_kwargs["label_value"]
     label_to_id = fn_kwargs["label_to_id"]
     data_args = fn_kwargs["data_args"]
+    is_regression = fn_kwargs["is_regression"]
 
     # Tokenize the texts
-    args = (
-        (examples[sentence1_key],)
-        if sentence2_key is None
-        else (examples[sentence1_key], examples[sentence2_key])
-    )
+    args = (examples[sentence1_key],) if sentence2_key is None else (examples[sentence1_key], examples[sentence2_key])
 
-    result = tokenizer(
-        *args, padding=padding, max_length=max_seq_length, truncation=True
-    )
+    result = tokenizer(*args, padding=padding, max_length=max_seq_length, truncation=True)
 
     # print("data_args.special_task_type", data_args.special_task_type)
 
     if data_args.special_task_type != "multi_label_classification":
         if label_to_id is not None and label_value in examples:
-            result[label_value] = [
-                (label_to_id[l] if l != -1 else -1) for l in examples[label_value]
-            ]
+            # single label classification
+            result[label_value] = [(label_to_id[l] if l != -1 else -1) for l in examples[label_value]]
+            
+        elif is_regression:
+            result[label_value] = examples[label_value]
 
         result["labels"] = result[label_value].copy()
 
@@ -718,20 +706,14 @@ def detect_last_checkpoint(logger, training_args):
 
     """
     last_checkpoint = None
-    if (
-        os.path.isdir(training_args.output_dir)
-        and training_args.do_train
-        and not training_args.overwrite_output_dir
-    ):
+    if os.path.isdir(training_args.output_dir) and training_args.do_train and not training_args.overwrite_output_dir:
         last_checkpoint = get_last_checkpoint(training_args.output_dir)
         if last_checkpoint is None and len(os.listdir(training_args.output_dir)) > 0:
             raise ValueError(
                 f"Output directory ({training_args.output_dir}) already exists and is not empty. "
                 "Use --overwrite_output_dir to overcome."
             )
-        elif (
-            last_checkpoint is not None and training_args.resume_from_checkpoint is None
-        ):
+        elif last_checkpoint is not None and training_args.resume_from_checkpoint is None:
             logger.info(
                 f"Checkpoint detected, resuming training at {last_checkpoint}. To avoid this behavior, change "
                 "the `--output_dir` or add `--overwrite_output_dir` to train from scratch."
@@ -1041,9 +1023,7 @@ def load_raw_dataset_qa(data_args: DataTrainingArguments, model_args: ModelArgum
     return raw_datasets
 
 
-def preprocess_raw_datasets(
-    raw_datasets: Any, data_args: DataTrainingArguments, label_value: str
-):
+def preprocess_raw_datasets(raw_datasets: Any, data_args: DataTrainingArguments, label_value: str):
     """
     method for pre-processing raw datasets
 
@@ -1061,14 +1041,9 @@ def preprocess_raw_datasets(
     else:
         # Again, we try to have some nice defaults but don't hesitate to tweak to your use case.
         # non_label_column_names = [name for name in raw_datasets["train"].column_names if name != "label"]
-        non_label_column_names = [
-            name for name in raw_datasets["train"].column_names if name != label_value
-        ]
+        non_label_column_names = [name for name in raw_datasets["train"].column_names if name != label_value]
         # print("non_label_columns", non_label_column_names)
-        if (
-            "sentence1" in non_label_column_names
-            and "sentence2" in non_label_column_names
-        ):
+        if "sentence1" in non_label_column_names and "sentence2" in non_label_column_names:
             sentence1_key, sentence2_key = "sentence1", "sentence2"
         else:
             if len(non_label_column_names) >= 2:
@@ -1252,9 +1227,7 @@ def map_train_validation_predict_ds_ner(
         if data_args.max_eval_samples is not None:
             max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
             eval_dataset = eval_dataset.select(range(max_eval_samples))
-        with training_args.main_process_first(
-            desc="validation dataset map pre-processing"
-        ):
+        with training_args.main_process_first(desc="validation dataset map pre-processing"):
             eval_dataset = eval_dataset.map(
                 tokenize_and_align_labels,
                 batched=True,
@@ -1267,9 +1240,7 @@ def map_train_validation_predict_ds_ner(
     return train_dataset, eval_dataset, predict_dataset
 
 
-def generate_label_list(
-    raw_datasets: Any, features: Any, ClassLabel: Any, label_column_name: str
-):
+def generate_label_list(raw_datasets: Any, features: Any, ClassLabel: Any, label_column_name: str):
     """
     method to generate label_list and label_to_id
 
@@ -1300,9 +1271,7 @@ def generate_label_list(
     return label_list, label_to_id, feature_file_exists, labels_are_int
 
 
-def prepare_train_features_qa(
-    examples: Dict[str, Any], **fn_kwargs_train
-) -> Dict[str, Any]:
+def prepare_train_features_qa(examples: Dict[str, Any], **fn_kwargs_train) -> Dict[str, Any]:
     """
     method to prepare train features for qa task
 
@@ -1326,9 +1295,7 @@ def prepare_train_features_qa(
     # Some of the questions have lots of whitespace on the left, which is not useful and will make the
     # truncation of the context fail (the tokenized question will take a lots of space). So we remove that
     # left whitespace
-    examples[question_column_name] = [
-        q.lstrip() for q in examples[question_column_name]
-    ]
+    examples[question_column_name] = [q.lstrip() for q in examples[question_column_name]]
 
     # Tokenize our examples with truncation and maybe padding, but keep the overflows using a stride. This results
     # in one example possible giving several features when a context is long, each of those features having a
@@ -1398,19 +1365,13 @@ def prepare_train_features_qa(
                 token_end_index -= 1
 
             # Detect if the answer is out of the span (in which case this feature is labeled with the CLS index).
-            if not (
-                offsets[token_start_index][0] <= start_char
-                and offsets[token_end_index][1] >= end_char
-            ):
+            if not (offsets[token_start_index][0] <= start_char and offsets[token_end_index][1] >= end_char):
                 tokenized_examples["start_positions"].append(cls_index)
                 tokenized_examples["end_positions"].append(cls_index)
             else:
                 # Otherwise move the token_start_index and token_end_index to the two ends of the answer.
                 # Note: we could go after the last offset if the answer is the last word (edge case).
-                while (
-                    token_start_index < len(offsets)
-                    and offsets[token_start_index][0] <= start_char
-                ):
+                while token_start_index < len(offsets) and offsets[token_start_index][0] <= start_char:
                     token_start_index += 1
                 tokenized_examples["start_positions"].append(token_start_index - 1)
                 while offsets[token_end_index][1] >= end_char:
@@ -1420,9 +1381,7 @@ def prepare_train_features_qa(
     return tokenized_examples
 
 
-def prepare_features_validation_qa(
-    examples: Dict[str, Any], **fn_kwargs_validation
-) -> Dict[str, Any]:
+def prepare_features_validation_qa(examples: Dict[str, Any], **fn_kwargs_validation) -> Dict[str, Any]:
     """
     method to generate features for validation dataset for qa task
 
@@ -1445,9 +1404,7 @@ def prepare_features_validation_qa(
     # Some of the questions have lots of whitespace on the left, which is not useful and will make the
     # truncation of the context fail (the tokenized question will take a lots of space). So we remove that
     # left whitespace
-    examples[question_column_name] = [
-        q.lstrip() for q in examples[question_column_name]
-    ]
+    examples[question_column_name] = [q.lstrip() for q in examples[question_column_name]]
 
     # Tokenize our examples with truncation and maybe padding, but keep the overflows using a stride. This results
     # in one example possible giving several features when a context is long, each of those features having a
@@ -1687,3 +1644,25 @@ def get_true_predictions_labels(
             "f1": results["overall_f1"],
             "accuracy": results["overall_accuracy"],
         }
+
+
+def deactivate_bias_gradients(model: nn.Module, needle_name: str = "bias"):
+    """
+    Turn off the model parameters requires_grad except the trainable bias terms
+    (aka "BitFit" https://arxiv.org/pdf/2106.10199v2.pdf)
+    """
+    deactivated = []
+    activated = []
+
+    for name, param in model.named_parameters():
+        if needle_name in name:
+            param.requires_grad = True
+            activated.append(name)
+        else:
+            param.requires_grad = False
+            deactivated.append(name)
+
+    logger.info(f"Activated parameters: {len(activated)} ({activated[:10]} ...)")
+    logger.info(f"Deactivated parameters: {len(deactivated)} ({deactivated[:3]} ...)")
+
+    return model
