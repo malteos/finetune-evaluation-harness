@@ -38,7 +38,7 @@ finetune_eval_harness.main()
 
 Please refer to the latest package details here: https://pypi.org/project/finetune-eval-harness/
 
-This framework is build on top of Huggingface, hence all the keyword arguments used in regular HF transformers library work here as well: https://github.com/huggingface/transformers/blob/main/src/transformers/trainer.py.
+This framework is build on top of [Huggingface Transformers](https://github.com/huggingface/transformers), hence all [keyword arguments](https://github.com/huggingface/transformers/blob/main/src/transformers/trainer.py) used in regular HF transformers library work here as well.
 
 
 ## Some Important Arguments
@@ -91,8 +91,7 @@ finetune_eval_harness.get_all_tasks()
 
 ## Implementing New Tasks
 
-To implement a new task in eval harness, see [this guide](./docs/task_guide.md).
-
+To implement a new evaluation task, see [this guide](./docs/task_guide.md).
 
 ## Evaluating the Coverage of the Current Code
 Please go to Github Actions sections of this repository and start the build named "Evaluate", this would check if the coverage on existing code is more than 80%. The build
@@ -103,3 +102,6 @@ status is also visible on the main repo page.
 - If text sequence processing fails for some tasks such as classification, please try with setting --use_fast_tokenizer as False
 - Please make sure that the dataset (i.e task) url is publically visible on huggingface datasets
 
+## License
+
+MIT
