@@ -1,0 +1,16 @@
+# Dev image with SSH server installed
+FROM ghcr.io/malteos/finetune-evaluation-harness:latest
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install openssh-server sudo -y
+
+# change port and allow root login
+RUN echo "Port 5022" >> /etc/ssh/sshd_config
+RUN echo "LogLevel DEBUG3" >> /etc/ssh/sshd_config
+
+RUN mkdir -p /run/sshd
+RUN ssh-keygen -A
+RUN service ssh start
+
+CMD ["/bin/bash"]

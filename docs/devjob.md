@@ -16,6 +16,11 @@ srun \
   --container-save=$DEV_IMAGE --mem=150G \
   -p $ANY_PARTITION --pty /bin/bash
 
+srun \
+  --container-image=$DEV_IMAGE \
+  --container-save=$DEV_IMAGE --mem=150G \
+  -p $ANY_PARTITION --pty /bin/bash
+
 ```
 
 ## Start job

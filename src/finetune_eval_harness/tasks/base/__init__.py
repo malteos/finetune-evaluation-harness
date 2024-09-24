@@ -62,6 +62,9 @@ class BaseTask(object):
     def get_model(self):
         raise NotImplementedError()
 
+    def get_compute_metrics(self):
+        raise NotImplementedError()
+
     def get_url(self):
         return self.HOMEPAGE_URL
 
